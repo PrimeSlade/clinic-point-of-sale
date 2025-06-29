@@ -12,7 +12,9 @@ jobs:
       - run: echo "Installing dependencies"
       - run: npm ci
       - run: echo "Type checking"
-      - run: tsc --noEmit
+      - run: echo "Linting"
+      - run: npm run lint
+      - run: npx tsc --noEmit
       - run: echo "Building project"
       - run: CI=true npm run build
 
