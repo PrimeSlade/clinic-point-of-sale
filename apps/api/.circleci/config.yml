@@ -3,23 +3,22 @@ version: 2.1
 orbs:
   node: circleci/node@7.1.0
 
-jobs:
+job:
   build:
-    docker:
-      - image: cimg/node:current
-    steps:
-      - checkout
-      - run: echo "Installing dependencies"
-      - run: npm ci
-      - run: echo "Linting"
-      - run: npm run lint
-      - run: echo "Type checking"
-      - run: tsc --noEmit
-      - run: echo "Building project"
-      - run: CI=true npm run build
+    docker: cimg/node:current
+  steps:
+    - checkout
+    - run: echo "installing dependencies"
+    - run: npm ci
+    - run: echo "installing lint"
+    - run: npm run lint
+    - run: echo "running ts check"
+    - run: npm run build -- --noEmit
+    - run: echo "Building project"
+    - run: CI=true npm run build
 
 workflows:
-  version: 2
+  version: 2.1
   build_only:
     jobs:
       - build
