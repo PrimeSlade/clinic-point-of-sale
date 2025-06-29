@@ -1,0 +1,13 @@
+services:
+  point-of-sale-backend:
+    container_name: Pos-Backend
+    build: ./
+
+    working_dir: /usr/src/Point-Of-Sale-Backend
+    environment:
+      PORT: ${PORT}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/usr/src/Point-Of-Sale-Backend
+      - /usr/src/Point-Of-Sale-Backend/node_modules
