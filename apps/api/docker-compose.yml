@@ -3,11 +3,29 @@ services:
     container_name: Pos-Backend
     build: ./
 
-    working_dir: /usr/src/Point-Of-Sale-Backend
+    working_dir: /usr/src/Point-of-Sale-Backend
     environment:
       PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "3000:3000"
     volumes:
-      - ./:/usr/src/Point-Of-Sale-Backend
-      - /usr/src/Point-Of-Sale-Backend/node_modules
+      - ./:/usr/src/Point-of-Sale-Backend
+      - /usr/src/Point-of-Sale-Backend/node_modules
+    command: sh -c "npm run migrate && npm run dev"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16.3
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/postgres_data
+
+volumes:
+  postgres_data:
