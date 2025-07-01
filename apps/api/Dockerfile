@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:24.2.0-alpine
 
 WORKDIR /usr/src/Point-Of-Sale-Backend
 
