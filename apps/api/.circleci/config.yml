@@ -13,7 +13,7 @@ jobs:
       - run: npm ci
       - run: echo "Linting"
       - run: npm run lint
-       - run: echo "Type checking"
+      - run: echo "Type checking"
       - run: npx tsc --noEmit
       - run: echo "Building project"
       - run: CI=true npm run build
