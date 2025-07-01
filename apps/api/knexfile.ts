@@ -1,5 +1,3 @@
-import type { Knex } from "knex";
-
 // Update with your config settings.
 
 export default {
