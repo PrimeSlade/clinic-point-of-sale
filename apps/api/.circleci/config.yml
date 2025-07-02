@@ -11,8 +11,8 @@ jobs:
       - checkout
       - run: echo "Installing dependencies"
       - run: npm ci
-      # - run: echo "Linting"
-      # - run: npm run lint
+      - run: echo "Linting"
+      - run: npm run lint
       - run: echo "Type checking"
       - run: npx tsc --noEmit
       - run: echo "Building project"
