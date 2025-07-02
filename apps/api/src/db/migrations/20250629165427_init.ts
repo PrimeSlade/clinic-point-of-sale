@@ -57,17 +57,17 @@ export async function up(knex: Knex): Promise<void> {
       .references("id")
       .inTable("locations");
 
-    table.enu("unit_type_1", unit_type).notNullable();
-    table.integer("unit_1").notNullable();
-    table.decimal("purchase_price_1", 10, 2).notNullable();
+    table.enu("unit_type1", unit_type).notNullable();
+    table.integer("unit1").notNullable();
+    table.decimal("purchase_price1", 10, 2).notNullable();
 
-    table.enu("unit_type_2", unit_type).notNullable();
-    table.integer("unit_2").notNullable();
-    table.decimal("purchase_price_2", 10, 2).notNullable();
+    table.enu("unit_type2", unit_type).notNullable();
+    table.integer("unit2").notNullable();
+    table.decimal("purchase_price2", 10, 2).notNullable();
 
-    table.enu("unit_type_3", unit_type).notNullable();
-    table.integer("unit_3").notNullable();
-    table.decimal("purchase_price_3", 10, 2).notNullable();
+    table.enu("unit_type3", unit_type).notNullable();
+    table.integer("unit3").notNullable();
+    table.decimal("purchase_price3", 10, 2).notNullable();
 
     table.text("description");
   });
@@ -198,8 +198,8 @@ export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists("treatments");
   await knex.schema.dropTableIfExists("doctors");
   await knex.schema.dropTableIfExists("patients");
-  await knex.schema.dropTableIfExists("phone_numbers");
-  await knex.schema.dropTableIfExists("locations");
   await knex.schema.dropTableIfExists("services");
   await knex.schema.dropTableIfExists("items");
+  await knex.schema.dropTableIfExists("locations");
+  await knex.schema.dropTableIfExists("phone_numbers");
 }
