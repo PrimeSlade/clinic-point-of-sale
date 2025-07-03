@@ -2,32 +2,36 @@ import { Request, Response } from "express";
 import * as itemModel from "../models/item.model";
 
 const addItem = async (req: Request, res: Response): Promise<void> => {
-  const item = req.body;
+  const { units, ...item } = req.body;
+  console.log(item);
+  console.log(units);
 
-  if (!item) {
-    res.status(400).json({
-      success: false,
-      message: "Request body cannot be empty",
-    });
-    return;
-  }
+  res.json(item);
 
-  try {
-    const addedItem = await itemModel.addItem(item);
+  // if (!item) {
+  //   res.status(400).json({
+  //     success: false,
+  //     message: "Request body cannot be empty",
+  //   });
+  //   return;
+  // }
 
-    res.status(200).json({
-      success: true,
-      message: "Item created",
-      data: addedItem,
-    });
-  } catch (error: any) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to create item",
-      error: error.message || "Internal server error",
-    });
-  }
+  // try {
+  //   const addedItem = await itemModel.addItem(item);
+
+  //   res.status(200).json({
+  //     success: true,
+  //     message: "Item created",
+  //     data: addedItem,
+  //   });
+  // } catch (error: any) {
+  //   console.log(error);
+  //   res.status(500).json({
+  //     success: false,
+  //     message: "Failed to create item",
+  //     error: error.message || "Internal server error",
+  //   });
+  // }
 };
 
 const getItems = async (req: Request, res: Response): Promise<void> => {
@@ -50,10 +54,10 @@ const getItems = async (req: Request, res: Response): Promise<void> => {
 };
 
 const updateItem = async (req: Request, res: Response): Promise<void> => {
-  const itemId = Number(req.params);
+  const { id } = req.params;
   const item = req.body;
 
-  console.log(item);
+  const itemId = Number(id);
 
   if (isNaN(itemId) || itemId <= 0) {
     res.status(400).json({

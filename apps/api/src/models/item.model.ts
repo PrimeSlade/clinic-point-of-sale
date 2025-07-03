@@ -1,17 +1,8 @@
-import knex from "../db/knex";
 import { Item } from "../types/items.types";
 
-const addItem = async (items: Item) => {
-  const [added] = await knex("items").insert(items).returning("*");
-  return added;
-};
+const addItem = async (items: Item) => {};
 
-const getItems = async () => {
-  return knex<Item>("items").select("*");
-};
+const getItems = async () => {};
 
-const updateItem = async (items: any, id: number) => {
-  const updated = await knex("items").update(items).where(id).returning("*");
-  return updateItem;
-};
+const updateItem = async (items: any, id: number) => {};
 export { addItem, getItems, updateItem };
