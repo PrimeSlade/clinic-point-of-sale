@@ -1,8 +1,8 @@
 {
   "dependencies": {
+    "@prisma/client": "^6.11.0",
+    "@prisma/extension-accelerate": "^2.0.1",
     "express": "^5.1.0",
-    "knex": "^3.1.0",
-    "knex-stringcase": "^1.5.5",
     "pg": "^8.16.3"
   },
   "scripts": {
@@ -19,6 +19,7 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.1",
     "prettier": "^3.6.2",
+    "prisma": "^6.11.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.0"
