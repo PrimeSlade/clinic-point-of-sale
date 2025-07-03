@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UnitType {
+  btl
+  amp
+  tube
+  strip
+  cap
+  pcs
+  sac
+  box
+  pkg
+  tab
+}
+
+enum Gender {
+  male
+  female
+}
+
+enum PatientStatus {
+  new_patient
+  follow_up
+  post_op
+}
+
+enum PatientCondition {
+  disable
+  pregnant_woman
+}
+
+enum Department {
+  og
+  oto
+  surgery
+  general
+}
+
+enum PatientType {
+  in
+  out
+}
+
+model PhoneNumber {
+  id        Int       @id @default(autoincrement())
+  number    String    @unique @db.VarChar(30)
+  createdAt DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  location Location?
+  patients Patient[]
+  doctors  Doctor[]
+
+  @@map("phone_numbers")
+}
+
+model Location {
+  id Int @id @default(autoincrement())
+  name String
+  address String? 
+
+  phoneNumberId Int @unique @map("phone_number_id")
+
+  //Relations
+  phoneNumber PhoneNumber @relation(fields: [phoneNumberId],references: [id])
+  items Item[]
+  patients Patient[]
+  doctors Doctor[]
+  invoices Invoice[]
+  users User[]
+
+  @@map("locations")
+}
+
+model Item{
+  id Int @id @default(autoincrement())
+  name String
+  category String
+  expiryDate DateTime @map("expiry_date") @db.Date
+  pricePercent Int @map("price_percent") 
+  description String?
+
+  locationId Int @map("location_id")
+
+  //Relations
+  location Location @relation(fields: [locationId],references: [id])
+  itemUnits ItemUnit[]
+
+  @@map("items")
+}
+
+model ItemUnit {
+  id Int @id @default(autoincrement())
+
+  unitType UnitType @map("unit_type")
+  unit Int 
+  purchasePrice Decimal @map("purchase_price") @db.Decimal(10,2)
+
+  itemId Int @map("item_id")
+
+  //Realtions
+  item Item @relation(fields: [itemId],references: [id],onDelete: Cascade)
+
+  @@map("item_units")
+}
+
+model Service {
+  id Int @id @default(autoincrement())
+  name String
+  retailPrice Decimal @map("retail_price") @db.Decimal(10,2) 
+
+  @@map("services")
+}
+
+model Patient {
+  id Int @id @default(autoincrement())
+  name String
+  gender Gender
+  dateOfBirth DateTime @map("date_of_birth") @db.Date
+  address String?
+  patientStatus PatientStatus @map("patient_status")
+  patientCondition PatientCondition @map("patient_condition")
+  patientType PatientType @map("patient_type")
+  department Department 
+  registeredAt DateTime @default(now()) @map("registered_at")
+
+  phoneNumberId Int @map("phone_number_id")
+  locationId Int @map("location_id")
+
+  //Relations
+  phoneNumber PhoneNumber @relation(fields: [phoneNumberId],references: [id])
+  location Location @relation(fields: [locationId],references: [id])
+  treatments Treatment[]
+
+  @@map("patients")
+}
+
+model Doctor {
+  id String @id @default(uuid())
+  name String
+  commission Decimal @db.Decimal(10,2)
+  address String?
+  description String?
+
+  locationId Int @map("location_id")
+  phoneNumberId Int @map("phone_number_id")
+
+  //Relations
+  phoneNumber PhoneNumber @relation(fields: [phoneNumberId],references: [id])
+  location Location @relation(fields: [locationId],references: [id])
+  treatments Treatment[]
+
+  @@map("doctors")
+}
+
+model Treatment {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  doctorId String @map("doctor_id")
+  patientId Int @map("patient_id")
+
+  //Relations
+  doctor Doctor @relation(fields: [doctorId],references: [id])
+  patient Patient @relation(fields: [patientId],references: [id])
+  invoice Invoice? 
+
+  @@map("treatments")
+}
+
+model Invoice {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  locationId Int @map("location_id")
+  treatmentId Int @unique @map("treatment_id") 
+
+  //Relations
+  location  Location  @relation(fields: [locationId], references: [id])
+  treatment Treatment @relation(fields: [treatmentId], references: [id])
+
+  @@map("invoices")
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  locationId Int @map("location_id")
+  roleId Int @map("role_id")
+
+  //Relations
+  location Location @relation(fields: [locationId], references: [id])
+  role Role @relation(fields: [roleId],references: [id])
+
+  @@map("users")
+}
+
+model Role{
+  id Int @id @default(autoincrement())
+  name String
+  userId String @map("user_id")
+
+  // Relations
+  user User[]
+
+  @@map("roles")
+}
+
+
+
+
