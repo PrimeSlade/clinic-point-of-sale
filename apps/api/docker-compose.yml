@@ -9,6 +9,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
     ports:
       - "3000:3000"
+      - "5555:5555" # for prisma
     volumes:
       - ./:/usr/src/Point-of-Sale-Backend
       - /usr/src/Point-of-Sale-Backend/node_modules

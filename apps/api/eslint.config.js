@@ -6,6 +6,7 @@ export default [
   ...tseslint.configs.recommended,
   {
     files: ["**/*.ts", "**/*.tsx"],
+    ignores: ["**/generated/**"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
