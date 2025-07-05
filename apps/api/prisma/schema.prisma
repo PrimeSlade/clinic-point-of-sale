@@ -83,6 +83,7 @@ model Location {
   doctors Doctor[]
   invoices Invoice[]
   users User[]
+  expenses Expense[]
 
   @@map("locations")
 }
@@ -225,6 +226,31 @@ model Role{
   @@map("roles")
 }
 
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
 
+  // Relations
+  expenses  Expense[]
 
+  @@map("categories")
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  name        String
+  amount      Decimal
+  date        DateTime @db.Date
+  description String?
+
+  locationId Int @map("location_id")
+  categoryId Int @map("category_id")
+
+  //Relations
+  category Category @relation(fields: [categoryId], references: [id])
+  location Location @relation(fields: [locationId],references: [id])
+
+  @@map("expenses")
+}
 
