@@ -47,17 +47,23 @@ const updateLocation = async (data: Location, id: number) => {
     };
   }
 
-  const updated = await prisma.location.update({
-    where: {
-      id,
-    },
-    data: updateData,
-    include: {
-      phoneNumber: true,
-    },
-  });
+  try {
+    const updated = await prisma.location.update({
+      where: {
+        id,
+      },
+      data: updateData,
+      include: {
+        phoneNumber: true,
+      },
+    });
 
-  return updated;
+    return updated;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+  }
 };
 
 const deleteLocation = async (id: number) => {

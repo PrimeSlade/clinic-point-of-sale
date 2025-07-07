@@ -16,10 +16,6 @@ const addLocaiton = async (
   try {
     const location = await locationModel.addLocation(data);
 
-    if (!location) {
-      throw new NotFoundError("Location not found");
-    }
-
     res
       .status(201)
       .json({ success: true, message: "Location added", data: location });
@@ -69,10 +65,6 @@ const updateLocation = async (
       Number(id),
     );
 
-    if (!updatedLocation) {
-      throw new NotFoundError();
-    }
-
     res.status(200).json({
       success: true,
       message: "Location updated",
@@ -92,10 +84,6 @@ const deleteLocation = async (
 
   try {
     const deletedLocation = await locationModel.deleteLocation(id);
-
-    if (!deletedLocation) {
-      throw new NotFoundError();
-    }
 
     res.status(200).json({
       success: true,
