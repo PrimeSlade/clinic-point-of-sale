@@ -4,10 +4,6 @@ type Location = {
   phoneNumber: string;
 };
 
-type UpdateLoation = {
-  name?: string;
-  address?: string;
-  phoneNumber?: string;
-};
+type UpdateLoation = Partial<Location>;
 
-export { Location };
+export { Location, UpdateLoation };

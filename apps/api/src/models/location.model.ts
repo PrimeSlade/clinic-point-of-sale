@@ -1,25 +1,32 @@
 import prisma from "../config/prisma.client";
 import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
-import { Location } from "../types/location.type";
+import { Location, UpdateLoation } from "../types/location.type";
 
 const addLocation = async (data: Location) => {
-  const addedLocation = await prisma.location.create({
-    data: {
-      name: data.name,
-      address: data.address,
-      phoneNumber: {
-        create: {
-          number: data.phoneNumber,
+  try {
+    const addedLocation = await prisma.location.create({
+      data: {
+        name: data.name,
+        address: data.address,
+        phoneNumber: {
+          create: {
+            number: data.phoneNumber,
+          },
         },
       },
-    },
-    include: {
-      phoneNumber: true,
-    },
-  });
+      include: {
+        phoneNumber: true,
+      },
+    });
 
-  return addedLocation;
+    return addedLocation;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+    throw new CustomError("Database operation failed", 500);
+  }
 };
 
 const getAllLocations = async () => {
@@ -34,7 +41,7 @@ const getAllLocations = async () => {
   return locations;
 };
 
-const updateLocation = async (data: Location, id: number) => {
+const updateLocation = async (data: UpdateLoation, id: number) => {
   const updateData: any = {};
 
   if (data.name !== undefined) updateData.name = data.name;
@@ -63,6 +70,7 @@ const updateLocation = async (data: Location, id: number) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
+    throw new CustomError("Database operation failed", 500);
   }
 };
 
