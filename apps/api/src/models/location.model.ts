@@ -42,24 +42,20 @@ const getAllLocations = async () => {
 };
 
 const updateLocation = async (data: UpdateLoation, id: number) => {
-  const updateData: any = {};
-
-  if (data.name !== undefined) updateData.name = data.name;
-  if (data.address !== undefined) updateData.address = data.address;
-  if (data.phoneNumber !== undefined) {
-    updateData.phoneNumber = {
-      update: {
-        number: data.phoneNumber,
-      },
-    };
-  }
-
   try {
     const updated = await prisma.location.update({
       where: {
         id,
       },
-      data: updateData,
+      data: {
+        name: data.name,
+        address: data.address,
+        phoneNumber: {
+          update: {
+            number: data.phoneNumber,
+          },
+        },
+      },
       include: {
         phoneNumber: true,
       },

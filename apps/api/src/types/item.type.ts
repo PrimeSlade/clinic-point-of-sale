@@ -19,10 +19,14 @@ type Item = {
   description?: string; //option
 };
 
+type UpdateItem = Partial<Item>;
+
 type Unit = {
   unitType: UnitType;
   unit: number;
   purchasePrice: number;
 };
 
-export { Item, Unit };
+type UpdateUnit = { id: number } & Partial<Unit>;
+
+export { Item, Unit, UpdateItem, UpdateUnit };
