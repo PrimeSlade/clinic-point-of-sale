@@ -1,29 +1,42 @@
 import { NextFunction, Request, Response } from "express";
 import * as itemModel from "../models/item.model";
-import { CustomError } from "../errors/CustomError";
+import { NotFoundError } from "../errors/NotFoundError";
 
 const addItem = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const { itemUnits, ...item } = req.body;
+  const { item, itemUnits } = req.body;
 
-  if (!item && !itemUnits) {
-    throw new CustomError("Item not found", 404);
+  if (!item || !itemUnits) {
+    throw new NotFoundError();
   }
 
   try {
-    console.log(itemUnits);
-    res.json(item);
+    const addedItem = await itemModel.addItem(item, itemUnits);
+
+    res.status(201).json({
+      success: true,
+      message: "Item created",
+      data: addedItem,
+    });
   } catch (error: any) {
     next(error);
   }
 };
 
-const getItems = async (req: Request, res: Response): Promise<void> => {
+const getItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const items = await itemModel.getItems();
+
+    if (!items) {
+      throw new NotFoundError();
+    }
 
     res.status(200).json({
       success: true,
@@ -31,39 +44,24 @@ const getItems = async (req: Request, res: Response): Promise<void> => {
       data: items,
     });
   } catch (error: any) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch items",
-      error: error.message || "Internal server error",
-    });
+    next(error);
   }
 };
 
-const updateItem = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const item = req.body;
+const updateItem = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const id = Number(req.params.id);
+  const { item, itemUnits } = req.body;
 
-  const itemId = Number(id);
-
-  if (isNaN(itemId) || itemId <= 0) {
-    res.status(400).json({
-      success: false,
-      message: "Invalid item ID",
-    });
-    return;
-  }
-
-  if (!item) {
-    res.status(400).json({
-      success: false,
-      message: "Request body cannot be empty",
-    });
-    return;
+  if (!item || !itemUnits || !id) {
+    throw new NotFoundError();
   }
 
   try {
-    const updatedItem = await itemModel.updateItem(item, itemId);
+    const updatedItem = await itemModel.updateItem(item, itemUnits, id);
 
     res.status(200).json({
       success: true,
@@ -71,13 +69,28 @@ const updateItem = async (req: Request, res: Response): Promise<void> => {
       data: updatedItem,
     });
   } catch (error: any) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update item",
-      error: error.message || "Internal server error",
-    });
+    next(error);
   }
 };
 
-export { addItem, getItems, updateItem };
+const deleteItem = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const id = Number(req.params.id);
+
+  try {
+    const deletedItem = await itemModel.deleteItem(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Item deleted",
+      data: deletedItem,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export { addItem, getItems, updateItem, deleteItem };
