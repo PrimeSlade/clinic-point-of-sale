@@ -4,7 +4,8 @@ import * as itemController from "../controllers/item.controller";
 const router = Router();
 
 router.post("/add", itemController.addItem);
-router.get("/get", itemController.getItems);
-router.put("/edit/:id", itemController.updateItem);
+router.get("/", itemController.getItems);
+router.put("/:id", itemController.updateItem);
+router.delete("/:id", itemController.deleteItem);
 
 export default router;
