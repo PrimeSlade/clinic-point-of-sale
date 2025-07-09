@@ -1,14 +1,15 @@
-type UnitType =
-  | "btl"
-  | "amp"
-  | "tube"
-  | "strip"
-  | "cap"
-  | "pcs"
-  | "sac"
-  | "box"
-  | "pkg"
-  | "tab";
+export enum UnitType {
+  BTL = "btl",
+  AMP = "amp",
+  TUBE = "tube",
+  STRIP = "strip",
+  CAP = "cap",
+  PCS = "pcs",
+  SAC = "sac",
+  BOX = "box",
+  PKG = "pkg",
+  TAB = "tab",
+}
 
 type Item = {
   name: string;
