@@ -25,20 +25,29 @@ const addLocation = async (data: Location) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
+
     throw new CustomError("Database operation failed", 500);
   }
 };
 
 const getAllLocations = async () => {
-  const locations = await prisma.location.findMany({
-    include: {
-      phoneNumber: true,
-    },
-    orderBy: {
-      id: "asc",
-    },
-  });
-  return locations;
+  try {
+    const locations = await prisma.location.findMany({
+      include: {
+        phoneNumber: true,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+    return locations;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError("Locations not found");
+    }
+
+    throw new CustomError("Database operation failed", 500);
+  }
 };
 
 const updateLocation = async (data: UpdateLoation, id: number) => {
@@ -66,6 +75,7 @@ const updateLocation = async (data: UpdateLoation, id: number) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
+
     throw new CustomError("Database operation failed", 500);
   }
 };

@@ -34,23 +34,29 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
-    console.error(error);
     throw new CustomError("Database operation failed", 500);
   }
 };
 
 const getItems = async () => {
-  const items = await prisma.item.findMany({
-    include: {
-      location: true,
-      itemUnits: true,
-    },
-    orderBy: {
-      id: "asc",
-    },
-  });
+  try {
+    const items = await prisma.item.findMany({
+      include: {
+        location: true,
+        itemUnits: true,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
 
-  return items;
+    return items;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError("Items not found");
+    }
+    throw new CustomError("Database operation failed", 500);
+  }
 };
 
 const updateItem = async (
@@ -92,7 +98,7 @@ const updateItem = async (
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
-    console.error(error);
+
     throw new CustomError("Database operation failed", 500);
   }
 };
@@ -114,7 +120,7 @@ const deleteItem = async (id: number) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
-    console.error(error);
+
     throw new CustomError("Database operation failed", 500);
   }
 };

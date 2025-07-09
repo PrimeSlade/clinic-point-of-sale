@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as locationModel from "../models/location.model";
 import { NotFoundError } from "../errors/NotFoundError";
+import { BadRequestError } from "../errors/BadRequestError";
 
 const addLocaiton = async (
   req: Request,
@@ -10,21 +11,23 @@ const addLocaiton = async (
   const data = req.body;
 
   if (!data) {
-    throw new NotFoundError();
+    throw new BadRequestError("Location data is required");
   }
 
   try {
     const location = await locationModel.addLocation(data);
 
-    res
-      .status(201)
-      .json({ success: true, message: "Location added", data: location });
+    res.status(201).json({
+      success: true,
+      message: "Location added",
+      data: location,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-const getAllLocations = async (
+const getLocations = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -32,13 +35,9 @@ const getAllLocations = async (
   try {
     const locations = await locationModel.getAllLocations();
 
-    if (!locations) {
-      throw new NotFoundError("Location not found");
-    }
-
     res.status(200).json({
       success: true,
-      message: "locations fetched",
+      message: "Locations fetched",
       data: locations,
     });
   } catch (error) {
@@ -56,7 +55,7 @@ const updateLocation = async (
   const id = Number(req.params.id); //Change into number
 
   if (!data || !id) {
-    throw new NotFoundError();
+    throw new BadRequestError("Location data is required");
   }
 
   try {
@@ -95,4 +94,4 @@ const deleteLocation = async (
   }
 };
 
-export { addLocaiton, getAllLocations, updateLocation, deleteLocation };
+export { addLocaiton, getLocations, updateLocation, deleteLocation };

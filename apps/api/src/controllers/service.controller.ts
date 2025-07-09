@@ -1,76 +1,72 @@
 import { NextFunction, Request, Response } from "express";
-import * as itemModel from "../models/item.model";
+import * as serviceModel from "../models/service.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { BadRequestError } from "../errors/BadRequestError";
 
-const addItem = async (
+const addService = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const { item, itemUnits } = req.body;
+  const data = req.body;
 
-  if (!item || !itemUnits) {
-    throw new BadRequestError("Item data is required");
+  if (!data) {
+    throw new BadRequestError("Service data is required");
   }
 
   try {
-    const addedItem = await itemModel.addItem(item, itemUnits);
+    const addedService = await serviceModel.addService(data);
 
     res.status(201).json({
       success: true,
-      message: "Item created",
-      data: addedItem,
+      meesage: "Service added",
+      data: addedService,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-const getItems = async (
+const getServices = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const items = await itemModel.getItems();
+    const services = await serviceModel.getServices();
 
     res.status(200).json({
       success: true,
-      message: "Items fetched",
-      data: items,
+      message: "Services fetched",
+      data: services,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-const updateItem = async (
+const updateService = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const data = req.body;
   const id = Number(req.params.id);
-  const { item, itemUnits } = req.body;
-
-  if (!item || !itemUnits || !id) {
-    throw new BadRequestError("Item data is required");
-  }
 
   try {
-    const updatedItem = await itemModel.updateItem(item, itemUnits, id);
+    const updatedService = await serviceModel.updateService(data, id);
 
     res.status(200).json({
       success: true,
-      message: "Item updated",
-      data: updatedItem,
+      message: "Service updated",
+      data: updatedService,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-const deleteItem = async (
+const deleteService = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -78,16 +74,16 @@ const deleteItem = async (
   const id = Number(req.params.id);
 
   try {
-    const deletedItem = await itemModel.deleteItem(id);
+    const deletedService = await serviceModel.deleteService(id);
 
     res.status(200).json({
       success: true,
-      message: "Item deleted",
-      data: deletedItem,
+      message: "Service deleted",
+      data: deletedService,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-export { addItem, getItems, updateItem, deleteItem };
+export { addService, getServices, updateService, deleteService };
