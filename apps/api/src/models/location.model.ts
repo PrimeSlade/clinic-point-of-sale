@@ -54,26 +54,26 @@ const updateLocation = async (data: UpdateLoation, id: number) => {
   return updated;
 };
 
-const deleteLocation = async (id: number) => {
-  const location = await prisma.location.findUnique({
+const findLocationById = async (id: number) => {
+  return await prisma.location.findUnique({
     where: {
       id,
     },
     include: { phoneNumber: true },
   });
-
-  if (!location) return null;
-
-  await prisma.$transaction([
-    prisma.location.delete({ where: { id } }),
-    prisma.phoneNumber.delete({
-      where: {
-        id: location?.phoneNumberId,
-      },
-    }),
-  ]);
-
-  return location;
 };
 
-export { addLocation, getAllLocations, updateLocation, deleteLocation };
+const deleteLocationAndPhone = async (id: number, phoneId: number) => {
+  return await prisma.$transaction([
+    prisma.location.delete({ where: { id } }),
+    prisma.phoneNumber.delete({ where: { id: phoneId } }),
+  ]);
+};
+
+export {
+  addLocation,
+  getAllLocations,
+  updateLocation,
+  findLocationById,
+  deleteLocationAndPhone,
+};

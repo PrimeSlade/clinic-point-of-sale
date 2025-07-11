@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../errors/BadRequestError";
-import * as patientModel from "../models/patient.model";
+import * as patientService from "../services/patient.service";
 
 const addPatient = async (
   req: Request,
@@ -14,7 +14,7 @@ const addPatient = async (
   }
 
   try {
-    const addedPatient = await patientModel.addPatient(data);
+    const addedPatient = await patientService.addPatient(data);
 
     res.status(201).json({
       success: true,
