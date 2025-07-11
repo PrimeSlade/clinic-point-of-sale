@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import * as locationModel from "../models/location.model";
+import * as locationService from "../services/location.service";
 import { BadRequestError } from "../errors/BadRequestError";
 
 const addLocaiton = async (
@@ -14,7 +14,7 @@ const addLocaiton = async (
   }
 
   try {
-    const location = await locationModel.addLocation(data);
+    const location = await locationService.addLocation(data);
 
     res.status(201).json({
       success: true,
@@ -32,7 +32,7 @@ const getLocations = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const locations = await locationModel.getAllLocations();
+    const locations = await locationService.getAllLocations();
 
     res.status(200).json({
       success: true,
@@ -58,7 +58,7 @@ const updateLocation = async (
   }
 
   try {
-    const updatedLocation = await locationModel.updateLocation(
+    const updatedLocation = await locationService.updateLocation(
       data,
       Number(id),
     );
@@ -81,7 +81,7 @@ const deleteLocation = async (
   const id = Number(req.params.id);
 
   try {
-    const deletedLocation = await locationModel.deleteLocation(id);
+    const deletedLocation = await locationService.deleteLocation(id);
 
     res.status(200).json({
       success: true,
