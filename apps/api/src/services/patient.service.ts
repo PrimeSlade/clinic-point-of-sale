@@ -2,8 +2,9 @@ import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { Patient, UpdatePatient } from "../types/patient.type";
 import * as patientModel from "../models/patient.model";
-import * as phoneNumberModel from "../models/phone.number.model";
+import * as phoneNumberModel from "../models/phoneNumber.model";
 import prisma from "../config/prisma.client";
+import { ensurePhoneNumberExists } from "../utils/phoneNumber.util";
 
 const addPatient = async (data: Patient) => {
   try {
@@ -37,14 +38,7 @@ const updatePatient = async (data: UpdatePatient, id: number) => {
     const patient = await prisma.$transaction(async (trx) => {
       //typesafety
       if (data.phoneNumber) {
-        const phoneNumber = await phoneNumberModel.findNumber(
-          data.phoneNumber,
-          trx,
-        );
-
-        if (!phoneNumber) {
-          await phoneNumberModel.createNumber(data.phoneNumber, trx);
-        }
+        await ensurePhoneNumberExists(data.phoneNumber, trx);
       }
 
       const updatedPatient = await patientModel.updatePatient(data, id, trx);
