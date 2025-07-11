@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.client";
 import { Patient, UpdatePatient } from "../types/patient.type";
 
@@ -44,8 +45,12 @@ const getPatients = async () => {
   });
 };
 
-const updatePatient = async (data: UpdatePatient, id: number) => {
-  return prisma.patient.update({
+const updatePatient = async (
+  data: UpdatePatient,
+  id: number,
+  trx: Prisma.TransactionClient,
+) => {
+  return trx.patient.update({
     where: { id },
     data: {
       name: data.name,
@@ -74,6 +79,14 @@ const updatePatient = async (data: UpdatePatient, id: number) => {
   });
 };
 
-const deletePatient = async () => {};
+const deletePatient = async (id: number, trx: Prisma.TransactionClient) => {
+  return trx.patient.delete({
+    where: { id },
+    include: {
+      location: true,
+      phoneNumber: true,
+    },
+  });
+};
 
-export { addPatient, getPatients, updatePatient };
+export { addPatient, getPatients, updatePatient, deletePatient };

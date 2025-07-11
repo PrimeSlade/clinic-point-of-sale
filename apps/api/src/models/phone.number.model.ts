@@ -1,15 +1,16 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.client";
 
-const findNumber = async (number: string) => {
-  return prisma.phoneNumber.findFirst({
+const findNumber = async (number: string, trx: Prisma.TransactionClient) => {
+  return trx.phoneNumber.findFirst({
     where: {
       number,
     },
   });
 };
 
-const createNumber = async (number: string) => {
-  return prisma.phoneNumber.create({
+const createNumber = async (number: string, trx: Prisma.TransactionClient) => {
+  return trx.phoneNumber.create({
     data: {
       number,
     },
@@ -30,8 +31,8 @@ const unrefNumbers = async () => {
   });
 };
 
-const deleteUnrefNumbers = async () => {
-  return prisma.phoneNumber.deleteMany({
+const deleteUnrefNumbers = async (trx: Prisma.TransactionClient) => {
+  return trx.phoneNumber.deleteMany({
     where: {
       patients: {
         none: {},

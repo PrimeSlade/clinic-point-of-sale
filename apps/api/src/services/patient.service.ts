@@ -3,6 +3,7 @@ import { NotFoundError } from "../errors/NotFoundError";
 import { Patient, UpdatePatient } from "../types/patient.type";
 import * as patientModel from "../models/patient.model";
 import * as phoneNumberModel from "../models/phone.number.model";
+import prisma from "../config/prisma.client";
 
 const addPatient = async (data: Patient) => {
   try {
@@ -33,21 +34,28 @@ const getPatients = async () => {
 
 const updatePatient = async (data: UpdatePatient, id: number) => {
   try {
-    //typesafety
-    if (data.phoneNumber) {
-      const phoneNumber = await phoneNumberModel.findNumber(data.phoneNumber);
+    const patient = await prisma.$transaction(async (trx) => {
+      //typesafety
+      if (data.phoneNumber) {
+        const phoneNumber = await phoneNumberModel.findNumber(
+          data.phoneNumber,
+          trx,
+        );
 
-      if (!phoneNumber) {
-        await phoneNumberModel.createNumber(data.phoneNumber);
+        if (!phoneNumber) {
+          await phoneNumberModel.createNumber(data.phoneNumber, trx);
+        }
       }
-    }
 
-    const updatedPatient = await patientModel.updatePatient(data, id);
+      const updatedPatient = await patientModel.updatePatient(data, id, trx);
 
-    //clean up
-    await phoneNumberModel.deleteUnrefNumbers();
+      //clean up
+      await phoneNumberModel.deleteUnrefNumbers(trx);
 
-    return updatedPatient;
+      return updatedPatient;
+    });
+
+    return patient;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError();
@@ -56,6 +64,24 @@ const updatePatient = async (data: UpdatePatient, id: number) => {
   }
 };
 
-const deletePatient = async () => {};
+const deletePatient = async (id: number) => {
+  try {
+    const patient = await prisma.$transaction(async (trx) => {
+      const deletedPatient = await patientModel.deletePatient(id, trx);
 
-export { addPatient, getPatients, updatePatient };
+      //clean up
+      await phoneNumberModel.deleteUnrefNumbers(trx);
+
+      return deletedPatient;
+    });
+
+    return patient;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
+export { addPatient, getPatients, updatePatient, deletePatient };
