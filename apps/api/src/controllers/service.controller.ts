@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import * as serviceModel from "../models/service.model";
+import * as serviceService from "../services/service.service";
 import { BadRequestError } from "../errors/BadRequestError";
 
 const addService = async (
@@ -14,11 +14,11 @@ const addService = async (
   }
 
   try {
-    const addedService = await serviceModel.addService(data);
+    const addedService = await serviceService.addService(data);
 
     res.status(201).json({
       success: true,
-      meesage: "Service created",
+      message: "Service created",
       data: addedService,
     });
   } catch (error: any) {
@@ -32,7 +32,7 @@ const getServices = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const services = await serviceModel.getServices();
+    const services = await serviceService.getServices();
 
     res.status(200).json({
       success: true,
@@ -53,7 +53,7 @@ const updateService = async (
   const id = Number(req.params.id);
 
   try {
-    const updatedService = await serviceModel.updateService(data, id);
+    const updatedService = await serviceService.updateService(data, id);
 
     res.status(200).json({
       success: true,
@@ -73,7 +73,7 @@ const deleteService = async (
   const id = Number(req.params.id);
 
   try {
-    const deletedService = await serviceModel.deleteService(id);
+    const deletedService = await serviceService.deleteService(id);
 
     res.status(200).json({
       success: true,
