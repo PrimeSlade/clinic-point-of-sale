@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import * as serviceModel from "../models/service.model";
-import { NotFoundError } from "../errors/NotFoundError";
 import { BadRequestError } from "../errors/BadRequestError";
 
 const addService = async (
@@ -19,7 +18,7 @@ const addService = async (
 
     res.status(201).json({
       success: true,
-      meesage: "Service added",
+      meesage: "Service created",
       data: addedService,
     });
   } catch (error: any) {

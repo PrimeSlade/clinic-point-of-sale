@@ -1,12 +1,14 @@
 import { Router } from "express";
-import itemRotues from "./item.route";
+import itemRoutes from "./item.route";
 import locationRoutes from "./location.route";
-import serviceRotues from "./service.route";
+import serviceRoutes from "./service.route";
+import patientRoutes from "./patient.route";
 
 const router = Router();
 
-router.use("/items", itemRotues);
+router.use("/items", itemRoutes);
 router.use("/locations", locationRoutes);
-router.use("/services", serviceRotues);
+router.use("/services", serviceRoutes);
+router.use("/patients", patientRoutes);
 
 export default router;

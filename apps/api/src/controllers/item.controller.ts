@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import * as itemModel from "../models/item.model";
-import { NotFoundError } from "../errors/NotFoundError";
+import * as itemService from "../services/item.service";
 import { BadRequestError } from "../errors/BadRequestError";
 
 const addItem = async (
@@ -15,7 +14,7 @@ const addItem = async (
   }
 
   try {
-    const addedItem = await itemModel.addItem(item, itemUnits);
+    const addedItem = await itemService.addItem(item, itemUnits);
 
     res.status(201).json({
       success: true,
@@ -33,7 +32,7 @@ const getItems = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const items = await itemModel.getItems();
+    const items = await itemService.getItems();
 
     res.status(200).json({
       success: true,
@@ -58,7 +57,7 @@ const updateItem = async (
   }
 
   try {
-    const updatedItem = await itemModel.updateItem(item, itemUnits, id);
+    const updatedItem = await itemService.updateItem(item, itemUnits, id);
 
     res.status(200).json({
       success: true,
@@ -78,7 +77,7 @@ const deleteItem = async (
   const id = Number(req.params.id);
 
   try {
-    const deletedItem = await itemModel.deleteItem(id);
+    const deletedItem = await itemService.deleteItem(id);
 
     res.status(200).json({
       success: true,

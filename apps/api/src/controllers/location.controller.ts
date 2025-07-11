@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import * as locationModel from "../models/location.model";
-import { NotFoundError } from "../errors/NotFoundError";
 import { BadRequestError } from "../errors/BadRequestError";
 
 const addLocaiton = async (
@@ -19,7 +18,7 @@ const addLocaiton = async (
 
     res.status(201).json({
       success: true,
-      message: "Location added",
+      message: "Location created",
       data: location,
     });
   } catch (error) {
