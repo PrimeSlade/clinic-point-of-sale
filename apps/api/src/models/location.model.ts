@@ -2,7 +2,7 @@ import prisma from "../config/prisma.client";
 import { Location, UpdateLoation } from "../types/location.type";
 
 const addLocation = async (data: Location) => {
-  const addedLocation = await prisma.location.create({
+  return prisma.location.create({
     data: {
       name: data.name,
       address: data.address,
@@ -16,24 +16,18 @@ const addLocation = async (data: Location) => {
       phoneNumber: true,
     },
   });
-
-  return addedLocation;
 };
 
 const getAllLocations = async () => {
-  const locations = await prisma.location.findMany({
+  return prisma.location.findMany({
     include: {
       phoneNumber: true,
     },
-    orderBy: {
-      id: "asc",
-    },
   });
-  return locations;
 };
 
 const updateLocation = async (data: UpdateLoation, id: number) => {
-  const updated = await prisma.location.update({
+  return prisma.location.update({
     where: {
       id,
     },
@@ -50,12 +44,10 @@ const updateLocation = async (data: UpdateLoation, id: number) => {
       phoneNumber: true,
     },
   });
-
-  return updated;
 };
 
 const findLocationById = async (id: number) => {
-  return await prisma.location.findUnique({
+  return prisma.location.findUnique({
     where: {
       id,
     },
@@ -64,7 +56,7 @@ const findLocationById = async (id: number) => {
 };
 
 const deleteLocationAndPhone = async (id: number, phoneId: number) => {
-  return await prisma.$transaction([
+  return prisma.$transaction([
     prisma.location.delete({ where: { id } }),
     prisma.phoneNumber.delete({ where: { id: phoneId } }),
   ]);

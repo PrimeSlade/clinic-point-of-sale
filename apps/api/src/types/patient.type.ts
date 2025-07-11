@@ -39,4 +39,6 @@ type Patient = {
   locationId: number;
 };
 
-export { Patient };
+type UpdatePatient = Partial<Patient>;
+
+export { Patient, UpdatePatient };

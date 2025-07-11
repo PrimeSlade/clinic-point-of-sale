@@ -2,7 +2,7 @@ import prisma from "../config/prisma.client";
 import { Item, Unit, UpdateItem, UpdateUnit } from "../types/item.type";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
-  const addedItem = await prisma.item.create({
+  return prisma.item.create({
     data: {
       name: data.name,
       category: data.category,
@@ -25,22 +25,15 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
       itemUnits: true,
     },
   });
-
-  return addedItem;
 };
 
 const getItems = async () => {
-  const items = await prisma.item.findMany({
+  return prisma.item.findMany({
     include: {
       location: true,
       itemUnits: true,
     },
-    orderBy: {
-      id: "asc",
-    },
   });
-
-  return items;
 };
 
 const updateItem = async (
@@ -48,7 +41,7 @@ const updateItem = async (
   unit: Array<UpdateUnit>,
   id: number,
 ) => {
-  const updated = await prisma.item.update({
+  return prisma.item.update({
     where: {
       id: id,
     },
@@ -75,12 +68,10 @@ const updateItem = async (
       itemUnits: true,
     },
   });
-
-  return updated;
 };
 
 const deleteItem = async (id: number) => {
-  const deleted = await prisma.item.delete({
+  return prisma.item.delete({
     where: {
       id,
     },
@@ -89,8 +80,6 @@ const deleteItem = async (id: number) => {
       itemUnits: true,
     },
   });
-
-  return deleted;
 };
 
 export { addItem, getItems, updateItem, deleteItem };

@@ -2,21 +2,17 @@ import prisma from "../config/prisma.client";
 import { Service, UpdateService } from "../types/service.type";
 
 const addService = async (data: Service) => {
-  const addedService = await prisma.service.create({
+  return prisma.service.create({
     data: data,
   });
-
-  return addedService;
 };
 
 const getServices = async () => {
-  const services = await prisma.service.findMany();
-
-  return services;
+  return prisma.service.findMany();
 };
 
 const updateService = async (data: UpdateService, id: number) => {
-  const updatedService = await prisma.service.update({
+  return prisma.service.update({
     where: {
       id,
     },
@@ -25,18 +21,14 @@ const updateService = async (data: UpdateService, id: number) => {
       retailPrice: data.retailPrice,
     },
   });
-
-  return updatedService;
 };
 
 const deleteService = async (id: number) => {
-  const deletedService = await prisma.service.delete({
+  return prisma.service.delete({
     where: {
       id: id,
     },
   });
-
-  return deletedService;
 };
 
 export { addService, getServices, updateService, deleteService };
