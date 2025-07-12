@@ -65,4 +65,24 @@ const updateDoctor = async (
   }
 };
 
-export { addDoctor, getDoctors, updateDoctor };
+const deleteDoctor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const id = req.params.id;
+
+  try {
+    const deletedDoctor = await doctorService.deleteDoctor(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor deleted",
+      data: deletedDoctor,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export { addDoctor, getDoctors, updateDoctor, deleteDoctor };

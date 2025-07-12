@@ -55,4 +55,22 @@ const updateDoctor = async (data: UpdateDoctor, id: string) => {
   }
 };
 
-export { addDoctor, getDoctors, updateDoctor };
+const deleteDoctor = async (id: string) => {
+  try {
+    const doctor = await prisma.$transaction(async (trx) => {
+      const deletedDoctor = await doctorModel.deleteDoctor(id, trx);
+
+      await phoneNumberModel.deleteUnrefNumbers(trx);
+
+      return deletedDoctor;
+    });
+    return doctor;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
+export { addDoctor, getDoctors, updateDoctor, deleteDoctor };

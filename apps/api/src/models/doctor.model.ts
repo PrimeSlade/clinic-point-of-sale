@@ -73,4 +73,16 @@ const updateDoctor = async (
   });
 };
 
-export { addDoctor, getDoctors, updateDoctor };
+const deleteDoctor = async (id: string, trx: Prisma.TransactionClient) => {
+  return trx.doctor.delete({
+    where: {
+      id,
+    },
+    include: {
+      location: true,
+      phoneNumber: true,
+    },
+  });
+};
+
+export { addDoctor, getDoctors, updateDoctor, deleteDoctor };
