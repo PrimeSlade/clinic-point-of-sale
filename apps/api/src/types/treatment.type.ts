@@ -1,6 +1,10 @@
 type Treatment = {
   doctorId: string;
   patientId: number;
+  diagnosis?: string;
+  treatment?: string;
 };
 
-export { Treatment };
+type UpdateTreatment = Partial<Treatment>;
+
+export { Treatment, UpdateTreatment };

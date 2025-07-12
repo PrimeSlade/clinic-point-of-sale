@@ -139,6 +139,7 @@ model Patient {
   patientType PatientType @map("patient_type")
   department Department 
   registeredAt DateTime @default(now()) @map("registered_at")
+  
 
   phoneNumberId Int @map("phone_number_id")
   locationId Int @map("location_id")
@@ -175,6 +176,8 @@ model Treatment {
 
   doctorId String @map("doctor_id")
   patientId Int @map("patient_id")
+  diagnosis String?
+  treatment String?
 
   //Relations
   doctor Doctor @relation(fields: [doctorId],references: [id])
