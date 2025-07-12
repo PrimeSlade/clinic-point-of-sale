@@ -1,4 +1,4 @@
-import e, { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../errors/BadRequestError";
 import * as patientService from "../services/patient.service";
 
