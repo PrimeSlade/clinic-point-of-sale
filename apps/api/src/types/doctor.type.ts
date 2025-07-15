@@ -1,5 +1,6 @@
 type Doctor = {
   name: string;
+  email: string;
   commission: number;
   address?: string;
   description?: string;

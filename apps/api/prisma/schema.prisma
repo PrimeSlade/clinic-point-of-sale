@@ -155,6 +155,7 @@ model Patient {
 model Doctor {
   id String @id @default(uuid())
   name String
+  email String @unique
   commission Decimal @db.Decimal(10,2)
   address String?
   description String?

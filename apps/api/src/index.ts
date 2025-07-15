@@ -12,10 +12,6 @@ app.use(express.json());
 
 app.use("/api", mainRouter);
 
-app.get("/error-test", (req, res, next) => {
-  throw new Error("This should be caught and logged!");
-});
-
 app.listen(port, () => {
   console.log(`app is listening on port ${port}`);
 });

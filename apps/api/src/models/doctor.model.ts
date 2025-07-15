@@ -6,6 +6,7 @@ const addDoctor = async (data: Doctor) => {
   return prisma.doctor.create({
     data: {
       name: data.name,
+      email: data.email,
       commission: data.commission,
       address: data.address,
       description: data.description,
@@ -52,6 +53,7 @@ const updateDoctor = async (
     },
     data: {
       name: data.name,
+      email: data.email,
       commission: data.commission,
       address: data.address,
       description: data.description,
