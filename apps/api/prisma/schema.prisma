@@ -109,7 +109,7 @@ model ItemUnit {
   id Int @id @default(autoincrement())
 
   unitType UnitType @map("unit_type")
-  unit Int 
+  quantity Int 
   purchasePrice Decimal @map("purchase_price") @db.Decimal(10,2)
 
   itemId Int @map("item_id")
@@ -193,14 +193,32 @@ model Invoice {
   createdAt DateTime @default(now()) @map("created_at")
 
   locationId Int @map("location_id")
-  treatmentId Int @unique @map("treatment_id") 
+  treatmentId Int? @unique @map("treatment_id") 
 
   //Relations
+  invoiceItems InvoiceItem[]
   location  Location  @relation(fields: [locationId], references: [id])
-  treatment Treatment @relation(fields: [treatmentId], references: [id])
+  treatment Treatment? @relation(fields: [treatmentId], references: [id])
 
   @@map("invoices")
 }
+
+model InvoiceItem {
+  id Int @id @default(autoincrement())
+  itemName String @map("item_name")
+  unitType UnitType @map("unit_type") 
+  quantity Int
+  purchasePrice Decimal @map("purchase_price") @db.Decimal(10,2)
+  discountPrice Decimal @map("discount_price") @db.Decimal(10,2)
+
+  invoiceId Int @map("invoice_id")
+
+  //Relations
+  invoice Invoice @relation(fields: [invoiceId],references: [id])
+
+  @@map("invoice_items")
+}
+
 
 model User {
   id String @id @default(uuid())

@@ -24,7 +24,7 @@ type UpdateItem = Partial<Item>;
 
 type Unit = {
   unitType: UnitType;
-  unit: number;
+  quantity: number;
   purchasePrice: number;
 };
 
