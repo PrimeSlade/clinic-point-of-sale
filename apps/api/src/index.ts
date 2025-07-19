@@ -3,11 +3,20 @@ import mainRouter from "./routes/index.route";
 import dotenv from "dotenv";
 import { errorHandler } from "./middlewares/errorHandler";
 import helmet from "helmet";
+import cors from "cors";
 
 dotenv.config();
 const port = process.env.PORT;
+const frontEndOrigin = process.env.FRONT_END_ORIGIN;
 
 const app = express();
+
+app.use(
+  cors({
+    origin: frontEndOrigin,
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(helmet());

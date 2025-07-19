@@ -13,6 +13,10 @@ const addLocation = async (data: Location) => {
       throw new NotFoundError();
     }
 
+    if (error.code === "P2002") {
+      throw new CustomError("This Phone Number already exists.", 409);
+    }
+
     throw new CustomError("Database operation failed", 500);
   }
 };
