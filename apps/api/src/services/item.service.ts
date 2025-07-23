@@ -12,7 +12,7 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
-    throw new CustomError("Database operation failed", 500);
+    throw new CustomError("Database operation failed", 500,{ cause: error });
   }
 };
 

@@ -23,6 +23,7 @@ const getAllLocations = async () => {
     include: {
       phoneNumber: true,
     },
+    orderBy: { id: "asc" },
   });
 };
 
