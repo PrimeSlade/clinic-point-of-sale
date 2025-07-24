@@ -12,7 +12,7 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
-    throw new CustomError("Database operation failed", 500,{ cause: error });
+    throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };
 
@@ -21,6 +21,19 @@ const getItems = async () => {
     const items = await itemModel.getItems();
 
     return items;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError("Items not found");
+    }
+    throw new CustomError("Database operation failed", 500);
+  }
+};
+
+const getItemById = async (id: number) => {
+  try {
+    const item = await itemModel.getItemById(id);
+
+    return item;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Items not found");
@@ -61,4 +74,4 @@ const deleteItem = async (id: number) => {
   }
 };
 
-export { addItem, getItems, updateItem, deleteItem };
+export { addItem, getItems, getItemById, updateItem, deleteItem };

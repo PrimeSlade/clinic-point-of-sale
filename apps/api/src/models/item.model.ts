@@ -36,6 +36,18 @@ const getItems = async () => {
   });
 };
 
+const getItemById = async (id: number) => {
+  return prisma.item.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      location: true,
+      itemUnits: true,
+    },
+  });
+};
+
 const updateItem = async (
   data: UpdateItem,
   unit: Array<UpdateUnit>,
@@ -82,4 +94,4 @@ const deleteItem = async (id: number) => {
   });
 };
 
-export { addItem, getItems, updateItem, deleteItem };
+export { addItem, getItems, getItemById, updateItem, deleteItem };

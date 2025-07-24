@@ -9,7 +9,7 @@ const addItem = async (
 ): Promise<void> => {
   const { item, itemUnits } = req.body;
 
-  console.log(item,itemUnits);
+  console.log(item, itemUnits);
 
   if (!item || !itemUnits) {
     throw new BadRequestError("Item data is required");
@@ -40,6 +40,26 @@ const getItems = async (
       success: true,
       message: "Items fetched",
       data: items,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+const getItemById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const id = Number(req.params.id);
+
+  try {
+    const item = await itemService.getItemById(id);
+
+    res.status(200).json({
+      success: true,
+      messge: "Item fetched",
+      data: item,
     });
   } catch (error: any) {
     next(error);
@@ -91,4 +111,4 @@ const deleteItem = async (
   }
 };
 
-export { addItem, getItems, updateItem, deleteItem };
+export { addItem, getItems, getItemById, updateItem, deleteItem };
