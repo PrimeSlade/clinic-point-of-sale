@@ -56,7 +56,7 @@ const updateItem = async (
       throw new NotFoundError();
     }
 
-    throw new CustomError("Database operation failed", 500);
+    throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };
 

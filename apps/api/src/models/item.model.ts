@@ -33,6 +33,7 @@ const getItems = async () => {
       location: true,
       itemUnits: true,
     },
+    orderBy: { id: "asc" },
   });
 };
 
