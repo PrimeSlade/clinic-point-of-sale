@@ -44,20 +44,33 @@ const updateLocation = async (data: UpdateLoation, id: number) => {
       throw new NotFoundError();
     }
 
+    if (error.code === "P2002") {
+      throw new CustomError("This Phone Number already exists.", 409);
+    }
+
     throw new CustomError("Database operation failed", 500);
   }
 };
 
 const deleteLocation = async (id: number) => {
-  const location = await locationModel.findLocationById(id);
+  try {
+    const location = await locationModel.findLocationById(id);
 
-  if (!location || !location.phoneNumberId) {
-    throw new NotFoundError("Location or phone number not found");
+    if (!location || !location.phoneNumberId) {
+      throw new NotFoundError("Location or phone number not found");
+    }
+
+    await locationModel.deleteLocationAndPhone(id, location.phoneNumberId);
+
+    return location;
+  } catch (error: any) {
+    if (error.code === "P2003") {
+      throw new CustomError(
+        "Cannot delete location because there are items linked to it. Please remove or reassign those items first.",
+        409,
+      );
+    }
   }
-
-  await locationModel.deleteLocationAndPhone(id, location.phoneNumberId);
-
-  return location;
 };
 
 export { addLocation, getAllLocations, updateLocation, deleteLocation };
