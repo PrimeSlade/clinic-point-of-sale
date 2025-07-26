@@ -18,7 +18,7 @@ const addPatient = async (
 
     res.status(201).json({
       success: true,
-      message: "Patient created",
+      message: "Patient created successfully!",
       data: addedPatient,
     });
   } catch (error: any) {
@@ -36,7 +36,7 @@ const getPatients = async (
 
     res.status(200).json({
       success: true,
-      message: "Patients fetched",
+      message: "Patients fetched successfully!",
       data: patients,
     });
   } catch (error: any) {
@@ -61,7 +61,7 @@ const updatePatient = async (
 
     res.status(200).json({
       success: true,
-      message: "Patient updated",
+      message: "Patient updated successfully!",
       data: updatePatient,
     });
   } catch (error: any) {
@@ -81,7 +81,7 @@ const deletePatient = async (
 
     res.status(200).json({
       success: true,
-      message: "Patient deleted",
+      message: "Patient deleted successfully!",
       data: deletedPatient,
     });
   } catch (error: any) {

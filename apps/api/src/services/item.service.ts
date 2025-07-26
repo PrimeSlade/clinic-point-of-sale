@@ -1,6 +1,12 @@
 import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
-import { Item, Unit, UpdateItem, UpdateUnit } from "../types/item.type";
+import {
+  Item,
+  ItemPagination,
+  Unit,
+  UpdateItem,
+  UpdateUnit,
+} from "../types/item.type";
 import * as itemModel from "../models/item.model";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
@@ -16,9 +22,9 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   }
 };
 
-const getItems = async () => {
+const getItems = async ({ offset, limit }: ItemPagination) => {
   try {
-    const items = await itemModel.getItems();
+    const { items, total } = await itemModel.getItems({ offset, limit });
 
     //change string to number
     const parsedItems = items.map((item) => ({
@@ -29,7 +35,7 @@ const getItems = async () => {
       })),
     }));
 
-    return parsedItems;
+    return { items: parsedItems, total };
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Items not found");

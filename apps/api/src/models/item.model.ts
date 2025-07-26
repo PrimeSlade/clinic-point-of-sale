@@ -1,5 +1,11 @@
 import prisma from "../config/prisma.client";
-import { Item, Unit, UpdateItem, UpdateUnit } from "../types/item.type";
+import {
+  Item,
+  ItemPagination,
+  Unit,
+  UpdateItem,
+  UpdateUnit,
+} from "../types/item.type";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
   return prisma.item.create({
@@ -26,14 +32,21 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   });
 };
 
-const getItems = async () => {
-  return prisma.item.findMany({
-    include: {
-      location: true,
-      itemUnits: true,
-    },
-    orderBy: { id: "asc" },
-  });
+const getItems = async ({ offset, limit }: ItemPagination) => {
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      skip: offset,
+      take: limit,
+      include: {
+        location: true,
+        itemUnits: true,
+      },
+      orderBy: { id: "desc" },
+    }),
+    prisma.item.count(),
+  ]);
+
+  return { items, total };
 };
 
 const getItemById = async (id: number) => {

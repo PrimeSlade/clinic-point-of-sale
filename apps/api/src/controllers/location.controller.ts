@@ -18,7 +18,7 @@ const addLocaiton = async (
 
     res.status(201).json({
       success: true,
-      message: "Location created",
+      message: "Location created successfully!",
       data: location,
     });
   } catch (error) {
@@ -36,7 +36,7 @@ const getLocations = async (
 
     res.status(200).json({
       success: true,
-      message: "Locations fetched",
+      message: "Locations fetched successfully!",
       data: locations,
     });
   } catch (error) {
@@ -65,7 +65,7 @@ const updateLocation = async (
 
     res.status(200).json({
       success: true,
-      message: "Location updated",
+      message: "Location updated successfully!",
       data: updatedLocation,
     });
   } catch (error) {
@@ -85,7 +85,7 @@ const deleteLocation = async (
 
     res.status(200).json({
       success: true,
-      message: "Location deleted",
+      message: "Location deleted successfully!",
       data: deletedLocation,
     });
   } catch (error) {

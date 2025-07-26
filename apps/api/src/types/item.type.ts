@@ -29,4 +29,9 @@ type Unit = {
 
 type UpdateUnit = { id: number } & Partial<Unit>;
 
-export { Item, Unit, UpdateItem, UpdateUnit };
+type ItemPagination = {
+  offset: number;
+  limit: number;
+};
+
+export { Item, Unit, UpdateItem, UpdateUnit, ItemPagination };

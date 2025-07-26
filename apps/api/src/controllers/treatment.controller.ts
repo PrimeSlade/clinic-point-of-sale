@@ -18,7 +18,7 @@ const addTreatment = async (
 
     res.status(201).json({
       success: true,
-      message: "Treatment created",
+      message: "Treatment created successfully!",
       data: addedTreatment,
     });
   } catch (error: any) {
@@ -36,7 +36,7 @@ const getTreatments = async (
 
     res.status(200).json({
       success: true,
-      message: "Treatments fetched",
+      message: "Treatments fetched successfully!",
       data: treatments,
     });
   } catch (error: any) {
@@ -61,7 +61,7 @@ const updateTreatment = async (
 
     res.status(200).json({
       success: true,
-      message: "Treatment updated",
+      message: "Treatment updated successfully!",
       data: updatedTreatment,
     });
   } catch (error: any) {
@@ -81,7 +81,7 @@ const deleteTreatment = async (
 
     res.status(200).json({
       success: true,
-      message: "Treatment deleted",
+      message: "Treatment deleted successfully!",
       data: deletedTreatment,
     });
   } catch (error: any) {

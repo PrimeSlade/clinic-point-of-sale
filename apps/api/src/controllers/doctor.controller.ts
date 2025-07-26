@@ -18,7 +18,7 @@ const addDoctor = async (
 
     res.status(201).json({
       success: true,
-      message: "Doctor added",
+      message: "Doctor added successfully!",
       data: addedDoctor,
     });
   } catch (error: any) {
@@ -36,7 +36,7 @@ const getDoctors = async (
 
     res.status(200).json({
       success: true,
-      message: "Doctors fetched",
+      message: "Doctors fetched successfully!",
       data: doctors,
     });
   } catch (error: any) {
@@ -57,7 +57,7 @@ const updateDoctor = async (
 
     res.status(200).json({
       success: true,
-      message: "Doctor updated",
+      message: "Doctor updated successfully!",
       data: updatedDoctor,
     });
   } catch (error: any) {
@@ -77,7 +77,7 @@ const deleteDoctor = async (
 
     res.status(200).json({
       success: true,
-      message: "Doctor deleted",
+      message: "Doctor deleted successfully!",
       data: deletedDoctor,
     });
   } catch (error: any) {

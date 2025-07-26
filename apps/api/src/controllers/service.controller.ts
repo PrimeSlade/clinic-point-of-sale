@@ -18,7 +18,7 @@ const addService = async (
 
     res.status(201).json({
       success: true,
-      message: "Service created",
+      message: "Service created successfully!",
       data: addedService,
     });
   } catch (error: any) {
@@ -36,7 +36,7 @@ const getServices = async (
 
     res.status(200).json({
       success: true,
-      message: "Services fetched",
+      message: "Services fetched successfully!",
       data: services,
     });
   } catch (error: any) {
@@ -57,7 +57,7 @@ const updateService = async (
 
     res.status(200).json({
       success: true,
-      message: "Service updated",
+      message: "Service updated successfully!",
       data: updatedService,
     });
   } catch (error: any) {
@@ -77,7 +77,7 @@ const deleteService = async (
 
     res.status(200).json({
       success: true,
-      message: "Service deleted",
+      message: "Service deleted successfully!",
       data: deletedService,
     });
   } catch (error: any) {
