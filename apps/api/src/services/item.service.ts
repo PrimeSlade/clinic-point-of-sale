@@ -20,7 +20,16 @@ const getItems = async () => {
   try {
     const items = await itemModel.getItems();
 
-    return items;
+    //change string to number
+    const parsedItems = items.map((item) => ({
+      ...item,
+      itemUnits: item.itemUnits.map((unit) => ({
+        ...unit,
+        purchasePrice: unit.purchasePrice.toNumber(),
+      })),
+    }));
+
+    return parsedItems;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Items not found");
@@ -33,7 +42,16 @@ const getItemById = async (id: number) => {
   try {
     const item = await itemModel.getItemById(id);
 
-    return item;
+    //change string to number
+    const parsedItem = {
+      ...item,
+      itemUnits: item?.itemUnits.map((unit) => ({
+        ...unit,
+        purchasePrice: unit.purchasePrice.toNumber(),
+      })),
+    };
+
+    return parsedItem;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Items not found");
