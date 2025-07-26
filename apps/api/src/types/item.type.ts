@@ -15,7 +15,6 @@ type Item = {
   name: string;
   category: string;
   expiryDate: string;
-  pricePercent: number;
   locationId: number;
   description?: string; //option
 };

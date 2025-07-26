@@ -93,7 +93,6 @@ model Item{
   name String
   category String
   expiryDate DateTime @map("expiry_date") @db.Date
-  pricePercent Int @map("price_percent") 
   description String?
 
   locationId Int @map("location_id")
@@ -226,6 +225,7 @@ model User {
   email String @unique
   password String
   createdAt DateTime @default(now()) @map("created_at")
+  pricePercent Int @map("price_percent") 
 
   locationId Int @map("location_id")
   roleId Int @map("role_id")

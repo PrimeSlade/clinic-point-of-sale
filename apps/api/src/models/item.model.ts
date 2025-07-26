@@ -8,7 +8,6 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
       category: data.category,
       expiryDate: data.expiryDate,
       description: data?.description,
-      pricePercent: data.pricePercent,
       locationId: data.locationId,
       itemUnits: {
         createMany: {
@@ -63,7 +62,6 @@ const updateItem = async (
       category: data.category,
       expiryDate: data.expiryDate,
       description: data?.description,
-      pricePercent: data.pricePercent,
       locationId: data.locationId,
       itemUnits: {
         update: unit.map((u) => ({
