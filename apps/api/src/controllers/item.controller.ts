@@ -35,12 +35,19 @@ const getItems = async (
 ): Promise<void> => {
   const page = Number(req.query.page);
   const limit = Number(req.query.limit);
+  const search = String(req.query.search || "");
+  const filter = String(req.query.filter || "");
 
   //pagination
   const offset = (page - 1) * limit;
 
   try {
-    const { items, total } = await itemService.getItems({ offset, limit });
+    const { items, total } = await itemService.getItems({
+      offset,
+      limit,
+      search,
+      filter,
+    });
 
     //pagination
     const totalPages = Math.ceil(total / limit);

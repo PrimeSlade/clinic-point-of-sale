@@ -22,9 +22,14 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   }
 };
 
-const getItems = async ({ offset, limit }: ItemPagination) => {
+const getItems = async ({ offset, limit, search, filter }: ItemPagination) => {
   try {
-    const { items, total } = await itemModel.getItems({ offset, limit });
+    const { items, total } = await itemModel.getItems({
+      offset,
+      limit,
+      search,
+      filter,
+    });
 
     //change string to number
     const parsedItems = items.map((item) => ({

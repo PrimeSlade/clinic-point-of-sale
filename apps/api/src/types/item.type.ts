@@ -32,6 +32,8 @@ type UpdateUnit = { id: number } & Partial<Unit>;
 type ItemPagination = {
   offset: number;
   limit: number;
+  search: string;
+  filter: string;
 };
 
 export { Item, Unit, UpdateItem, UpdateUnit, ItemPagination };

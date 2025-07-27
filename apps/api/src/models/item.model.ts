@@ -1,3 +1,4 @@
+import { equal } from "assert";
 import prisma from "../config/prisma.client";
 import {
   Item,
@@ -6,6 +7,7 @@ import {
   UpdateItem,
   UpdateUnit,
 } from "../types/item.type";
+import { Prisma } from "../generated/prisma";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
   return prisma.item.create({
@@ -32,7 +34,30 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   });
 };
 
-const getItems = async ({ offset, limit }: ItemPagination) => {
+const getItems = async ({ offset, limit, search, filter }: ItemPagination) => {
+  const conditions: Prisma.ItemWhereInput[] = [];
+
+  if (search) {
+    conditions.push({
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { category: { contains: search, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  if (filter) {
+    conditions.push({
+      location: {
+        name: { equals: filter, mode: "insensitive" },
+      },
+    });
+  }
+
+  const whereClause: Prisma.ItemWhereInput = {
+    AND: conditions,
+  };
+
   const [items, total] = await Promise.all([
     prisma.item.findMany({
       skip: offset,
@@ -41,9 +66,10 @@ const getItems = async ({ offset, limit }: ItemPagination) => {
         location: true,
         itemUnits: true,
       },
+      where: whereClause,
       orderBy: { id: "desc" },
     }),
-    prisma.item.count(),
+    prisma.item.count({ where: whereClause }),
   ]);
 
   return { items, total };
