@@ -8,7 +8,9 @@ const addService = async (data: Service) => {
 };
 
 const getServices = async () => {
-  return prisma.service.findMany();
+  return prisma.service.findMany({
+    orderBy: { id: "desc" },
+  });
 };
 
 const updateService = async (data: UpdateService, id: number) => {

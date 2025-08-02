@@ -21,7 +21,12 @@ const getServices = async () => {
   try {
     const services = await serviceModel.getServices();
 
-    return services;
+    const parsedServices = services.map((s) => ({
+      ...s,
+      retailPrice: Number(s.retailPrice),
+    }));
+
+    return parsedServices;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Services not found");
