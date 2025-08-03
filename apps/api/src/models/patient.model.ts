@@ -41,6 +41,7 @@ const getPatients = async () => {
     include: {
       phoneNumber: true,
       location: true,
+      treatments: true,
     },
   });
 };
@@ -75,6 +76,7 @@ const updatePatient = async (
     include: {
       location: true,
       phoneNumber: true,
+      treatments: true,
     },
   });
 };
