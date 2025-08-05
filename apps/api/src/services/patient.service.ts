@@ -33,6 +33,19 @@ const getPatients = async () => {
   }
 };
 
+const getPatientById = async (id: number) => {
+  try {
+    const patient = await patientModel.getPatientById(id);
+
+    return patient;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
 const updatePatient = async (data: UpdatePatient, id: number) => {
   try {
     const patient = await prisma.$transaction(async (trx) => {
@@ -78,4 +91,10 @@ const deletePatient = async (id: number) => {
   }
 };
 
-export { addPatient, getPatients, updatePatient, deletePatient };
+export {
+  addPatient,
+  getPatients,
+  getPatientById,
+  updatePatient,
+  deletePatient,
+};

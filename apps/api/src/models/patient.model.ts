@@ -6,6 +6,7 @@ const addPatient = async (data: Patient) => {
   return prisma.patient.create({
     data: {
       name: data.name,
+      email: data.email,
       gender: data.gender,
       dateOfBirth: data.dateOfBirth,
       address: data.address,
@@ -41,7 +42,30 @@ const getPatients = async () => {
     include: {
       phoneNumber: true,
       location: true,
-      treatments: true,
+      treatments: {
+        orderBy: {
+          id: "desc",
+        },
+      },
+    },
+    orderBy: { id: "desc" },
+  });
+};
+
+const getPatientById = async (id: number) => {
+  return prisma.patient.findUnique({
+    where: { id },
+    include: {
+      phoneNumber: true,
+      location: true,
+      treatments: {
+        orderBy: {
+          id: "desc",
+        },
+        include: {
+          doctor: true,
+        },
+      },
     },
   });
 };
@@ -55,6 +79,7 @@ const updatePatient = async (
     where: { id },
     data: {
       name: data.name,
+      email: data.email,
       gender: data.gender,
       dateOfBirth: data.dateOfBirth,
       address: data.address,
@@ -91,4 +116,10 @@ const deletePatient = async (id: number, trx: Prisma.TransactionClient) => {
   });
 };
 
-export { addPatient, getPatients, updatePatient, deletePatient };
+export {
+  addPatient,
+  getPatients,
+  getPatientById,
+  updatePatient,
+  deletePatient,
+};

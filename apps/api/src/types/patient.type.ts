@@ -28,6 +28,7 @@ export enum PatientType {
 
 type Patient = {
   name: string;
+  email?: string;
   gender: Gender;
   dateOfBirth: Date;
   address?: string;

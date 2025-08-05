@@ -44,6 +44,30 @@ const getPatients = async (
   }
 };
 
+const getPatientById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const id = Number(req.params.id);
+
+  if (!id) {
+    throw new BadRequestError("Patient id is required");
+  }
+
+  try {
+    const patient = await patientService.getPatientById(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Patient fetched successfully!",
+      data: patient,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 const updatePatient = async (
   req: Request,
   res: Response,
@@ -89,4 +113,10 @@ const deletePatient = async (
   }
 };
 
-export { addPatient, getPatients, updatePatient, deletePatient };
+export {
+  addPatient,
+  getPatients,
+  getPatientById,
+  updatePatient,
+  deletePatient,
+};

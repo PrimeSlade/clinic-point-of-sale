@@ -133,6 +133,7 @@ model Patient {
   gender Gender
   dateOfBirth DateTime @map("date_of_birth") @db.Date
   address String?
+  email String?
   patientStatus PatientStatus @map("patient_status")
   patientCondition PatientCondition @map("patient_condition")
   patientType PatientType @map("patient_type")
