@@ -29,11 +29,11 @@ type Unit = {
 
 type UpdateUnit = { id: number } & Partial<Unit>;
 
-type ItemPagination = {
+type ItemQueryParams = {
   offset: number;
   limit: number;
   search: string;
   filter: string;
 };
 
-export { Item, Unit, UpdateItem, UpdateUnit, ItemPagination };
+export { Item, Unit, UpdateItem, UpdateUnit, ItemQueryParams };

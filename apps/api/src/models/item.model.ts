@@ -1,7 +1,7 @@
 import prisma from "../config/prisma.client";
 import {
   Item,
-  ItemPagination,
+  ItemQueryParams,
   Unit,
   UpdateItem,
   UpdateUnit,
@@ -33,7 +33,7 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   });
 };
 
-const getItems = async ({ offset, limit, search, filter }: ItemPagination) => {
+const getItems = async ({ offset, limit, search, filter }: ItemQueryParams) => {
   const conditions: Prisma.ItemWhereInput[] = [];
 
   if (search) {

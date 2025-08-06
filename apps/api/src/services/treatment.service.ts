@@ -1,4 +1,8 @@
-import { Treatment, UpdateTreatment } from "../types/treatment.type";
+import {
+  Treatment,
+  TreatmentQueryParams,
+  UpdateTreatment,
+} from "../types/treatment.type";
 import * as treatmentModel from "../models/treatment.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { CustomError } from "../errors/CustomError";
@@ -17,11 +21,23 @@ const addTreatment = async (data: Treatment) => {
   }
 };
 
-const getTreatments = async () => {
+const getTreatments = async ({
+  offset,
+  limit,
+  search,
+  startDate,
+  endDate,
+}: TreatmentQueryParams) => {
   try {
-    const treatments = await treatmentModel.getTreatments();
+    const { treatments, total } = await treatmentModel.getTreatments({
+      offset,
+      limit,
+      search,
+      startDate,
+      endDate,
+    });
 
-    return treatments;
+    return { treatments, total };
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Services not found");

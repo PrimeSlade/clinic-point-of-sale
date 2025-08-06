@@ -2,7 +2,7 @@ import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
 import {
   Item,
-  ItemPagination,
+  ItemQueryParams,
   Unit,
   UpdateItem,
   UpdateUnit,
@@ -22,7 +22,7 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   }
 };
 
-const getItems = async ({ offset, limit, search, filter }: ItemPagination) => {
+const getItems = async ({ offset, limit, search, filter }: ItemQueryParams) => {
   try {
     const { items, total } = await itemModel.getItems({
       offset,

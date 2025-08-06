@@ -5,6 +5,14 @@ type Treatment = {
   treatment?: string;
 };
 
+type TreatmentQueryParams = {
+  offset: number;
+  limit: number;
+  search: string;
+  startDate?: string;
+  endDate?: string;
+};
+
 type UpdateTreatment = Partial<Treatment>;
 
-export { Treatment, UpdateTreatment };
+export { Treatment, UpdateTreatment, TreatmentQueryParams };
