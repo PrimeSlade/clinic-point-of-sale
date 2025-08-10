@@ -14,7 +14,7 @@ const addTreatment = async (data: Treatment) => {
     return addedTreatment;
   } catch (error: any) {
     if (error.code === "P2025") {
-      throw new NotFoundError("Services not found");
+      throw new NotFoundError();
     }
 
     throw new CustomError("Database operation failed", 500, { cause: error });
@@ -40,7 +40,21 @@ const getTreatments = async ({
     return { treatments, total };
   } catch (error: any) {
     if (error.code === "P2025") {
-      throw new NotFoundError("Services not found");
+      throw new NotFoundError();
+    }
+
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
+const getTreatmentById = async (id: number) => {
+  try {
+    const treatment = await treatmentModel.getTreatmentById(id);
+
+    return treatment;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
     }
 
     throw new CustomError("Database operation failed", 500, { cause: error });
@@ -54,7 +68,7 @@ const updateTreatment = async (data: UpdateTreatment, id: number) => {
     return updatedTreatment;
   } catch (error: any) {
     if (error.code === "P2025") {
-      throw new NotFoundError("Services not found");
+      throw new NotFoundError();
     }
 
     throw new CustomError("Database operation failed", 500, { cause: error });
@@ -68,11 +82,17 @@ const deleteTreatment = async (id: number) => {
     return deletedTreatment;
   } catch (error: any) {
     if (error.code === "P2025") {
-      throw new NotFoundError("Services not found");
+      throw new NotFoundError();
     }
 
     throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };
 
-export { addTreatment, getTreatments, updateTreatment, deleteTreatment };
+export {
+  addTreatment,
+  getTreatments,
+  getTreatmentById,
+  updateTreatment,
+  deleteTreatment,
+};

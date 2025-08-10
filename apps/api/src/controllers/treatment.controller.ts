@@ -69,6 +69,30 @@ const getTreatments = async (
   }
 };
 
+const getTreatmentById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const id = Number(req.params.id);
+
+  if (!id) {
+    throw new BadRequestError("Treatment id is required");
+  }
+
+  try {
+    const treatment = await treatmentService.getTreatmentById(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Treatment fetched successfully!",
+      data: treatment,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 const updateTreatment = async (
   req: Request,
   res: Response,
@@ -78,7 +102,7 @@ const updateTreatment = async (
   const id = Number(req.params.id);
 
   if (!data || !id) {
-    throw new BadRequestError("Treatment data or Id is required");
+    throw new BadRequestError("Treatment data or id is required");
   }
 
   try {
@@ -114,4 +138,10 @@ const deleteTreatment = async (
   }
 };
 
-export { addTreatment, getTreatments, updateTreatment, deleteTreatment };
+export {
+  addTreatment,
+  getTreatments,
+  getTreatmentById,
+  updateTreatment,
+  deleteTreatment,
+};

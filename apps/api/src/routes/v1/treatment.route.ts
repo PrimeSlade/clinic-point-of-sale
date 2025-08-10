@@ -5,6 +5,7 @@ const router = Router();
 
 router.post("/add", treatmentController.addTreatment);
 router.get("/", treatmentController.getTreatments);
+router.get("/:id", treatmentController.getTreatmentById);
 router.put("/:id", treatmentController.updateTreatment);
 router.delete("/:id", treatmentController.deleteTreatment);
 

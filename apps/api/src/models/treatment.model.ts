@@ -104,6 +104,24 @@ const getTreatments = async ({
   return { treatments, total };
 };
 
+const getTreatmentById = async (id: number) => {
+  return prisma.treatment.findUnique({
+    where: { id },
+    include: {
+      doctor: {
+        include: {
+          phoneNumber: true,
+        },
+      },
+      patient: {
+        include: {
+          phoneNumber: true,
+        },
+      },
+    },
+  });
+};
+
 const updateTreatment = async (data: UpdateTreatment, id: number) => {
   return prisma.treatment.update({
     where: { id },
@@ -132,4 +150,10 @@ const deleteTreatment = async (id: number) => {
   });
 };
 
-export { addTreatment, getTreatments, updateTreatment, deleteTreatment };
+export {
+  addTreatment,
+  getTreatments,
+  getTreatmentById,
+  updateTreatment,
+  deleteTreatment,
+};
