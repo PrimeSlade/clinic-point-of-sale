@@ -69,10 +69,15 @@ const getTreatments = async ({
   }
 
   if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    // Set end date to 23:59:59.999 to include the entire day
+    end.setHours(23, 59, 59, 999);
+
     conditions.push({
       createdAt: {
-        gte: new Date(startDate),
-        lte: new Date(endDate),
+        gte: start,
+        lte: end,
       },
     });
   }
