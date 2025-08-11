@@ -84,6 +84,7 @@ model Location {
   invoices Invoice[]
   users User[]
   expenses Expense[]
+  category Category[]
 
   @@map("locations")
 }
@@ -253,8 +254,11 @@ model Category {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
+  locationId Int @map("location_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
+  location Location @relation(fields: [locationId], references: [id])
   expenses  Expense[]
 
   @@map("categories")

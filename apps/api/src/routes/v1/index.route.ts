@@ -5,6 +5,7 @@ import serviceRoutes from "./service.route";
 import patientRoutes from "./patient.route";
 import doctorRoutes from "./doctor.route";
 import treatmentRoutes from "./treatment.route";
+import categoryRoutes from "./category.route";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use("/services", serviceRoutes);
 router.use("/patients", patientRoutes);
 router.use("/doctors", doctorRoutes);
 router.use("/treatments", treatmentRoutes);
+router.use("/categories", categoryRoutes);
 
 export default router;
