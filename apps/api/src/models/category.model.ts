@@ -3,11 +3,7 @@ import { Category } from "../types/category.type";
 
 const addCategory = async (data: Category) => {
   return prisma.category.create({
-    data: {
-      name: data.name,
-      description: data.description,
-      locationId: data.locationId,
-    },
+    data: data,
   });
 };
 
@@ -22,11 +18,7 @@ const getCategories = async () => {
 const updateCategory = async (data: Category, id: number) => {
   return prisma.category.update({
     where: { id },
-    data: {
-      name: data.name,
-      description: data.description,
-      locationId: data.locationId,
-    },
+    data: data,
   });
 };
 

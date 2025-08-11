@@ -9,8 +9,6 @@ const addItem = async (
 ): Promise<void> => {
   const { item, itemUnits } = req.body;
 
-  console.log(item, itemUnits);
-
   if (!item || !itemUnits) {
     throw new BadRequestError("Item data is required");
   }
