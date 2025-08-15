@@ -51,6 +51,12 @@ const deleteCategory = async (id: number) => {
     if (error.code === "P2025") {
       throw new NotFoundError();
     }
+    if (error.code === "P2003") {
+      throw new CustomError(
+        "Cannot delete category because there are expenses linked to it. Please remove or reassign those expenses first.",
+        409,
+      );
+    }
     throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };

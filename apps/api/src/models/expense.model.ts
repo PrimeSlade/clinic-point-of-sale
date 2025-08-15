@@ -13,6 +13,7 @@ const getExpenses = async () => {
       location: true,
       category: true,
     },
+    orderBy: { id: "desc" },
   });
 };
 

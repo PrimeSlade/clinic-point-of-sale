@@ -12,6 +12,7 @@ const getCategories = async () => {
     include: {
       location: true,
     },
+    orderBy: { id: "desc" },
   });
 };
 
