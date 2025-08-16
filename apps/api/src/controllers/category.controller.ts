@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { BadRequestError } from "../errors/BadRequestError";
 import * as categoryService from "../services/category.service";
 
-const addCategory = async (req: Request, res: Response, next: NextFunction) => {
+const addCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   const data = req.body;
 
   if (!data) {
@@ -26,7 +30,7 @@ const getCategories = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void> => {
   try {
     const categories = await categoryService.getCategories();
 
@@ -44,7 +48,7 @@ const updateCategory = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void> => {
   const data = req.body;
   const id = Number(req.params.id);
 
@@ -69,7 +73,7 @@ const deleteCategory = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void> => {
   const id = Number(req.params.id);
 
   if (!id) {

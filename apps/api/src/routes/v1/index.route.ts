@@ -7,9 +7,14 @@ import doctorRoutes from "./doctor.route";
 import treatmentRoutes from "./treatment.route";
 import categoryRoutes from "./category.route";
 import expenseRoutes from "./expense.route";
+import authRoutes from "./auth.route";
+import verifyAuth from "../../middlewares/verifyAuth";
 
 const router = Router();
 
+router.use("/user", authRoutes);
+
+router.use(verifyAuth);
 router.use("/items", itemRoutes);
 router.use("/locations", locationRoutes);
 router.use("/services", serviceRoutes);

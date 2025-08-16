@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { errorHandler } from "./middlewares/errorHandler";
 import helmet from "helmet";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const port = process.env.PORT;
@@ -14,11 +15,12 @@ const app = express();
 app.use(
   cors({
     origin: frontEndOrigin,
-    credentials: true,
+    credentials: true, //for cookies
   }),
 );
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(helmet());
 
 app.get("/api", (req, res) => {
