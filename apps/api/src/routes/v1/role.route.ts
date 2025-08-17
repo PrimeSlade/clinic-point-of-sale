@@ -8,5 +8,6 @@ router.post("/add", authorize("create", "Role"), roleController.addRole);
 router.get("/", authorize("read", "Role"), roleController.getRoles);
 router.put("/:id", authorize("update", "Role"), roleController.updateRole);
 router.delete("/:id", authorize("delete", "Role"), roleController.deleteRole);
+router.patch("/:id", authorize("update", "Role"), roleController.assignRole);
 
 export default router;

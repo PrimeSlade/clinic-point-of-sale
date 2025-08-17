@@ -7,7 +7,9 @@ async function main() {
     data: {
       name: "admin",
       permissions: {
-        create: [{ action: "manage", subject: "all" }],
+        connect: {
+          id: 8,
+        },
       },
     },
   });
@@ -17,10 +19,9 @@ async function main() {
     data: {
       name: "user",
       permissions: {
-        create: [
-          { action: "read", subject: "Item" },
-          { action: "read", subject: "Treatment" },
-        ],
+        connect: {
+          id: 22,
+        },
       },
     },
   });

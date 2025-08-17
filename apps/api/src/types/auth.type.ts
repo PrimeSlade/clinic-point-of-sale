@@ -1,19 +1,8 @@
+import { RoleInfo } from "./role.type";
+
 type LoginCredentials = {
   email: string;
   password: string;
-};
-
-type PermissionInfo = {
-  id: number;
-  roleId: number;
-  action: string; // Actions your CASL supports
-  subject: string; // Subjects your CASL supports
-};
-
-type RoleInfo = {
-  id: number;
-  name: string;
-  permissions: PermissionInfo[];
 };
 
 type UserForm = {

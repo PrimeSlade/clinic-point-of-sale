@@ -93,4 +93,32 @@ const deleteRole = async (
   }
 };
 
-export { addRole, getRoles, updateRole, deleteRole };
+const assignRole = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const userId = req.params.id;
+  const data = req.body;
+
+  if (!userId) {
+    throw new BadRequestError("user id must be provided");
+  }
+
+  try {
+    const assignedRole = await roleService.assignRole({
+      userId: userId,
+      ...data,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Role assigned successfully!",
+      data: assignedRole,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export { addRole, getRoles, updateRole, deleteRole, assignRole };

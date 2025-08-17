@@ -1,6 +1,6 @@
 import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
-import { RoleForm } from "../types/role.type";
+import { AssignRoleFrom, RoleForm } from "../types/role.type";
 import * as roleModel from "../models/role.model";
 
 const addRole = async (data: RoleForm) => {
@@ -61,4 +61,17 @@ const deleteRole = async (id: number) => {
   }
 };
 
-export { addRole, getRoles, updateRole, deleteRole };
+const assignRole = async (data: AssignRoleFrom) => {
+  try {
+    const assignedRole = await roleModel.assignRole(data);
+
+    return assignedRole;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+    throw new CustomError("Database operation failed", 500);
+  }
+};
+
+export { addRole, getRoles, updateRole, deleteRole, assignRole };
