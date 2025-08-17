@@ -1,11 +1,12 @@
 import { Router } from "express";
 import * as serviceController from "../../controllers/service.controller";
+import authorize from "../../abilities/authorize.middleware";
 
 const router = Router();
 
-router.post("/add", serviceController.addService);
-router.get("/", serviceController.getServices);
-router.put("/:id", serviceController.updateService);
-router.delete("/:id", serviceController.deleteService);
+router.post("/add", authorize("create", "Service"), serviceController.addService);
+router.get("/", authorize("read", "Service"), serviceController.getServices);
+router.put("/:id", authorize("update", "Service"), serviceController.updateService);
+router.delete("/:id", authorize("delete", "Service"), serviceController.deleteService);
 
 export default router;

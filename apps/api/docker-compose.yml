@@ -9,6 +9,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: ${NODE_ENV}
+      COOKIE_SECRET: ${COOKIE_SECRET}
     ports:
       - "3000:3000"
       - "5555:5555" # for prisma

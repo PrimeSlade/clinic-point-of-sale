@@ -3,7 +3,20 @@ type LoginCredentials = {
   password: string;
 };
 
-type UserInfo = {
+type PermissionInfo = {
+  id: number;
+  roleId: number;
+  action: string; // Actions your CASL supports
+  subject: string; // Subjects your CASL supports
+};
+
+type RoleInfo = {
+  id: number;
+  name: string;
+  permissions: PermissionInfo[];
+};
+
+type UserForm = {
   name: string;
   email: string;
   password: string;
@@ -12,4 +25,14 @@ type UserInfo = {
   pricePercent: number;
 };
 
-export type { LoginCredentials, UserInfo };
+type UserInfo = {
+  id: string;
+  name: string;
+  email: string;
+  locationId: number;
+  roleId: number;
+  pricePercent: number;
+  role: RoleInfo;
+};
+
+export type { LoginCredentials, UserForm, UserInfo };

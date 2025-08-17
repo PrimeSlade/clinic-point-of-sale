@@ -56,6 +56,33 @@ enum PatientType {
   out
 }
 
+enum Action {
+  manage
+  read
+  create
+  update
+  delete
+}
+
+enum Subject {
+  all
+  PhoneNumber
+  Location
+  Item
+  ItemUnit
+  Service
+  Patient
+  Doctor
+  Treatment
+  Invoice
+  InvoiceItem
+  User
+  Role
+  Permission
+  Category
+  Expense
+}
+
 model PhoneNumber {
   id        Int       @id @default(autoincrement())
   number    String    @unique @db.VarChar(30)
@@ -78,14 +105,15 @@ model Location {
 
   //Relations
   phoneNumber PhoneNumber @relation(fields: [phoneNumberId],references: [id])
+
   items Item[]
   patients Patient[]
   doctors Doctor[]
   invoices Invoice[]
   users User[]
   expenses Expense[]
-  category Category[]
-
+  categories Category[]
+  
   @@map("locations")
 }
 
@@ -241,12 +269,25 @@ model User {
 
 model Role{
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
 
   // Relations
-  user User[]
+  users User[]
+  permissions Permission[]
 
   @@map("roles")
+}
+
+model Permission {
+  id Int @id @default(autoincrement())
+  action String
+  subject String
+  roleId Int
+
+  //Relations
+  role Role @relation(fields: [roleId],references: [id])
+
+  @@map("permissions")
 }
 
 model Category {
