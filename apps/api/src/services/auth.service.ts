@@ -1,8 +1,9 @@
-import { LoginCredentials, UserInfo } from "../types/auth.type";
+import { LoginCredentials, UserForm } from "../types/auth.type";
 import * as authModel from "../models/auth.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { generatePassword, generateToken, verfiyPassword } from "../utils/auth";
 import { CustomError } from "../errors/CustomError";
+import { userInfo } from "os";
 
 const login = async (data: LoginCredentials) => {
   try {
@@ -33,7 +34,7 @@ const login = async (data: LoginCredentials) => {
   }
 };
 
-const signup = async (data: UserInfo) => {
+const signup = async (data: UserForm) => {
   try {
     const hashed = await generatePassword(data.password);
 
@@ -48,4 +49,25 @@ const signup = async (data: UserInfo) => {
   }
 };
 
-export { login, signup };
+const findInfo = async (id: string) => {
+  try {
+    const info = await authModel.findInfo(id, "id");
+
+    if (!info) {
+      throw new NotFoundError("User not found!");
+    }
+
+    const { password: _, ...userData } = info;
+
+    return userData;
+  } catch (error: any) {
+    //Pass through known errors
+    if (error instanceof CustomError || error instanceof NotFoundError) {
+      throw error;
+    }
+
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
+export { login, signup, findInfo };

@@ -6,6 +6,7 @@ const cookieOptions = {
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict" as const,
   maxAge: 24 * 60 * 60 * 1000, // 1 day
+  signed: true,
 };
 
 const login = async (req: Request, res: Response, next: NextFunction) => {

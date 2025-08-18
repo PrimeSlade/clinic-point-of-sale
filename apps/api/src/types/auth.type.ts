@@ -1,9 +1,11 @@
+import { RoleInfo } from "./role.type";
+
 type LoginCredentials = {
   email: string;
   password: string;
 };
 
-type UserInfo = {
+type UserForm = {
   name: string;
   email: string;
   password: string;
@@ -12,4 +14,14 @@ type UserInfo = {
   pricePercent: number;
 };
 
-export type { LoginCredentials, UserInfo };
+type UserInfo = {
+  id: string;
+  name: string;
+  email: string;
+  locationId: number;
+  roleId: number;
+  pricePercent: number;
+  role: RoleInfo;
+};
+
+export type { LoginCredentials, UserForm, UserInfo };
