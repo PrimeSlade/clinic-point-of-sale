@@ -1,9 +1,5 @@
-import { Subject } from "@casl/ability";
 import prisma from "../config/prisma.client";
-import { Action } from "../generated/prisma";
 import { AssignRoleFrom, RoleForm } from "../types/role.type";
-import { permission } from "process";
-import { create } from "domain";
 
 const addRole = async ({ name }: RoleForm) => {
   return prisma.role.create({

@@ -25,9 +25,13 @@ export type AppAbility = PureAbility<[Actions, Subjects]>;
 const defineAbilities = async (user: UserInfo) => {
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(PureAbility);
 
-  user?.role.permissions.forEach((perm) => {
-    can(perm.action as Actions, perm.subject as Subjects);
-  });
+  if (user.role.name === "admin") {
+    can("manage", "all");
+  } else {
+    user?.role.permissions.forEach((perm) => {
+      can(perm.action as Actions, perm.subject as Subjects);
+    });
+  }
 
   return build();
 };
