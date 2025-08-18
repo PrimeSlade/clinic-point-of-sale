@@ -33,7 +33,14 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   });
 };
 
-const getItems = async ({ offset, limit, search, filter }: ItemQueryParams) => {
+const getItems = async ({
+  offset,
+  limit,
+  search,
+  filter,
+  user,
+  abacFilter,
+}: ItemQueryParams) => {
   const conditions: Prisma.ItemWhereInput[] = [];
 
   if (search) {
@@ -45,7 +52,8 @@ const getItems = async ({ offset, limit, search, filter }: ItemQueryParams) => {
     });
   }
 
-  if (filter) {
+  //Admin can search all locations
+  if (user.role.name === "admin" && filter) {
     conditions.push({
       location: {
         name: { equals: filter, mode: "insensitive" },
@@ -54,7 +62,12 @@ const getItems = async ({ offset, limit, search, filter }: ItemQueryParams) => {
   }
 
   const whereClause: Prisma.ItemWhereInput = {
-    AND: conditions,
+    AND: [
+      ...(user.role.name !== "admin"
+        ? [abacFilter.Item as Prisma.ItemWhereInput]
+        : []),
+      ...conditions,
+    ],
   };
 
   const [items, total] = await Promise.all([

@@ -19,11 +19,11 @@ const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
 
     req.ability = await defineAbilities(user);
 
-    req.userId = user.id;
+    req.user = user;
 
     next();
   } catch (error: any) {
-    next(new CustomError("Invalid or expired token", 401));
+    throw new CustomError("Invalid or expired token", 401);
   }
 };
 
