@@ -2,10 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { CustomError } from "../errors/CustomError";
 import { Actions, AppAbility, Subjects } from "./abilities";
 import { accessibleBy } from "@casl/prisma";
+import fetchLocation from "../utils/fetchLocation";
 
-type Fetcher = (req: Request) => Promise<any>;
-
-const authorize = (action: string, subject: string, fetcher?: Fetcher) => {
+const authorize = (
+  action: string,
+  subject: string,
+  hasLocation: boolean = true,
+) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const ability = req?.ability as AppAbility;
 
@@ -16,25 +19,24 @@ const authorize = (action: string, subject: string, fetcher?: Fetcher) => {
       }
     }
 
+    const where = accessibleBy(ability, action as Actions);
+
     //Read
-    if (action === "read") {
-      const where = accessibleBy(ability, "read");
+    if (
+      action === "read" &&
+      ability?.can(action as Actions, subject as Subjects)
+    ) {
       req.abacFilter = where;
       return next();
     }
 
     //Update and Delete
     if (["update", "delete"].includes(action)) {
-      if (!fetcher) {
-        throw new CustomError(
-          `Fetcher is required for ${action} on ${subject}`,
-        );
-      }
-      const object = await fetcher(req);
-
-      if (ability?.can(action as Actions, object)) {
-        req.subject = object;
-        return next();
+      if (hasLocation) {
+        const object = await fetchLocation(subject, req, where);
+        if (object && ability?.can(action as Actions, subject as Subjects)) {
+          return next();
+        }
       }
     }
 
