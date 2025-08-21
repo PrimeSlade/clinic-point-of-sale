@@ -62,12 +62,7 @@ const getItems = async ({
   }
 
   const whereClause: Prisma.ItemWhereInput = {
-    AND: [
-      ...(user.role.name !== "admin"
-        ? [abacFilter.Item as Prisma.ItemWhereInput]
-        : []),
-      ...conditions,
-    ],
+    AND: [...[abacFilter as Prisma.ItemWhereInput], ...conditions],
   };
 
   const [items, total] = await Promise.all([

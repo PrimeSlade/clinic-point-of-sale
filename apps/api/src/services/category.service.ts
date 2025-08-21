@@ -2,6 +2,7 @@ import { Category } from "../types/category.type";
 import * as categoryModel from "../models/category.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { CustomError } from "../errors/CustomError";
+import { PrismaQuery } from "@casl/prisma";
 
 const addCategory = async (data: Category) => {
   try {
@@ -16,9 +17,9 @@ const addCategory = async (data: Category) => {
   }
 };
 
-const getCategories = async () => {
+const getCategories = async (abacFilter: PrismaQuery) => {
   try {
-    const categories = await categoryModel.getCategories();
+    const categories = await categoryModel.getCategories(abacFilter);
 
     return categories;
   } catch (error: any) {

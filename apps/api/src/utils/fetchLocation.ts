@@ -14,11 +14,16 @@ const fetchLocation = async (
     throw new NotFoundError(`No prisma model found for ${model}`);
   }
 
+  const models = ["Doctor", "User"];
+
+  const id = models.some((m) => m === model)
+    ? req.params.id
+    : Number(req.params.id);
   const loc = where[model];
 
   return prismaModel.findUnique({
     where: {
-      id: Number(req.params.id),
+      id,
       ...loc,
     },
   });

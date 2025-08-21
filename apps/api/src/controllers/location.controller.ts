@@ -31,8 +31,10 @@ const getLocations = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const abacFilter = req.abacFilter;
+
   try {
-    const locations = await locationService.getAllLocations();
+    const locations = await locationService.getAllLocations(abacFilter);
 
     res.status(200).json({
       success: true,

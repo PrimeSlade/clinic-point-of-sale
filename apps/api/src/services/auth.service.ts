@@ -37,7 +37,6 @@ const login = async (data: LoginCredentials) => {
 const signup = async (data: UserForm) => {
   try {
     const hashed = await generatePassword(data.password);
-
     const user = await authModel.createUser({ ...data, password: hashed });
 
     return user;

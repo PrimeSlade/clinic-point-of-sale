@@ -1,3 +1,4 @@
+import { PrismaQuery } from "@casl/prisma";
 import prisma from "../config/prisma.client";
 import { Expense } from "../types/expense.type";
 
@@ -7,12 +8,13 @@ const addExpense = async (data: Expense) => {
   });
 };
 
-const getExpenses = async () => {
+const getExpenses = async (abacFilter: PrismaQuery) => {
   return prisma.expense.findMany({
     include: {
       location: true,
       category: true,
     },
+    where: abacFilter,
     orderBy: { id: "desc" },
   });
 };

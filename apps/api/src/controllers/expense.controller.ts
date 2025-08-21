@@ -31,8 +31,10 @@ const getExpenses = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const abacFilter = req.abacFilter;
+
   try {
-    const expenses = await expenseService.getExpenses();
+    const expenses = await expenseService.getExpenses(abacFilter);
 
     res.status(200).json({
       success: true,

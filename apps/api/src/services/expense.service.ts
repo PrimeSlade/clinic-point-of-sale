@@ -2,6 +2,7 @@ import { Expense } from "../types/expense.type";
 import * as expenseModel from "../models/expense.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { CustomError } from "../errors/CustomError";
+import { PrismaQuery } from "@casl/prisma";
 
 const addExpense = async (data: Expense) => {
   try {
@@ -16,9 +17,9 @@ const addExpense = async (data: Expense) => {
   }
 };
 
-const getExpenses = async () => {
+const getExpenses = async (abacFilter: PrismaQuery) => {
   try {
-    const expenses = await expenseModel.getExpenses();
+    const expenses = await expenseModel.getExpenses(abacFilter);
 
     return expenses;
   } catch (error: any) {

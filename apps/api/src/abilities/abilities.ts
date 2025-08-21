@@ -32,9 +32,15 @@ const defineAbilities = async (user: UserInfo) => {
     can("manage", "all");
   } else {
     user?.role.permissions.forEach((perm) => {
-      can(perm.action as Actions, perm.subject as Subjects, {
-        locationId: user.locationId,
-      });
+      let conditions = {};
+
+      if (perm.subject === "Location") {
+        conditions = { id: user.locationId };
+      } else {
+        conditions = { locationId: user.locationId };
+      }
+
+      can(perm.action as Actions, perm.subject as Subjects, conditions);
     });
   }
 

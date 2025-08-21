@@ -2,6 +2,7 @@ import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { Location, UpdateLoation } from "../types/location.type";
 import * as locationModel from "../models/location.model";
+import { PrismaQuery } from "@casl/prisma";
 
 const addLocation = async (data: Location) => {
   try {
@@ -21,16 +22,16 @@ const addLocation = async (data: Location) => {
   }
 };
 
-const getAllLocations = async () => {
+const getAllLocations = async (abacFilter: PrismaQuery) => {
   try {
-    const locations = await locationModel.getAllLocations();
+    const locations = await locationModel.getAllLocations(abacFilter);
     return locations;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Locations not found");
     }
 
-    throw new CustomError("Database operation failed", 500);
+    throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };
 

@@ -31,8 +31,10 @@ const getDoctors = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const abacFilter = req.abacFilter;
+
   try {
-    const doctors = await doctorService.getDoctors();
+    const doctors = await doctorService.getDoctors(abacFilter);
 
     res.status(200).json({
       success: true,

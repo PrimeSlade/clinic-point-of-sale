@@ -5,6 +5,7 @@ import * as patientModel from "../models/patient.model";
 import * as phoneNumberModel from "../models/phoneNumber.model";
 import prisma from "../config/prisma.client";
 import { ensurePhoneNumberExists } from "../utils/phoneNumber.util";
+import { PrismaQuery } from "@casl/prisma";
 
 const addPatient = async (data: Patient) => {
   try {
@@ -20,9 +21,9 @@ const addPatient = async (data: Patient) => {
   }
 };
 
-const getPatients = async () => {
+const getPatients = async (abacFilter: PrismaQuery) => {
   try {
-    const patients = await patientModel.getPatients();
+    const patients = await patientModel.getPatients(abacFilter);
 
     return patients;
   } catch (error: any) {
@@ -33,9 +34,9 @@ const getPatients = async () => {
   }
 };
 
-const getPatientById = async (id: number) => {
+const getPatientById = async (id: number, abacFilter: PrismaQuery) => {
   try {
-    const patient = await patientModel.getPatientById(id);
+    const patient = await patientModel.getPatientById(id, abacFilter);
 
     return patient;
   } catch (error: any) {

@@ -6,6 +6,7 @@ type LoginCredentials = {
 };
 
 type UserForm = {
+  id?: string;
   name: string;
   email: string;
   password: string;
