@@ -9,11 +9,12 @@ import categoryRoutes from "./category.route";
 import expenseRoutes from "./expense.route";
 import authRoutes from "./auth.route";
 import roleRoutes from "./role.route";
+import userRouts from "./user.route";
 import verifyAuth from "../../middlewares/verifyAuth";
 
 const router = Router();
 
-router.use("/user", authRoutes);
+router.use("/auth", authRoutes);
 
 router.use(verifyAuth);
 router.use("/items", itemRoutes);
@@ -25,5 +26,6 @@ router.use("/treatments", treatmentRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/expenses", expenseRoutes);
 router.use("/roles", roleRoutes);
+router.use("/users", userRouts);
 
 export default router;
