@@ -31,8 +31,10 @@ const getPatients = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const abacFilter = req.abacFilter;
+
   try {
-    const patients = await patientService.getPatients();
+    const patients = await patientService.getPatients(abacFilter);
 
     res.status(200).json({
       success: true,
@@ -50,13 +52,14 @@ const getPatientById = async (
   next: NextFunction,
 ): Promise<void> => {
   const id = Number(req.params.id);
+  const abacFilter = req.abacFilter;
 
   if (!id) {
     throw new BadRequestError("Patient id is required");
   }
 
   try {
-    const patient = await patientService.getPatientById(id);
+    const patient = await patientService.getPatientById(id, abacFilter);
 
     res.status(200).json({
       success: true,

@@ -5,6 +5,7 @@ import { CustomError } from "../errors/CustomError";
 import prisma from "../config/prisma.client";
 import * as phoneNumberModel from "../models/phoneNumber.model";
 import { ensurePhoneNumberExists } from "../utils/phoneNumber.util";
+import { PrismaQuery } from "@casl/prisma";
 
 const addDoctor = async (data: Doctor) => {
   try {
@@ -19,9 +20,9 @@ const addDoctor = async (data: Doctor) => {
   }
 };
 
-const getDoctors = async () => {
+const getDoctors = async (abacFilter: PrismaQuery) => {
   try {
-    const doctors = await doctorModel.getDoctors();
+    const doctors = await doctorModel.getDoctors(abacFilter);
 
     return doctors;
   } catch (error: any) {

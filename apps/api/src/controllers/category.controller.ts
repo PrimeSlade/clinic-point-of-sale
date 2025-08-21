@@ -31,8 +31,10 @@ const getCategories = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const abacFilter = req.abacFilter;
+
   try {
-    const categories = await categoryService.getCategories();
+    const categories = await categoryService.getCategories(abacFilter);
 
     res.status(200).json({
       success: true,
@@ -75,6 +77,8 @@ const deleteCategory = async (
   next: NextFunction,
 ): Promise<void> => {
   const id = Number(req.params.id);
+
+  const abacFilter = req.abacFilter;
 
   if (!id) {
     throw new BadRequestError("Id must be provided");

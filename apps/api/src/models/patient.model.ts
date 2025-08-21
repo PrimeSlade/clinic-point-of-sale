@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.client";
 import { Patient, UpdatePatient } from "../types/patient.type";
+import { PrismaQuery } from "@casl/prisma";
 
 const addPatient = async (data: Patient) => {
   return prisma.patient.create({
@@ -37,7 +38,7 @@ const addPatient = async (data: Patient) => {
   });
 };
 
-const getPatients = async () => {
+const getPatients = async (abacFilter: PrismaQuery) => {
   return prisma.patient.findMany({
     include: {
       phoneNumber: true,
@@ -48,13 +49,14 @@ const getPatients = async () => {
         },
       },
     },
+    where: abacFilter,
     orderBy: { id: "desc" },
   });
 };
 
-const getPatientById = async (id: number) => {
+const getPatientById = async (id: number, abacFilter: PrismaQuery) => {
   return prisma.patient.findUnique({
-    where: { id },
+    where: { id, ...abacFilter.Patient },
     include: {
       phoneNumber: true,
       location: true,

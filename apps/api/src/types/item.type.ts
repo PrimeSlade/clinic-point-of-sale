@@ -1,3 +1,6 @@
+import { PrismaQuery } from "@casl/prisma";
+import { UserInfo } from "./auth.type";
+
 export enum UnitType {
   BTL = "btl",
   AMP = "amp",
@@ -34,6 +37,8 @@ type ItemQueryParams = {
   limit: number;
   search: string;
   filter: string;
+  user: UserInfo;
+  abacFilter: PrismaQuery;
 };
 
 export { Item, Unit, UpdateItem, UpdateUnit, ItemQueryParams };

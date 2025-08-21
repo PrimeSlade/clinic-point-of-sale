@@ -36,6 +36,9 @@ const getItems = async (
   const search = String(req.query.search || "");
   const filter = String(req.query.filter || "");
 
+  const user = req.user;
+  const abacFilter = req.abacFilter;
+
   //pagination
   const offset = (page - 1) * limit;
 
@@ -45,6 +48,8 @@ const getItems = async (
       limit,
       search,
       filter,
+      user,
+      abacFilter,
     });
 
     //pagination

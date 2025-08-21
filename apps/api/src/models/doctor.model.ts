@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.client";
 import { Doctor, UpdateDoctor } from "../types/doctor.type";
+import { PrismaQuery } from "@casl/prisma";
 
 const addDoctor = async (data: Doctor) => {
   return prisma.doctor.create({
@@ -33,12 +34,13 @@ const addDoctor = async (data: Doctor) => {
   });
 };
 
-const getDoctors = async () => {
+const getDoctors = async (abacFilter: PrismaQuery) => {
   return prisma.doctor.findMany({
     include: {
       location: true,
       phoneNumber: true,
     },
+    where: abacFilter,
   });
 };
 

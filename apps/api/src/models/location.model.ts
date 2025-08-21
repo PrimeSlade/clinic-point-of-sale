@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.client";
 import { Location, UpdateLoation } from "../types/location.type";
+import { PrismaQuery } from "@casl/prisma";
 
 const addLocation = async (data: Location) => {
   return prisma.location.create({
@@ -18,11 +19,14 @@ const addLocation = async (data: Location) => {
   });
 };
 
-const getAllLocations = async () => {
+const getAllLocations = async (abacFilter: PrismaQuery) => {
+  console.log("hello world hello world hello world");
+
   return prisma.location.findMany({
     include: {
       phoneNumber: true,
     },
+    where: abacFilter,
     orderBy: { id: "asc" },
   });
 };

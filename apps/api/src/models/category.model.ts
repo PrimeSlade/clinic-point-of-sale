@@ -1,3 +1,4 @@
+import { PrismaQuery } from "@casl/prisma";
 import prisma from "../config/prisma.client";
 import { Category } from "../types/category.type";
 
@@ -7,11 +8,12 @@ const addCategory = async (data: Category) => {
   });
 };
 
-const getCategories = async () => {
+const getCategories = async (abacFilter: PrismaQuery) => {
   return prisma.category.findMany({
     include: {
       location: true,
     },
+    where: abacFilter,
     orderBy: { id: "desc" },
   });
 };

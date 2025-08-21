@@ -22,13 +22,22 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
   }
 };
 
-const getItems = async ({ offset, limit, search, filter }: ItemQueryParams) => {
+const getItems = async ({
+  offset,
+  limit,
+  search,
+  filter,
+  user,
+  abacFilter,
+}: ItemQueryParams) => {
   try {
     const { items, total } = await itemModel.getItems({
       offset,
       limit,
       search,
       filter,
+      user,
+      abacFilter,
     });
 
     //change string to number
@@ -45,7 +54,7 @@ const getItems = async ({ offset, limit, search, filter }: ItemQueryParams) => {
     if (error.code === "P2025") {
       throw new NotFoundError("Items not found");
     }
-    throw new CustomError("Database operation failed", 500);
+    throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };
 

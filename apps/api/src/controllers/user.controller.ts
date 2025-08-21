@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
+import * as userService from "../services/user.service";
 import { BadRequestError } from "../errors/BadRequestError";
-import * as expenseService from "../services/expense.service";
 
-const addExpense = async (
+const addUser = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -10,23 +10,23 @@ const addExpense = async (
   const data = req.body;
 
   if (!data) {
-    throw new BadRequestError("Item data is required");
+    throw new BadRequestError("User data is required");
   }
 
   try {
-    const addedExpense = await expenseService.addExpense(data);
+    const user = await userService.addUser(data);
 
     res.status(201).json({
       success: true,
-      message: "Expense created successfully!",
-      data: addedExpense,
+      message: "User created successfully!",
+      data: user,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-const getExpenses = async (
+const getUsers = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -34,65 +34,65 @@ const getExpenses = async (
   const abacFilter = req.abacFilter;
 
   try {
-    const expenses = await expenseService.getExpenses(abacFilter);
+    const users = await userService.getUsers(abacFilter);
 
     res.status(200).json({
       success: true,
-      message: "Expenses fetched successfully!",
-      data: expenses,
+      message: "Users fetched successfully!",
+      data: users,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-const updateExpense = async (
+const updateUser = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const userId = req.params.id;
   const data = req.body;
-  const id = Number(req.params.id);
 
-  if (!data || !id) {
-    throw new BadRequestError("Both expense data and Id must be provided");
+  if (!data || !userId) {
+    throw new BadRequestError("Both user data and Id must be provided");
   }
 
   try {
-    const updatedExpense = await expenseService.updateExpense(data, id);
+    const updatedUser = await userService.updateUser(userId, data);
 
     res.status(200).json({
       success: true,
-      message: "Expense updated successfully!",
-      data: updatedExpense,
+      message: "User updated successfully!",
+      data: updatedUser,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-const deleteExpense = async (
+const deleteUser = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const id = Number(req.params.id);
+  const userId = req.params.id;
 
-  if (!id) {
+  if (!userId) {
     throw new BadRequestError("Id must be provided");
   }
 
   try {
-    const deletedExpense = await expenseService.deleteExpense(id);
+    const deletedUser = await userService.deleteUser(userId);
 
     res.status(200).json({
       success: true,
-      message: "Expense deleted successfully!",
-      data: deletedExpense,
+      message: "User deleted successfully!",
+      data: deletedUser,
     });
   } catch (error: any) {
     next(error);
   }
 };
 
-export { addExpense, getExpenses, updateExpense, deleteExpense };
+export { addUser, getUsers, updateUser, deleteUser };
