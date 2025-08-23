@@ -10,6 +10,20 @@ const upsertUser = async (data: UserForm) => {
   });
 };
 
+const getUserById = async (id: string) => {
+  return prisma.user.findUnique({
+    where: { id },
+    include: {
+      role: {
+        include: {
+          permissions: true,
+        },
+      },
+      location: true,
+    },
+  });
+};
+
 const getUsers = async (abacFilter: PrismaQuery) => {
   return prisma.user.findMany({
     where: abacFilter,
@@ -23,4 +37,4 @@ const deleteUser = async (id: string) => {
   });
 };
 
-export { upsertUser, getUsers, deleteUser };
+export { upsertUser, getUsers, getUserById, deleteUser };

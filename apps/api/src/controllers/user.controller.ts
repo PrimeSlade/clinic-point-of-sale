@@ -26,6 +26,26 @@ const addUser = async (
   }
 };
 
+const getMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const userId = req.user.id;
+
+  try {
+    const user = await userService.getUserById(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "User fetched successfully!",
+      data: user,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 const getUsers = async (
   req: Request,
   res: Response,
@@ -95,4 +115,4 @@ const deleteUser = async (
   }
 };
 
-export { addUser, getUsers, updateUser, deleteUser };
+export { addUser, getUsers, getMe, updateUser, deleteUser };

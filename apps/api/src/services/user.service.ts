@@ -19,6 +19,22 @@ const addUser = async (data: UserForm) => {
   }
 };
 
+const getUserById = async (id: string) => {
+  try {
+    const user = await userModel.getUserById(id);
+
+    if (!user) {
+      throw new NotFoundError("User not found!");
+    }
+
+    const { password: _, ...userData } = user;
+
+    return userData;
+  } catch (error: any) {
+    throw new CustomError("Database operation failed", 500);
+  }
+};
+
 const getUsers = async (abacFilter: PrismaQuery) => {
   try {
     const users = await userModel.getUsers(abacFilter);
@@ -65,4 +81,4 @@ const deleteUser = async (id: string) => {
   }
 };
 
-export { addUser, getUsers, updateUser, deleteUser };
+export { addUser, getUsers, getUserById, updateUser, deleteUser };

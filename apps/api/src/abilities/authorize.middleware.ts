@@ -21,8 +21,6 @@ const authorize = (
 
     const where = accessibleBy(ability, action as Actions);
 
-    console.log(subject);
-
     if (
       action === "read" &&
       ability?.can(action as Actions, subject as Subjects)

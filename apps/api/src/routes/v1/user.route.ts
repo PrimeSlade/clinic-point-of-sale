@@ -4,6 +4,7 @@ import authorize from "../../abilities/authorize.middleware";
 
 const router = Router();
 
+router.get("/me", userController.getMe);
 router.post("/add", authorize("create", "User"), userController.addUser);
 router.get("/", authorize("read", "User"), userController.getUsers);
 router.put("/:id", authorize("update", "User"), userController.updateUser);

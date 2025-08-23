@@ -3,7 +3,6 @@ import * as authModel from "../models/auth.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { generatePassword, generateToken, verfiyPassword } from "../utils/auth";
 import { CustomError } from "../errors/CustomError";
-import { userInfo } from "os";
 
 const login = async (data: LoginCredentials) => {
   try {

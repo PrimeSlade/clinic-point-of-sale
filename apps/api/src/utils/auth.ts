@@ -8,12 +8,12 @@ const generatePassword = async (password: string): Promise<string> => {
 const verfiyPassword = async (
   password: string,
   hashedPassword: string,
-): Promise<Boolean> => {
+): Promise<boolean> => {
   return bcryptjs.compare(password, hashedPassword);
 };
 
 const generateToken = (userId: string): string => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: "2h" });
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 };
 
 const verfiyToken = (token: string) => {
