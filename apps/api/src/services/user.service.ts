@@ -8,7 +8,7 @@ import { NotFoundError } from "../errors/NotFoundError";
 const addUser = async (data: UserForm) => {
   try {
     const hashed = await generatePassword(data.password);
-    const user = await userModel.upsertUser({ ...data, password: hashed });
+    const user = await userModel.addUser({ ...data, password: hashed });
 
     return user;
   } catch (error: any) {
@@ -55,7 +55,7 @@ const updateUser = async (id: string, data: UserForm) => {
     if (data.password) {
       userData.password = await generatePassword(data.password);
     }
-    const user = await userModel.upsertUser(userData);
+    const user = await userModel.updateUser(userData);
 
     return user;
   } catch (error: any) {

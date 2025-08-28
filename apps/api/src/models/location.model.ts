@@ -20,8 +20,6 @@ const addLocation = async (data: Location) => {
 };
 
 const getAllLocations = async (abacFilter: PrismaQuery) => {
-  console.log("hello world hello world hello world");
-
   return prisma.location.findMany({
     include: {
       phoneNumber: true,

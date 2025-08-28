@@ -1,5 +1,6 @@
 type RoleForm = {
   name: string;
+  permissions: { id: number }[];
 };
 
 type PermissionInfo = {

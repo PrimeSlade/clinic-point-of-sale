@@ -1,3 +1,5 @@
+import { PrismaQuery } from "@casl/prisma";
+
 type Treatment = {
   doctorId: string;
   patientId: number;
@@ -11,6 +13,7 @@ type TreatmentQueryParams = {
   search: string;
   startDate?: string;
   endDate?: string;
+  abacFilter: PrismaQuery;
 };
 
 type UpdateTreatment = Partial<Treatment>;

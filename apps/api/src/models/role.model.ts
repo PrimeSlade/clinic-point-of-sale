@@ -1,10 +1,15 @@
 import prisma from "../config/prisma.client";
 import { AssignRoleFrom, RoleForm } from "../types/role.type";
 
-const addRole = async ({ name }: RoleForm) => {
+const addRole = async (data: RoleForm) => {
   return prisma.role.create({
     data: {
-      name: name,
+      name: data.name,
+      permissions: {
+        connect: data.permissions.map((perm) => ({
+          id: perm.id,
+        })),
+      },
     },
   });
 };
@@ -13,11 +18,16 @@ const getRoles = async () => {
   return prisma.role.findMany();
 };
 
-const updateRole = async ({ name }: RoleForm, id: number) => {
+const updateRole = async (data: RoleForm, id: number) => {
   return prisma.role.update({
     where: { id },
     data: {
-      name: name,
+      name: data.name,
+      permissions: {
+        set: data.permissions.map((perm) => ({
+          id: perm.id,
+        })),
+      },
     },
   });
 };

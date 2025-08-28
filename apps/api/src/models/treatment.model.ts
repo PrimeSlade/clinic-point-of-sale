@@ -28,6 +28,7 @@ const getTreatments = async ({
   search,
   startDate,
   endDate,
+  abacFilter,
 }: TreatmentQueryParams) => {
   const conditions: Prisma.TreatmentWhereInput[] = [];
 
@@ -83,7 +84,13 @@ const getTreatments = async ({
   }
 
   const whereClause: Prisma.TreatmentWhereInput = {
-    AND: conditions,
+    AND: [
+      ...conditions,
+      {
+        patient: abacFilter,
+      },
+      { doctor: abacFilter },
+    ],
   };
 
   const [treatments, total] = await Promise.all([

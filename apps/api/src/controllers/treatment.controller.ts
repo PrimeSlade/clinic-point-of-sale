@@ -40,6 +40,8 @@ const getTreatments = async (
   //pagination
   const offset = (page - 1) * limit;
 
+  const abacFilter = req.abacFilter;
+
   try {
     const { treatments, total } = await treatmentService.getTreatments({
       offset,
@@ -47,6 +49,7 @@ const getTreatments = async (
       search,
       startDate,
       endDate,
+      abacFilter,
     });
 
     //pagination

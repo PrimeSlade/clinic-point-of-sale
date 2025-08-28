@@ -27,6 +27,7 @@ const getTreatments = async ({
   search,
   startDate,
   endDate,
+  abacFilter,
 }: TreatmentQueryParams) => {
   try {
     const { treatments, total } = await treatmentModel.getTreatments({
@@ -35,6 +36,7 @@ const getTreatments = async ({
       search,
       startDate,
       endDate,
+      abacFilter,
     });
 
     return { treatments, total };
