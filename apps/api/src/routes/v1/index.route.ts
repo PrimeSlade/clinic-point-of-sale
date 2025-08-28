@@ -10,6 +10,7 @@ import expenseRoutes from "./expense.route";
 import authRoutes from "./auth.route";
 import roleRoutes from "./role.route";
 import userRouts from "./user.route";
+import permissionRoutes from "./permission.route";
 import verifyAuth from "../../middlewares/verifyAuth";
 
 const router = Router();
@@ -27,5 +28,6 @@ router.use("/categories", categoryRoutes);
 router.use("/expenses", expenseRoutes);
 router.use("/roles", roleRoutes);
 router.use("/users", userRouts);
+router.use("/permissions", permissionRoutes);
 
 export default router;
