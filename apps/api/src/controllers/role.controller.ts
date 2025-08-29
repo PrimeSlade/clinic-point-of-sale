@@ -44,6 +44,30 @@ const getRoles = async (
   }
 };
 
+const getRoleById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const id = Number(req.params.id);
+
+  if (!id) {
+    throw new BadRequestError("Id must be provided");
+  }
+
+  try {
+    const role = await roleService.getRoleById(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Role fetched successfully!",
+      data: role,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 const updateRole = async (
   req: Request,
   res: Response,
@@ -51,6 +75,9 @@ const updateRole = async (
 ): Promise<void> => {
   const data = req.body;
   const id = Number(req.params.id);
+
+  console.log(data);
+  console.log(id);
 
   if (!data || !id) {
     throw new BadRequestError("Both role data and Id must be provided");
@@ -121,4 +148,4 @@ const assignRole = async (
   }
 };
 
-export { addRole, getRoles, updateRole, deleteRole, assignRole };
+export { addRole, getRoles, getRoleById, updateRole, deleteRole, assignRole };

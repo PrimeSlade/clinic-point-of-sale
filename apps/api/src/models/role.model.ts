@@ -18,6 +18,15 @@ const getRoles = async () => {
   return prisma.role.findMany();
 };
 
+const getRoleById = async (id: number) => {
+  return prisma.role.findUnique({
+    where: { id },
+    include: {
+      permissions: true,
+    },
+  });
+};
+
 const updateRole = async (data: RoleForm, id: number) => {
   return prisma.role.update({
     where: { id },
@@ -66,4 +75,4 @@ const assignRole = async (data: AssignRoleFrom) => {
   ]);
 };
 
-export { addRole, getRoles, updateRole, deleteRole, assignRole };
+export { addRole, getRoles, getRoleById, updateRole, deleteRole, assignRole };

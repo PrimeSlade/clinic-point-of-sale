@@ -27,6 +27,24 @@ const getRoles = async () => {
   }
 };
 
+const getRoleById = async (id: number) => {
+  try {
+    const role = await roleModel.getRoleById(id);
+
+    if (!role) {
+      throw new NotFoundError("Role not found");
+    }
+
+    return role;
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+
+    throw new CustomError("Database operation failed", 500);
+  }
+};
+
 const updateRole = async (data: RoleForm, id: number) => {
   try {
     const updatedRole = await roleModel.updateRole(data, id);
@@ -74,4 +92,4 @@ const assignRole = async (data: AssignRoleFrom) => {
   }
 };
 
-export { addRole, getRoles, updateRole, deleteRole, assignRole };
+export { addRole, getRoles, getRoleById, updateRole, deleteRole, assignRole };

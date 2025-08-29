@@ -6,6 +6,7 @@ const router = Router();
 
 router.post("/add", authorize("create", "Role"), roleController.addRole);
 router.get("/", authorize("read", "Role"), roleController.getRoles);
+router.get("/:id", authorize("read", "Role"), roleController.getRoleById);
 router.put(
   "/:id",
   authorize("update", "Role", false),
