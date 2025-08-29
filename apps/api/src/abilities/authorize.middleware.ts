@@ -3,6 +3,7 @@ import { CustomError } from "../errors/CustomError";
 import { Actions, AppAbility, Subjects } from "./abilities";
 import { accessibleBy } from "@casl/prisma";
 import fetchLocation from "../utils/fetchLocation";
+import { PermissionInfo } from "../types/role.type";
 
 const authorize = (
   action: string,
@@ -11,6 +12,7 @@ const authorize = (
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const ability = req?.ability as AppAbility;
+    const userPermissions = req.user.role.permissions;
 
     //Create
     if (action === "create") {
@@ -39,7 +41,12 @@ const authorize = (
     //Update and Delete
     if (["update", "delete"].includes(action)) {
       if (ability.can(action as Actions, subject as Subjects)) {
-        if (hasLocation) {
+        if (
+          hasLocation &&
+          !userPermissions.some(
+            (p) => p.action === "manage" && p.subject === "all",
+          )
+        ) {
           const object = await fetchLocation(subject, req, where);
           if (object) {
             return next();

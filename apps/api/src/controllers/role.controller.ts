@@ -76,9 +76,6 @@ const updateRole = async (
   const data = req.body;
   const id = Number(req.params.id);
 
-  console.log(data);
-  console.log(id);
-
   if (!data || !id) {
     throw new BadRequestError("Both role data and Id must be provided");
   }

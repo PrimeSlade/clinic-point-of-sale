@@ -28,7 +28,7 @@ const defineAbilities = async (user: UserInfo) => {
     createPrismaAbility,
   );
 
-  if (user.role.name === "admin") {
+  if (user.role.name.toUpperCase() === "ADMIN") {
     can("manage", "all");
   } else {
     user?.role.permissions.forEach((perm) => {
