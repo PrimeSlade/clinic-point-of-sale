@@ -20,6 +20,7 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
         createMany: {
           data: unit.map((u) => ({
             unitType: u.unitType,
+            rate: u.rate,
             quantity: u.quantity,
             purchasePrice: u.purchasePrice,
           })),
@@ -114,6 +115,7 @@ const updateItem = async (
           where: { id: u.id },
           data: {
             unitType: u.unitType,
+            rate: u.rate,
             quantity: u.quantity,
             purchasePrice: u.purchasePrice,
           },

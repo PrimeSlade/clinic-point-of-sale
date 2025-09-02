@@ -137,6 +137,7 @@ model ItemUnit {
   id Int @id @default(autoincrement())
 
   unitType UnitType @map("unit_type")
+  rate Int 
   quantity Int 
   purchasePrice Decimal @map("purchase_price") @db.Decimal(10,2)
 

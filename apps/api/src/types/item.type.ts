@@ -28,6 +28,7 @@ type Unit = {
   unitType: UnitType;
   quantity: number;
   purchasePrice: number;
+  rate: number;
 };
 
 type UpdateUnit = { id: number } & Partial<Unit>;
