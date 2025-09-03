@@ -4,6 +4,7 @@ import { verfiyToken } from "../utils/auth";
 import { CustomError } from "../errors/CustomError";
 import defineAbilities from "../abilities/abilities";
 import * as authService from "../services/auth.service";
+import { resolvePermissionDependencies } from "../utils/roleMapping";
 
 const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -17,7 +18,9 @@ const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
 
     const user = await authService.findInfo(id);
 
-    req.ability = await defineAbilities(user);
+    const depMap = resolvePermissionDependencies(user);
+
+    req.ability = await defineAbilities(depMap);
 
     req.user = user;
 
