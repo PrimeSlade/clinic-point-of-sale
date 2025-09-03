@@ -9,7 +9,7 @@ const addRole = async (data: RoleForm) => {
       permissions: {
         connect: [
           // Add default permissions
-          ...defaultPermissionIds.map((id) => ({ id })),
+          //...defaultPermissionIds.map((id) => ({ id })),
           // Add user-selected permissions
           ...data.permissions.map((perm) => ({ id: perm.id })),
         ],
@@ -40,7 +40,7 @@ const updateRole = async (data: RoleForm, id: number) => {
       permissions: {
         set: [
           // Add default permissions
-          ...defaultPermissionIds.map((id) => ({ id })),
+          //...defaultPermissionIds.map((id) => ({ id })),
           // Add user-selected permissions
           ...data.permissions.map((perm) => ({ id: perm.id })),
         ],
