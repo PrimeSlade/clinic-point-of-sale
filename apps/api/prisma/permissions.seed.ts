@@ -63,12 +63,27 @@ async function main() {
     { action: "read", subject: "User" },
     { action: "update", subject: "User" },
     { action: "delete", subject: "User" },
+
+    // Invoice
+    { action: "create", subject: "Invoice" },
+    { action: "read", subject: "Invoice" },
+    { action: "update", subject: "Invoice" },
+    { action: "delete", subject: "Invoice" },
   ];
 
   for (const permission of permissions) {
-    await prisma.permission.create({
-      data: permission,
+    const existing = await prisma.permission.findFirst({
+      where: {
+        action: permission.action,
+        subject: permission.subject,
+      },
     });
+
+    if (!existing) {
+      await prisma.permission.create({
+        data: permission,
+      });
+    }
   }
 }
 

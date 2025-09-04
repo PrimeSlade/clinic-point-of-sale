@@ -83,6 +83,13 @@ enum Subject {
   Expense
 }
 
+enum PaymentMethod {
+  kpay
+  wave
+  cash
+  others
+}
+
 model PhoneNumber {
   id        Int       @id @default(autoincrement())
   number    String    @unique @db.VarChar(30)
@@ -129,6 +136,7 @@ model Item{
   //Relations
   location Location @relation(fields: [locationId],references: [id])
   itemUnits ItemUnit[]
+  invoiceItem InvoiceItem[]
 
   @@map("items")
 }
@@ -225,6 +233,13 @@ model Invoice {
   locationId Int @map("location_id")
   treatmentId Int? @unique @map("treatment_id") 
 
+  totalAmount Decimal @map("total_amount") @db.Decimal(10,2)
+  discountAmount Decimal @map("discount_amount") @db.Decimal(10,2)
+
+  paymentMethod PaymentMethod @map("payment_method")
+  paymentDescription String?  @map("payment_description")
+  note String?
+
   //Relations
   invoiceItems InvoiceItem[]
   location  Location  @relation(fields: [locationId], references: [id])
@@ -242,9 +257,11 @@ model InvoiceItem {
   discountPrice Decimal @map("discount_price") @db.Decimal(10,2)
 
   invoiceId Int @map("invoice_id")
+  itemId  Int?   @map("item_id")  
 
   //Relations
   invoice Invoice @relation(fields: [invoiceId],references: [id])
+  item Item? @relation(fields: [itemId],references: [id], onDelete: SetNull)
 
   @@map("invoice_items")
 }
