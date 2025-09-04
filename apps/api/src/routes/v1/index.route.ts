@@ -11,6 +11,7 @@ import authRoutes from "./auth.route";
 import roleRoutes from "./role.route";
 import userRouts from "./user.route";
 import permissionRoutes from "./permission.route";
+import invoiceRoutes from "./invoice.route";
 import verifyAuth from "../../middlewares/verifyAuth";
 
 const router = Router();
@@ -29,5 +30,6 @@ router.use("/expenses", expenseRoutes);
 router.use("/roles", roleRoutes);
 router.use("/users", userRouts);
 router.use("/permissions", permissionRoutes);
+router.use("/invoices", invoiceRoutes);
 
 export default router;
