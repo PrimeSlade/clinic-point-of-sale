@@ -1,25 +1,33 @@
 import prisma from "../config/prisma.client";
 import { Prisma } from "../generated/prisma";
-import { Invoice, InvoiceQueryParams } from "../types/invoice.type";
+import {
+  Invoice,
+  InvoiceQueryParams,
+  InvoiceInput,
+} from "../types/invoice.type";
+import { getItemsToDelete } from "../utils/filterItemsToDelete";
 
-const createInvoice = async (data: Invoice) => {
+const createInvoice = async (data: InvoiceInput) => {
+  const { invoiceItems, invoiceServices, ...invoiceData } = data;
+
   return prisma.invoice.create({
     data: {
-      locationId: data.locationId,
-      treatmentId: data.treatmentId,
-      totalAmount: data.totalAmount,
-      discountAmount: data.discountAmount,
-      paymentMethod: data.paymentMethod,
-      paymentDescription: data.paymentDescription,
-      note: data.note,
+      ...invoiceData,
       invoiceItems: {
-        create: data.invoiceItems.map((item) => ({
+        create: invoiceItems.map((item) => ({
           itemId: item.itemId,
           itemName: item.itemName,
           quantity: item.quantity,
-          purchasePrice: item.purchasePrice,
+          retailPrice: item.retailPrice,
           discountPrice: item.discountPrice,
           unitType: item.unitType,
+        })),
+      },
+      invoiceServices: {
+        create: invoiceServices.map((service) => ({
+          serviceId: service.serviceId,
+          name: service.name,
+          retailPrice: service.retailPrice,
         })),
       },
     },
@@ -27,6 +35,7 @@ const createInvoice = async (data: Invoice) => {
       location: true,
       treatment: true,
       invoiceItems: true,
+      invoiceServices: true,
     },
   });
 };
@@ -35,8 +44,6 @@ const getInvoices = async ({
   offset,
   limit,
   search,
-  filter,
-  user,
   abacFilter,
   startDate,
   endDate,
@@ -60,16 +67,12 @@ const getInvoices = async ({
             },
           },
         },
+        {
+          location: {
+            name: { contains: search, mode: "insensitive" },
+          },
+        },
       ],
-    });
-  }
-
-  // Admin can search all locations
-  if (user.role.name === "admin" && filter) {
-    conditions.push({
-      location: {
-        name: { equals: filter, mode: "insensitive" },
-      },
     });
   }
 
@@ -101,9 +104,11 @@ const getInvoices = async ({
         treatment: {
           include: {
             patient: true,
+            doctor: true,
           },
         },
         invoiceItems: true,
+        invoiceServices: true,
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -120,35 +125,32 @@ const getInvoiceById = async (id: number) => {
       location: true,
       treatment: true,
       invoiceItems: true,
+      invoiceServices: true,
     },
   });
 };
 
-const updateInvoice = async (id: number, data: Invoice) => {
-  //find existing items first
-  const existingInvoiceItems = await prisma.invoiceItem.findMany({
-    where: { invoiceId: id },
-    select: { id: true },
+const updateInvoice = async (id: number, data: InvoiceInput) => {
+  const itemsToDelete = await getItemsToDelete({
+    id,
+    modelName: "invoiceItem",
+    data: data.invoiceItems,
+    prisma,
   });
 
-  //filter items
-  const itemIdsToKeep = data.invoiceItems.map((item) => item.id);
+  const servicesToDelete = await getItemsToDelete({
+    id,
+    modelName: "invoiceService",
+    data: data.invoiceServices,
+    prisma,
+  });
 
-  //used with **in**
-  const itemsToDelete = existingInvoiceItems
-    .filter((existingItem) => itemIdsToKeep.includes(existingItem.id))
-    .map((item) => item.id);
+  const { invoiceItems, invoiceServices, ...invoiceData } = data;
 
   return prisma.invoice.update({
     where: { id },
     data: {
-      locationId: data.locationId,
-      treatmentId: data.treatmentId,
-      totalAmount: data.totalAmount,
-      discountAmount: data.discountAmount,
-      paymentMethod: data.paymentMethod,
-      paymentDescription: data.paymentDescription,
-      note: data.note,
+      ...invoiceData,
       invoiceItems: {
         deleteMany:
           itemsToDelete.length > 0
@@ -156,15 +158,15 @@ const updateInvoice = async (id: number, data: Invoice) => {
                 id: { in: itemsToDelete },
               }
             : undefined,
-        upsert: data.invoiceItems.map((item) => ({
+        upsert: invoiceItems.map((item) => ({
           where: {
-            id: item.id,
+            id: item.id || -1,
           },
           create: {
             itemId: item.itemId,
             itemName: item.itemName,
             quantity: item.quantity,
-            purchasePrice: item.purchasePrice,
+            retailPrice: item.retailPrice,
             discountPrice: item.discountPrice,
             unitType: item.unitType,
           },
@@ -172,9 +174,32 @@ const updateInvoice = async (id: number, data: Invoice) => {
             itemId: item.itemId,
             itemName: item.itemName,
             quantity: item.quantity,
-            purchasePrice: item.purchasePrice,
+            retailPrice: item.retailPrice,
             discountPrice: item.discountPrice,
             unitType: item.unitType,
+          },
+        })),
+      },
+      invoiceServices: {
+        deleteMany:
+          servicesToDelete.length > 0
+            ? {
+                id: { in: servicesToDelete },
+              }
+            : undefined,
+        upsert: invoiceServices.map((service) => ({
+          where: {
+            id: service.id || -1,
+          },
+          create: {
+            serviceId: service.serviceId,
+            name: service.name,
+            retailPrice: service.retailPrice,
+          },
+          update: {
+            serviceId: service.serviceId,
+            name: service.name,
+            retailPrice: service.retailPrice,
           },
         })),
       },
@@ -183,19 +208,14 @@ const updateInvoice = async (id: number, data: Invoice) => {
       location: true,
       treatment: true,
       invoiceItems: true,
+      invoiceServices: true,
     },
   });
 };
 
 const deleteInvoice = async (id: number) => {
-  return prisma.$transaction(async (trx) => {
-    await trx.invoiceItem.deleteMany({
-      where: { invoiceId: id },
-    });
-
-    return trx.invoice.delete({
-      where: { id },
-    });
+  return prisma.invoice.delete({
+    where: { id },
   });
 };
 

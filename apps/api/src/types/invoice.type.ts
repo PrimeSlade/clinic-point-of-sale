@@ -26,11 +26,20 @@ export enum UnitType {
 type InvoiceItem = {
   id: number;
   itemId: number;
+  invoiceId: number;
   itemName: string;
   unitType: UnitType;
   quantity: number;
-  purchasePrice: number;
+  retailPrice: number;
   discountPrice: number;
+};
+
+type InvoiceService = {
+  id: number;
+  serviceId: number;
+  invoiceId: number;
+  name: string;
+  retailPrice: number;
 };
 
 type Invoice = {
@@ -44,17 +53,18 @@ type Invoice = {
   invoiceItems: InvoiceItem[];
   location?: Location;
   treatment?: Treatment | null;
+  invoiceServices: InvoiceService[];
 };
+
+type InvoiceInput = Omit<Invoice, 'location' | 'treatment'>;
 
 type InvoiceQueryParams = {
   offset: number;
   limit: number;
   search?: string;
-  filter?: string;
-  user: UserInfo;
   abacFilter?: PrismaQuery;
   startDate?: string;
   endDate?: string;
 };
 
-export { Invoice, InvoiceItem, InvoiceQueryParams };
+export { Invoice, InvoiceItem, InvoiceQueryParams, InvoiceService, InvoiceInput };

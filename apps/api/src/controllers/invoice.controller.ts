@@ -7,37 +7,17 @@ const createInvoice = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const {
-    locationId,
-    treatmentId,
-    totalAmount,
-    discountAmount,
-    paymentMethod,
-    paymentDescription,
-    note,
-    invoiceItems,
-  } = req.body;
+  const { invoiceItems, invoiceServices, ...data } = req.body;
 
-  if (
-    !locationId ||
-    !totalAmount ||
-    !discountAmount ||
-    !paymentMethod ||
-    !invoiceItems
-  ) {
+  if (!data || !invoiceItems || !invoiceServices) {
     throw new BadRequestError("Required invoice data is missing");
   }
 
   try {
     const invoice = await invoiceService.createInvoice({
-      locationId,
-      treatmentId,
-      totalAmount,
-      discountAmount,
-      paymentMethod,
-      paymentDescription,
-      note,
+      ...data,
       invoiceItems,
+      invoiceServices,
     });
 
     res.status(201).json({
@@ -58,11 +38,9 @@ const getInvoices = async (
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
   const search = String(req.query.search || "");
-  const filter = String(req.query.filter || "");
   const startDate = String(req.query.startDate || "");
   const endDate = String(req.query.endDate || "");
 
-  const user = req.user;
   const abacFilter = req.abacFilter;
 
   //pagination
@@ -73,8 +51,6 @@ const getInvoices = async (
       offset,
       limit,
       search,
-      filter,
-      user,
       abacFilter,
       startDate,
       endDate,

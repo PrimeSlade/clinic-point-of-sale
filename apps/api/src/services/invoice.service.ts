@@ -13,7 +13,7 @@ const createInvoice = async (data: Invoice) => {
       discountAmount: invoice.discountAmount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
-        purchasePrice: item.purchasePrice.toNumber(),
+        purchasePrice: item.retailPrice.toNumber(),
         discountPrice: item.discountPrice.toNumber(),
       })),
     };
@@ -31,8 +31,6 @@ const getInvoices = async ({
   offset,
   limit,
   search,
-  filter,
-  user,
   abacFilter,
   startDate,
   endDate,
@@ -42,8 +40,6 @@ const getInvoices = async ({
       offset,
       limit,
       search,
-      filter,
-      user,
       abacFilter,
       startDate,
       endDate,
@@ -55,7 +51,7 @@ const getInvoices = async ({
       discountAmount: invoice.discountAmount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
-        purchasePrice: item.purchasePrice.toNumber(),
+        purchasePrice: item.retailPrice.toNumber(),
         discountPrice: item.discountPrice.toNumber(),
       })),
     }));
@@ -83,7 +79,7 @@ const getInvoiceById = async (id: number) => {
       discountAmount: invoice.discountAmount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
-        purchasePrice: item.purchasePrice.toNumber(),
+        purchasePrice: item.retailPrice.toNumber(),
         discountPrice: item.discountPrice.toNumber(),
       })),
     };
@@ -107,7 +103,7 @@ const updateInvoice = async (id: number, data: Invoice) => {
       discountAmount: updatedInvoice.discountAmount.toNumber(),
       invoiceItems: updatedInvoice.invoiceItems.map((item) => ({
         ...item,
-        purchasePrice: item.purchasePrice.toNumber(),
+        purchasePrice: item.retailPrice.toNumber(),
         discountPrice: item.discountPrice.toNumber(),
       })),
     };
