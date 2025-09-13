@@ -3,7 +3,6 @@ import { CustomError } from "../errors/CustomError";
 import { Actions, AppAbility, Subjects } from "./abilities";
 import { accessibleBy } from "@casl/prisma";
 import fetchLocation from "../utils/fetchLocation";
-import { PermissionInfo } from "../types/role.type";
 
 const authorize = (
   action: string,

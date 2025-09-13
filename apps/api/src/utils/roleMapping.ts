@@ -2,13 +2,18 @@ import { UserInfo } from "../types/auth.type";
 
 const PERMISSION_DEPENDENCIES: Record<
   string,
-  { id: number; action: string; subject: string }
+  { id: number; action: string; subject: string }[]
 > = {
-  Treatment: { id: 22, action: "read", subject: "Item" },
-  User: { id: 26, action: "read", subject: "Location" },
-  Expense: { id: 10, action: "read", subject: "Category" },
-  Patient: { id: 26, action: "read", subject: "Location" },
-  Item: { id: 26, action: "read", subject: "Location" },
+  Treatment: [{ id: 22, action: "read", subject: "Item" }],
+  User: [{ id: 26, action: "read", subject: "Location" }],
+  Expense: [{ id: 10, action: "read", subject: "Category" }],
+  Patient: [{ id: 26, action: "read", subject: "Location" }],
+  Item: [{ id: 26, action: "read", subject: "Location" }],
+  Invoice: [
+    { id: 42, action: "read", subject: "Treatment" },
+    { id: 14, action: "read", subject: "Doctor" },
+    { id: 30, action: "read", subject: "Patient" },
+  ],
 };
 
 export const resolvePermissionDependencies = (user: UserInfo): UserInfo => {
@@ -23,11 +28,15 @@ export const resolvePermissionDependencies = (user: UserInfo): UserInfo => {
   }> = [];
 
   user.role.permissions.forEach((prev) => {
-    const dep = PERMISSION_DEPENDENCIES[prev.subject];
+    const deps = PERMISSION_DEPENDENCIES[prev.subject];
 
-    if (dep && !existingPermissionIds.has(dep.id)) {
-      permissionsToAdd.push(dep);
-      existingPermissionIds.add(dep.id);
+    if (deps) {
+      deps.forEach((dep) => {
+        if (!existingPermissionIds.has(dep.id)) {
+          permissionsToAdd.push(dep);
+          existingPermissionIds.add(dep.id);
+        }
+      });
     }
   });
 
