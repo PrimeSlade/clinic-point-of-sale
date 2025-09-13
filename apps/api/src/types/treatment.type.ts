@@ -1,4 +1,5 @@
 import { PrismaQuery } from "@casl/prisma";
+import { UserInfo } from "./auth.type";
 
 type Treatment = {
   doctorId: string;
@@ -16,6 +17,21 @@ type TreatmentQueryParams = {
   abacFilter: PrismaQuery;
 };
 
+type TreatmentByCursorQueryParams = {
+  cursor: string;
+  limit: number;
+  location?: string;
+  patientName?: string;
+  doctorName?: string;
+  abacFilter: PrismaQuery;
+  user: UserInfo;
+};
+
 type UpdateTreatment = Partial<Treatment>;
 
-export { Treatment, UpdateTreatment, TreatmentQueryParams };
+export {
+  Treatment,
+  UpdateTreatment,
+  TreatmentQueryParams,
+  TreatmentByCursorQueryParams,
+};

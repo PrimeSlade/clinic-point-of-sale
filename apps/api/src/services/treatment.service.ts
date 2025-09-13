@@ -1,5 +1,6 @@
 import {
   Treatment,
+  TreatmentByCursorQueryParams,
   TreatmentQueryParams,
   UpdateTreatment,
 } from "../types/treatment.type";
@@ -40,6 +41,37 @@ const getTreatments = async ({
     });
 
     return { treatments, total };
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
+const getTreatmentsByCursor = async ({
+  cursor,
+  limit,
+  location,
+  patientName,
+  doctorName,
+  user,
+  abacFilter,
+}: TreatmentByCursorQueryParams) => {
+  try {
+    const { treatments, hasNextPage, nextCursor } =
+      await treatmentModel.getTreatmentsByCursor({
+        cursor,
+        limit,
+        location,
+        patientName,
+        doctorName,
+        user,
+        abacFilter,
+      });
+
+    return { treatments, hasNextPage, nextCursor };
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError();
@@ -94,6 +126,7 @@ const deleteTreatment = async (id: number) => {
 export {
   addTreatment,
   getTreatments,
+  getTreatmentsByCursor,
   getTreatmentById,
   updateTreatment,
   deleteTreatment,

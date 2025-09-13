@@ -15,6 +15,11 @@ router.get(
   treatmentController.getTreatments,
 );
 router.get(
+  "/infinite",
+  authorize("read", "Treatment"),
+  treatmentController.getTreatmentsByCursor,
+);
+router.get(
   "/:id",
   authorize("read", "Treatment"),
   treatmentController.getTreatmentById,

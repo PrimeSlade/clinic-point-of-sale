@@ -105,7 +105,7 @@ model PhoneNumber {
 
 model Location {
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
   address String? 
 
   phoneNumberId Int @unique @map("phone_number_id")

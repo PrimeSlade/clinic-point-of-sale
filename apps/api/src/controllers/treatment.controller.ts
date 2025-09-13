@@ -72,11 +72,51 @@ const getTreatments = async (
   }
 };
 
+const getTreatmentsByCursor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const cursor = req.query.cursor as string;
+  const limit = Number(req.query.limit);
+  const location = String(req.query.location || "");
+  const patientName = String(req.query.patientName || "");
+  const doctorName = String(req.query.doctorName || "");
+
+  const user = req.user;
+  const abacFilter = req.abacFilter;
+
+  try {
+    const { treatments, hasNextPage, nextCursor } =
+      await treatmentService.getTreatmentsByCursor({
+        cursor,
+        limit,
+        location,
+        patientName,
+        doctorName,
+        user,
+        abacFilter,
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "Treatments fetched successfully!",
+      data: treatments,
+      meta: {
+        hasNextPage,
+        nextCursor,
+      },
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 const getTreatmentById = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void> => {
   const id = Number(req.params.id);
 
   if (!id) {
@@ -144,6 +184,7 @@ const deleteTreatment = async (
 export {
   addTreatment,
   getTreatments,
+  getTreatmentsByCursor,
   getTreatmentById,
   updateTreatment,
   deleteTreatment,

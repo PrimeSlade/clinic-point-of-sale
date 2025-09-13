@@ -1,7 +1,9 @@
+import { readSync } from "fs";
 import prisma from "../config/prisma.client";
 import { Prisma } from "../generated/prisma";
 import {
   Treatment,
+  TreatmentByCursorQueryParams,
   TreatmentQueryParams,
   UpdateTreatment,
 } from "../types/treatment.type";
@@ -134,6 +136,95 @@ const getTreatmentById = async (id: number) => {
   });
 };
 
+const getTreatmentsByCursor = async ({
+  cursor,
+  limit,
+  location,
+  patientName,
+  doctorName,
+  user,
+  abacFilter,
+}: TreatmentByCursorQueryParams) => {
+  const conditions: Prisma.TreatmentWhereInput[] = [];
+
+  if (patientName) {
+    conditions.push({
+      patient: {
+        name: {
+          contains: patientName,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+
+  if (doctorName) {
+    conditions.push({
+      doctor: {
+        name: {
+          contains: doctorName,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+
+  const locationFilter = () => {
+    if (user.role.name.toLowerCase() === "admin") {
+      if (location) {
+        return {
+          location: {
+            name: { equals: location, mode: "insensitive" },
+          },
+        };
+      } else {
+        return abacFilter;
+      }
+    } else {
+      return abacFilter;
+    }
+  };
+
+  const whereClause: Prisma.TreatmentWhereInput = {
+    AND: [
+      ...conditions,
+      {
+        patient: locationFilter(),
+      },
+      { doctor: locationFilter() },
+    ],
+  };
+
+  const cursorId = parseInt(Buffer.from(cursor, "base64").toString());
+  const results = await prisma.treatment.findMany({
+    ...(cursorId && { cursor: { id: cursorId }, skip: 1 }),
+    take: limit + 1,
+    include: {
+      doctor: true,
+      patient: {
+        include: {
+          location: true,
+          phoneNumber: true,
+        },
+      },
+    },
+    where: whereClause,
+    orderBy: { id: "desc" },
+  });
+
+  const hasNextPage = results.length > limit;
+  const treatments = hasNextPage ? results.slice(0, limit) : results;
+
+  let nextCursor = null;
+
+  if (hasNextPage && treatments.length > 0) {
+    const lastItem = treatments[treatments.length - 1];
+    nextCursor = Buffer.from(lastItem.id.toString()).toString("base64");
+  }
+
+  return { treatments, hasNextPage, nextCursor };
+};
+
 const updateTreatment = async (data: UpdateTreatment, id: number) => {
   return prisma.treatment.update({
     where: { id },
@@ -166,6 +257,7 @@ export {
   addTreatment,
   getTreatments,
   getTreatmentById,
+  getTreatmentsByCursor,
   updateTreatment,
   deleteTreatment,
 };
