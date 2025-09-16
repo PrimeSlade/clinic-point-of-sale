@@ -11,6 +11,8 @@ const createInvoice = async (data: Invoice) => {
       ...invoice,
       totalAmount: invoice.totalAmount.toNumber(),
       discountAmount: invoice.discountAmount.toNumber(),
+      subTotal: invoice.subTotal.toNumber(),
+      totalItemDiscount: invoice.totalItemDiscount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
         purchasePrice: item.retailPrice.toNumber(),
@@ -49,6 +51,8 @@ const getInvoices = async ({
       ...invoice,
       totalAmount: invoice.totalAmount.toNumber(),
       discountAmount: invoice.discountAmount.toNumber(),
+      subTotal: invoice.subTotal.toNumber(),
+      totalItemDiscount: invoice.totalItemDiscount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
         purchasePrice: item.retailPrice.toNumber(),
@@ -77,6 +81,8 @@ const getInvoiceById = async (id: number) => {
       ...invoice,
       totalAmount: invoice.totalAmount.toNumber(),
       discountAmount: invoice.discountAmount.toNumber(),
+      subTotal: invoice.subTotal.toNumber(),
+      totalItemDiscount: invoice.totalItemDiscount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
         purchasePrice: item.retailPrice.toNumber(),
@@ -101,6 +107,8 @@ const updateInvoice = async (id: number, data: Invoice) => {
       ...updatedInvoice,
       totalAmount: updatedInvoice.totalAmount.toNumber(),
       discountAmount: updatedInvoice.discountAmount.toNumber(),
+      subTotal: updatedInvoice.subTotal.toNumber(),
+      totalItemDiscount: updatedInvoice.totalItemDiscount.toNumber(),
       invoiceItems: updatedInvoice.invoiceItems.map((item) => ({
         ...item,
         purchasePrice: item.retailPrice.toNumber(),

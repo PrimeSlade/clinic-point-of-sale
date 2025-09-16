@@ -159,7 +159,7 @@ model ItemUnit {
 
 model Service {
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
   retailPrice Decimal @map("retail_price") @db.Decimal(10,2) 
 
   //Relations
@@ -236,6 +236,8 @@ model Invoice {
   locationId Int @map("location_id")
   treatmentId Int? @unique @map("treatment_id") 
 
+  totalItemDiscount Decimal @map("total_item_discount") @db.Decimal(10,2)
+  subTotal Decimal @map("sub_total") @db.Decimal(10,2)
   totalAmount Decimal @map("total_amount") @db.Decimal(10,2)
   discountAmount Decimal @map("discount_amount") @db.Decimal(10,2)
 

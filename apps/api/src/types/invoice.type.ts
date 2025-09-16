@@ -45,7 +45,9 @@ type InvoiceService = {
 type Invoice = {
   locationId: number;
   treatmentId?: number | null;
+  subTotal: number;
   totalAmount: number;
+  totalItemDiscount: number;
   discountAmount: number;
   paymentMethod: PaymentMethod;
   paymentDescription?: string | null;
@@ -56,7 +58,7 @@ type Invoice = {
   invoiceServices: InvoiceService[];
 };
 
-type InvoiceInput = Omit<Invoice, 'location' | 'treatment'>;
+type InvoiceInput = Omit<Invoice, "location" | "treatment">;
 
 type InvoiceQueryParams = {
   offset: number;
@@ -67,4 +69,10 @@ type InvoiceQueryParams = {
   endDate?: string;
 };
 
-export { Invoice, InvoiceItem, InvoiceQueryParams, InvoiceService, InvoiceInput };
+export {
+  Invoice,
+  InvoiceItem,
+  InvoiceQueryParams,
+  InvoiceService,
+  InvoiceInput,
+};
