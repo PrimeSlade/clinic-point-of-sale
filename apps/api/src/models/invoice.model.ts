@@ -3,7 +3,6 @@ import { Prisma } from "../generated/prisma";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceModelInput } from "../types/invoice.type";
 import { calculatePriceWithIncrease } from "../utils/calcInvocie";
-import { getItemsToDelete } from "../utils/filterItemsToDelete";
 
 const createInvoice = async (data: InvoiceModelInput, user: UserInfo) => {
   const { invoiceItems, invoiceServices, ...invoiceData } = data;
@@ -13,7 +12,6 @@ const createInvoice = async (data: InvoiceModelInput, user: UserInfo) => {
       ...invoiceData,
       invoiceItems: {
         create: invoiceItems.map((item) => ({
-          itemId: item.itemId,
           itemName: item.itemName,
           quantity: item.quantity,
           retailPrice: calculatePriceWithIncrease(
@@ -26,7 +24,6 @@ const createInvoice = async (data: InvoiceModelInput, user: UserInfo) => {
       },
       invoiceServices: {
         create: invoiceServices.map((service) => ({
-          serviceId: service.serviceId,
           name: service.name,
           retailPrice: service.retailPrice,
         })),
@@ -136,20 +133,6 @@ const updateInvoice = async (
   data: InvoiceModelInput,
   user: UserInfo,
 ) => {
-  const itemsToDelete = await getItemsToDelete({
-    id,
-    modelName: "invoiceItem",
-    data: data.invoiceItems,
-    prisma,
-  });
-
-  const servicesToDelete = await getItemsToDelete({
-    id,
-    modelName: "invoiceService",
-    data: data.invoiceServices,
-    prisma,
-  });
-
   const { invoiceItems, invoiceServices, ...invoiceData } = data;
 
   return prisma.invoice.update({
@@ -157,61 +140,23 @@ const updateInvoice = async (
     data: {
       ...invoiceData,
       invoiceItems: {
-        deleteMany:
-          itemsToDelete.length > 0
-            ? {
-                id: { in: itemsToDelete },
-              }
-            : undefined,
-        upsert: invoiceItems.map((item) => ({
-          where: {
-            id: item.id || -1,
-          },
-          create: {
-            itemId: item.itemId,
-            itemName: item.itemName,
-            quantity: item.quantity,
-            retailPrice: calculatePriceWithIncrease(
-              item.purchasePrice,
-              user.pricePercent,
-            ),
-            discountPrice: item.discountPrice,
-            unitType: item.unitType,
-          },
-          update: {
-            itemId: item.itemId,
-            itemName: item.itemName,
-            quantity: item.quantity,
-            retailPrice: calculatePriceWithIncrease(
-              item.purchasePrice,
-              user.pricePercent,
-            ),
-            discountPrice: item.discountPrice,
-            unitType: item.unitType,
-          },
+        deleteMany: {},
+        create: invoiceItems.map((item) => ({
+          itemName: item.itemName,
+          quantity: item.quantity,
+          retailPrice: calculatePriceWithIncrease(
+            item.purchasePrice,
+            user.pricePercent,
+          ),
+          discountPrice: item.discountPrice,
+          unitType: item.unitType,
         })),
       },
       invoiceServices: {
-        deleteMany:
-          servicesToDelete.length > 0
-            ? {
-                id: { in: servicesToDelete },
-              }
-            : undefined,
-        upsert: invoiceServices.map((service) => ({
-          where: {
-            id: service.id || -1,
-          },
-          create: {
-            serviceId: service.serviceId,
-            name: service.name,
-            retailPrice: service.retailPrice,
-          },
-          update: {
-            serviceId: service.serviceId,
-            name: service.name,
-            retailPrice: service.retailPrice,
-          },
+        deleteMany: {},
+        create: invoiceServices.map((service) => ({
+          name: service.name,
+          retailPrice: service.retailPrice,
         })),
       },
     },
