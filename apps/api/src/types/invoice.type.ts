@@ -30,8 +30,12 @@ type InvoiceItem = {
   itemName: string;
   unitType: UnitType;
   quantity: number;
-  retailPrice: number;
+  purchasePrice: number;
   discountPrice: number;
+};
+
+type InvoiceItemInput = Omit<InvoiceItem, "retailPrice"> & {
+  purchasePrice: number;
 };
 
 type InvoiceService = {
@@ -58,7 +62,12 @@ type Invoice = {
   invoiceServices: InvoiceService[];
 };
 
-type InvoiceInput = Omit<Invoice, "location" | "treatment">;
+type InvoiceModelInput = Omit<Invoice, "location" | "treatment">;
+
+type InvoiceServiceInput = Omit<
+  InvoiceModelInput,
+  "subTotal" | "totalAmount" | "totalItemDiscount"
+>;
 
 type InvoiceQueryParams = {
   offset: number;
@@ -74,5 +83,6 @@ export {
   InvoiceItem,
   InvoiceQueryParams,
   InvoiceService,
-  InvoiceInput,
+  InvoiceModelInput,
+  InvoiceServiceInput,
 };

@@ -9,16 +9,21 @@ const createInvoice = async (
 ): Promise<void> => {
   const { invoiceItems, invoiceServices, ...data } = req.body;
 
+  const user = req.user;
+
   if (!data || !invoiceItems || !invoiceServices) {
     throw new BadRequestError("Required invoice data is missing");
   }
 
   try {
-    const invoice = await invoiceService.createInvoice({
-      ...data,
-      invoiceItems,
-      invoiceServices,
-    });
+    const invoice = await invoiceService.createInvoice(
+      {
+        ...data,
+        invoiceItems,
+        invoiceServices,
+      },
+      user,
+    );
 
     res.status(201).json({
       success: true,
@@ -107,12 +112,18 @@ const updateInvoice = async (
   const id = Number(req.params.id);
   const updateData = req.body;
 
+  const user = req.user;
+
   if (!id) {
     throw new BadRequestError("Invalid invoice ID");
   }
 
   try {
-    const updatedInvoice = await invoiceService.updateInvoice(id, updateData);
+    const updatedInvoice = await invoiceService.updateInvoice(
+      id,
+      updateData,
+      user,
+    );
 
     res.status(200).json({
       success: true,

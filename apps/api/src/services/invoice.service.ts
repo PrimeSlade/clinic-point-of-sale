@@ -1,11 +1,26 @@
 import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
 import * as invoiceModel from "../models/invoice.model";
-import { Invoice, InvoiceQueryParams } from "../types/invoice.type";
+import { UserInfo } from "../types/auth.type";
+import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
+import { calcInvoice } from "../utils/calcInvocie";
 
-const createInvoice = async (data: Invoice) => {
+const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
   try {
-    const invoice = await invoiceModel.createInvoice(data);
+    const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
+      data,
+      user,
+    );
+
+    const invoice = await invoiceModel.createInvoice(
+      {
+        ...data,
+        subTotal,
+        totalItemDiscount,
+        totalAmount,
+      },
+      user,
+    );
 
     const parsedInvoice = {
       ...invoice,
@@ -99,9 +114,27 @@ const getInvoiceById = async (id: number) => {
   }
 };
 
-const updateInvoice = async (id: number, data: Invoice) => {
+const updateInvoice = async (
+  id: number,
+  data: InvoiceServiceInput,
+  user: UserInfo,
+) => {
   try {
-    const updatedInvoice = await invoiceModel.updateInvoice(id, data);
+    const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
+      data,
+      user,
+    );
+
+    const updatedInvoice = await invoiceModel.updateInvoice(
+      id,
+      {
+        ...data,
+        subTotal,
+        totalItemDiscount,
+        totalAmount,
+      },
+      user,
+    );
 
     const parsedInvoice = {
       ...updatedInvoice,

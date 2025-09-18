@@ -1,13 +1,11 @@
 import prisma from "../config/prisma.client";
 import { Prisma } from "../generated/prisma";
-import {
-  Invoice,
-  InvoiceQueryParams,
-  InvoiceInput,
-} from "../types/invoice.type";
+import { UserInfo } from "../types/auth.type";
+import { InvoiceQueryParams, InvoiceModelInput } from "../types/invoice.type";
+import { calculatePriceWithIncrease } from "../utils/calcInvocie";
 import { getItemsToDelete } from "../utils/filterItemsToDelete";
 
-const createInvoice = async (data: InvoiceInput) => {
+const createInvoice = async (data: InvoiceModelInput, user: UserInfo) => {
   const { invoiceItems, invoiceServices, ...invoiceData } = data;
 
   return prisma.invoice.create({
@@ -18,7 +16,10 @@ const createInvoice = async (data: InvoiceInput) => {
           itemId: item.itemId,
           itemName: item.itemName,
           quantity: item.quantity,
-          retailPrice: item.retailPrice,
+          retailPrice: calculatePriceWithIncrease(
+            item.purchasePrice,
+            user.pricePercent,
+          ),
           discountPrice: item.discountPrice,
           unitType: item.unitType,
         })),
@@ -130,7 +131,11 @@ const getInvoiceById = async (id: number) => {
   });
 };
 
-const updateInvoice = async (id: number, data: InvoiceInput) => {
+const updateInvoice = async (
+  id: number,
+  data: InvoiceModelInput,
+  user: UserInfo,
+) => {
   const itemsToDelete = await getItemsToDelete({
     id,
     modelName: "invoiceItem",
@@ -166,7 +171,10 @@ const updateInvoice = async (id: number, data: InvoiceInput) => {
             itemId: item.itemId,
             itemName: item.itemName,
             quantity: item.quantity,
-            retailPrice: item.retailPrice,
+            retailPrice: calculatePriceWithIncrease(
+              item.purchasePrice,
+              user.pricePercent,
+            ),
             discountPrice: item.discountPrice,
             unitType: item.unitType,
           },
@@ -174,7 +182,10 @@ const updateInvoice = async (id: number, data: InvoiceInput) => {
             itemId: item.itemId,
             itemName: item.itemName,
             quantity: item.quantity,
-            retailPrice: item.retailPrice,
+            retailPrice: calculatePriceWithIncrease(
+              item.purchasePrice,
+              user.pricePercent,
+            ),
             discountPrice: item.discountPrice,
             unitType: item.unitType,
           },
