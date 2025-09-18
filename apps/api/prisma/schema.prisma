@@ -136,7 +136,6 @@ model Item{
   //Relations
   location Location @relation(fields: [locationId],references: [id])
   itemUnits ItemUnit[]
-  invoiceItems InvoiceItem[]
 
   @@map("items")
 }
@@ -161,9 +160,6 @@ model Service {
   id Int @id @default(autoincrement())
   name String @unique
   retailPrice Decimal @map("retail_price") @db.Decimal(10,2) 
-
-  //Relations
-  invoiceServices InvoiceService[]
 
   @@map("services")
 }
@@ -262,12 +258,10 @@ model InvoiceItem {
   retailPrice Decimal @map("retail_price") @db.Decimal(10,2)
   discountPrice Decimal @map("discount_price") @db.Decimal(10,2)
 
-  invoiceId Int @map("invoice_id")
-  itemId  Int?   @map("item_id")  
+  invoiceId Int @map("invoice_id") 
 
   //Relations
   invoice Invoice @relation(fields: [invoiceId],references: [id], onDelete: Cascade)
-  item Item? @relation(fields: [itemId],references: [id], onDelete: SetNull)
 
   @@map("invoice_items")
 }
@@ -279,11 +273,9 @@ model InvoiceService {
   retailPrice Decimal @map("retail_price") @db.Decimal(10,2) 
 
   invoiceId Int @map("invoice_id")
-  serviceId Int? @map("service_id")
 
   //Relations
   invoice Invoice @relation(fields: [invoiceId],references: [id], onDelete: Cascade)
-  service Service? @relation(fields: [serviceId],references: [id], onDelete: SetNull)
 
   @@map("invoice_services")
 }

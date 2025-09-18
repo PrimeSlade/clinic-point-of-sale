@@ -25,7 +25,6 @@ export enum UnitType {
 
 type InvoiceItem = {
   id: number;
-  itemId: number;
   invoiceId: number;
   itemName: string;
   unitType: UnitType;
@@ -40,7 +39,6 @@ type InvoiceItemInput = Omit<InvoiceItem, "retailPrice"> & {
 
 type InvoiceService = {
   id: number;
-  serviceId: number;
   invoiceId: number;
   name: string;
   retailPrice: number;
