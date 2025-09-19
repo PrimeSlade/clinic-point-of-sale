@@ -33,10 +33,6 @@ type InvoiceItem = {
   discountPrice: number;
 };
 
-type InvoiceItemInput = Omit<InvoiceItem, "retailPrice"> & {
-  purchasePrice: number;
-};
-
 type InvoiceService = {
   id: number;
   invoiceId: number;
@@ -60,8 +56,10 @@ type Invoice = {
   invoiceServices: InvoiceService[];
 };
 
+//For model layer
 type InvoiceModelInput = Omit<Invoice, "location" | "treatment">;
 
+//For service layer
 type InvoiceServiceInput = Omit<
   InvoiceModelInput,
   "subTotal" | "totalAmount" | "totalItemDiscount"

@@ -1,17 +1,22 @@
+import { BadRequestError } from "../errors/BadRequestError";
 import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
 import * as invoiceModel from "../models/invoice.model";
+import * as itemModel from "../models/item.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
 import { calcInvoice } from "../utils/calcInvocie";
+import { hasSufficentAmount } from "../utils/invoice.operations.ts";
 
 const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
   try {
+    //amount checker
+    await hasSufficentAmount(data);
+
     const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
       data,
       user,
     );
-
     const invoice = await invoiceModel.createInvoice(
       {
         ...data,
@@ -21,7 +26,6 @@ const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
       },
       user,
     );
-
     const parsedInvoice = {
       ...invoice,
       totalAmount: invoice.totalAmount.toNumber(),
@@ -34,11 +38,13 @@ const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
         discountPrice: item.discountPrice.toNumber(),
       })),
     };
-
     return parsedInvoice;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Related data not found");
+    }
+    if (error instanceof BadRequestError) {
+      throw error;
     }
     throw new CustomError("Database operation failed", 500, { cause: error });
   }
@@ -80,6 +86,7 @@ const getInvoices = async ({
     if (error.code === "P2025") {
       throw new NotFoundError("Invoices not found");
     }
+
     throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };
