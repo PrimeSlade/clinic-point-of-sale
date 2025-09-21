@@ -4,10 +4,14 @@ import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceModelInput } from "../types/invoice.type";
 import { calculatePriceWithIncrease } from "../utils/calcInvocie";
 
-const createInvoice = async (data: InvoiceModelInput, user: UserInfo) => {
+const createInvoice = async (
+  data: InvoiceModelInput,
+  user: UserInfo,
+  trx: Prisma.TransactionClient,
+) => {
   const { invoiceItems, invoiceServices, ...invoiceData } = data;
 
-  return prisma.invoice.create({
+  return trx.invoice.create({
     data: {
       ...invoiceData,
       invoiceItems: {

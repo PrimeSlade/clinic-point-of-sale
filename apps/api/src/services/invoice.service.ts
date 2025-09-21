@@ -2,48 +2,47 @@ import { BadRequestError } from "../errors/BadRequestError";
 import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
 import * as invoiceModel from "../models/invoice.model";
-import * as itemModel from "../models/item.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
 import { calcInvoice } from "../utils/calcInvocie";
-import {
-  deductUnitAmount,
-  hasSufficentAmount,
-} from "../utils/invoice.operations";
+import { deductUnitAmount } from "../utils/invoice.operations";
+import prisma from "../config/prisma.client";
+import * as itemModel from "../models/item.model";
 
 const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
   try {
-    //amount checker
-    await hasSufficentAmount(data);
+    const invoice = await prisma.$transaction(async (trx) => {
+      await deductUnitAmount(data, trx);
 
-    await deductUnitAmount(data);
+      const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
+        data,
+        user,
+      );
+      return await invoiceModel.createInvoice(
+        {
+          ...data,
+          subTotal,
+          totalItemDiscount,
+          totalAmount,
+        },
+        user,
+        trx,
+      );
+    });
 
-    // const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
-    //   data,
-    //   user,
-    // );
-    // const invoice = await invoiceModel.createInvoice(
-    //   {
-    //     ...data,
-    //     subTotal,
-    //     totalItemDiscount,
-    //     totalAmount,
-    //   },
-    //   user,
-    // );
-    // const parsedInvoice = {
-    //   ...invoice,
-    //   totalAmount: invoice.totalAmount.toNumber(),
-    //   discountAmount: invoice.discountAmount.toNumber(),
-    //   subTotal: invoice.subTotal.toNumber(),
-    //   totalItemDiscount: invoice.totalItemDiscount.toNumber(),
-    //   invoiceItems: invoice.invoiceItems.map((item) => ({
-    //     ...item,
-    //     purchasePrice: item.retailPrice.toNumber(),
-    //     discountPrice: item.discountPrice.toNumber(),
-    //   })),
-    // };
-    // return parsedInvoice;
+    const parsedInvoice = {
+      ...invoice,
+      totalAmount: invoice.totalAmount.toNumber(),
+      discountAmount: invoice.discountAmount.toNumber(),
+      subTotal: invoice.subTotal.toNumber(),
+      totalItemDiscount: invoice.totalItemDiscount.toNumber(),
+      invoiceItems: invoice.invoiceItems.map((item) => ({
+        ...item,
+        purchasePrice: item.retailPrice.toNumber(),
+        discountPrice: item.discountPrice.toNumber(),
+      })),
+    };
+    return parsedInvoice;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Related data not found");

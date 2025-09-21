@@ -129,8 +129,10 @@ const updateItem = async (
   });
 };
 
-const deleteItem = async (id: number) => {
-  return prisma.item.delete({
+const deleteItem = async (id: number, trx?: Prisma.TransactionClient) => {
+  const client = trx || prisma;
+
+  return client.item.delete({
     where: {
       id,
     },
