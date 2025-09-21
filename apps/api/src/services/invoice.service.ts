@@ -7,7 +7,6 @@ import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
 import { calcInvoice } from "../utils/calcInvocie";
 import { deductUnitAmount } from "../utils/invoice.operations";
 import prisma from "../config/prisma.client";
-import * as itemModel from "../models/item.model";
 
 const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
   try {

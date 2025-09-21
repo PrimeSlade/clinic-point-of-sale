@@ -1,8 +1,9 @@
 import { BadRequestError } from "../errors/BadRequestError";
 import { InvoiceServiceInput } from "../types/invoice.type";
-import * as itemModel from "../models/item.model";
+
 import { Prisma } from "@prisma/client";
 import { updateItemUnit } from "../models/itemUnit.model";
+import { deleteItem, getItemById } from "../models/item.model";
 
 export const unitType = [
   "pkg", // package (could be similar to box)
@@ -24,52 +25,91 @@ const deductUnitAmount = async (
   data: InvoiceServiceInput,
   trx: Prisma.TransactionClient,
 ) => {
-  for (let invoiceItem of data.invoiceItems) {
-    const item = await itemModel.getItemById(invoiceItem.id);
+  //combine quantity with same id and unit to reduce read and update
+  const aggregatedItem = data.invoiceItems.reduce(
+    (acc, invoiceItem) => {
+      const key = `${invoiceItem.id}-${invoiceItem.unitType}`;
+
+      if (!acc[key]) {
+        acc[key] = {
+          id: invoiceItem.id,
+          unitType: invoiceItem.unitType,
+          quantity: 0,
+        };
+      }
+
+      acc[key].quantity += invoiceItem.quantity;
+      return acc;
+    },
+    {} as Record<string, { id: number; unitType: string; quantity: number }>,
+  );
+
+  const uniqueItemId = [
+    ...new Set(Object.values(aggregatedItem).map((item) => item.id)),
+  ];
+
+  for (let itemId of uniqueItemId) {
+    const itemDeductions = Object.values(aggregatedItem).filter(
+      (item) => item.id === itemId,
+    );
+
+    const item = await getItemById(itemId);
 
     //sort item
-    const labeledItems = item!.itemUnits.sort(
+    const labeledItems = [...item!.itemUnits].sort(
       (a, b) => unitRank[a.unitType] - unitRank[b.unitType],
     );
 
-    const matchIndex = labeledItems.findIndex(
-      (item) => item.unitType === invoiceItem.unitType,
-    );
-
-    const deductedAmount =
-      labeledItems[matchIndex].quantity - invoiceItem.quantity;
-
-    console.log("Detucted Amount ", deductedAmount);
-
-    if (deductedAmount < 0) {
-      throw new BadRequestError(
-        `${invoiceItem.unitType} amount is insufficient!`,
+    //ded is just filtered values from data
+    for (const deduction of itemDeductions) {
+      const matchIndex = labeledItems.findIndex(
+        (item) => item.unitType === deduction.unitType,
       );
+
+      const deductedAmount =
+        labeledItems[matchIndex].quantity - deduction.quantity;
+
+      console.log("Detucted Amount ", deductedAmount);
+
+      //Amount checker
+      if (deductedAmount < 0) {
+        throw new BadRequestError(
+          `${deduction.unitType} amount is insufficient!`,
+        );
+      }
+      labeledItems[matchIndex].quantity = deductedAmount;
+
+      if (matchIndex === 0) {
+        // Rank 1
+        labeledItems[1].quantity =
+          labeledItems[0].quantity * labeledItems[0].rate;
+        labeledItems[2].quantity =
+          labeledItems[1].quantity * labeledItems[1].rate;
+      } else if (matchIndex === 1) {
+        // Rank 2
+        labeledItems[0].quantity = Math.floor(
+          labeledItems[1].quantity / labeledItems[0].rate,
+        );
+        labeledItems[2].quantity =
+          labeledItems[1].quantity * labeledItems[1].rate;
+      } else {
+        // Rank 3
+        labeledItems[1].quantity = Math.floor(
+          labeledItems[2].quantity / labeledItems[1].rate,
+        );
+        labeledItems[0].quantity = Math.floor(
+          labeledItems[1].quantity / labeledItems[0].rate,
+        );
+      }
     }
 
-    labeledItems[matchIndex].quantity = deductedAmount;
+    const isZero = labeledItems.every((item) => item.quantity === 0);
 
-    if (matchIndex === 0) {
-      // Rank 1 modified → convert down
-      labeledItems[1].quantity =
-        labeledItems[0].quantity * labeledItems[0].rate;
-      labeledItems[2].quantity =
-        labeledItems[1].quantity * labeledItems[1].rate;
-    } else if (matchIndex === 1) {
-      // Rank 2 modified → convert both ways
-      labeledItems[0].quantity =
-        labeledItems[1].quantity / labeledItems[0].rate;
-      labeledItems[2].quantity =
-        labeledItems[1].quantity * labeledItems[1].rate;
+    if (isZero) {
+      await deleteItem(itemId, trx);
     } else {
-      // Rank 3 modified → convert up
-      labeledItems[1].quantity =
-        labeledItems[2].quantity / labeledItems[1].rate;
-      labeledItems[0].quantity =
-        labeledItems[1].quantity / labeledItems[0].rate;
+      await updateItemUnit(labeledItems, trx);
     }
-
-    await updateItemUnit(labeledItems, trx);
   }
 };
 
