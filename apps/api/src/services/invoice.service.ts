@@ -6,39 +6,44 @@ import * as itemModel from "../models/item.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
 import { calcInvoice } from "../utils/calcInvocie";
-import { hasSufficentAmount } from "../utils/invoice.operations.ts";
+import {
+  deductUnitAmount,
+  hasSufficentAmount,
+} from "../utils/invoice.operations";
 
 const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
   try {
     //amount checker
     await hasSufficentAmount(data);
 
-    const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
-      data,
-      user,
-    );
-    const invoice = await invoiceModel.createInvoice(
-      {
-        ...data,
-        subTotal,
-        totalItemDiscount,
-        totalAmount,
-      },
-      user,
-    );
-    const parsedInvoice = {
-      ...invoice,
-      totalAmount: invoice.totalAmount.toNumber(),
-      discountAmount: invoice.discountAmount.toNumber(),
-      subTotal: invoice.subTotal.toNumber(),
-      totalItemDiscount: invoice.totalItemDiscount.toNumber(),
-      invoiceItems: invoice.invoiceItems.map((item) => ({
-        ...item,
-        purchasePrice: item.retailPrice.toNumber(),
-        discountPrice: item.discountPrice.toNumber(),
-      })),
-    };
-    return parsedInvoice;
+    await deductUnitAmount(data);
+
+    // const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
+    //   data,
+    //   user,
+    // );
+    // const invoice = await invoiceModel.createInvoice(
+    //   {
+    //     ...data,
+    //     subTotal,
+    //     totalItemDiscount,
+    //     totalAmount,
+    //   },
+    //   user,
+    // );
+    // const parsedInvoice = {
+    //   ...invoice,
+    //   totalAmount: invoice.totalAmount.toNumber(),
+    //   discountAmount: invoice.discountAmount.toNumber(),
+    //   subTotal: invoice.subTotal.toNumber(),
+    //   totalItemDiscount: invoice.totalItemDiscount.toNumber(),
+    //   invoiceItems: invoice.invoiceItems.map((item) => ({
+    //     ...item,
+    //     purchasePrice: item.retailPrice.toNumber(),
+    //     discountPrice: item.discountPrice.toNumber(),
+    //   })),
+    // };
+    // return parsedInvoice;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Related data not found");
