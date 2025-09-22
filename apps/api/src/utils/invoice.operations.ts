@@ -1,9 +1,15 @@
 import { BadRequestError } from "../errors/BadRequestError";
 import { InvoiceServiceInput } from "../types/invoice.type";
-
 import { Prisma } from "@prisma/client";
 import { updateItemUnit } from "../models/itemUnit.model";
 import { deleteItem, getItemById } from "../models/item.model";
+import { UnitType } from "../types/item.type";
+
+type AggregatedItem = {
+  id: number;
+  unitType: UnitType;
+  quantity: number;
+};
 
 export const unitType = [
   "pkg", // package (could be similar to box)
@@ -21,12 +27,38 @@ export const unitType = [
 //map
 const unitRank = Object.fromEntries(unitType.map((u, i) => [u, i])); //HashMap
 
-const deductUnitAmount = async (
-  data: InvoiceServiceInput,
-  trx: Prisma.TransactionClient,
+const recalculateRelatedUnits = (
+  itemUnit: { id: number; quantity: number; rate: number }[],
+  matchIndex: number,
 ) => {
-  //combine quantity with same id and unit to reduce read and update
-  const aggregatedItem = data.invoiceItems.reduce(
+  if (matchIndex === 0) {
+    //down
+    for (let i = matchIndex; i < itemUnit.length - 1; i++) {
+      itemUnit[i + 1].quantity = itemUnit[i].quantity * itemUnit[i].rate;
+    }
+  } else if (matchIndex === itemUnit.length - 1) {
+    //up
+    for (let i = itemUnit.length - 1; i > 0; i--) {
+      itemUnit[i - 1].quantity = Math.floor(
+        itemUnit[i].quantity / itemUnit[i - 1].rate,
+      );
+    }
+  } else {
+    //down
+    for (let i = matchIndex; i < itemUnit.length - 1; i++) {
+      itemUnit[i + 1].quantity = itemUnit[i].quantity * itemUnit[i].rate;
+    }
+    //up
+    for (let i = matchIndex; i > 0; i--) {
+      itemUnit[i - 1].quantity = Math.floor(
+        itemUnit[i].quantity / itemUnit[i - 1].rate,
+      );
+    }
+  }
+};
+
+const aggregateItem = (data: InvoiceServiceInput) => {
+  return data.invoiceItems.reduce(
     (acc, invoiceItem) => {
       const key = `${invoiceItem.id}-${invoiceItem.unitType}`;
 
@@ -41,35 +73,58 @@ const deductUnitAmount = async (
       acc[key].quantity += invoiceItem.quantity;
       return acc;
     },
-    {} as Record<string, { id: number; unitType: string; quantity: number }>,
+    {} as Record<string, AggregatedItem>,
   );
+};
 
-  const uniqueItemId = [
-    ...new Set(Object.values(aggregatedItem).map((item) => item.id)),
-  ];
+const getUniqueItemId = (aggregatedItems: Record<string, AggregatedItem>) => {
+  return [...new Set(Object.values(aggregatedItems).map((item) => item.id))];
+};
 
+const deductUnitAmount = async (
+  data: InvoiceServiceInput,
+  trx: Prisma.TransactionClient,
+) => {
+  //combine quantity with same id and unit to reduce read and update
+  const aggregatedItem = aggregateItem(data);
+
+  //get uniqueId => 1,1,2 => 1,2
+  const uniqueItemId = getUniqueItemId(aggregatedItem);
+
+  //id => 1,2
   for (let itemId of uniqueItemId) {
+    const item = await getItemById(itemId);
+
+    //Error handling
+    if (!item) {
+      throw new BadRequestError(`Item with ID ${itemId} not found`);
+    }
+
+    //sort item
+    const labeledItems = [...item.itemUnits].sort(
+      (a, b) => unitRank[a.unitType] - unitRank[b.unitType],
+    );
+
     const itemDeductions = Object.values(aggregatedItem).filter(
       (item) => item.id === itemId,
     );
 
-    const item = await getItemById(itemId);
-
-    //sort item
-    const labeledItems = [...item!.itemUnits].sort(
-      (a, b) => unitRank[a.unitType] - unitRank[b.unitType],
-    );
-
     //ded is just filtered values from data
+    //id => 1,1,2
     for (const deduction of itemDeductions) {
       const matchIndex = labeledItems.findIndex(
         (item) => item.unitType === deduction.unitType,
       );
 
+      //Error handling
+      if (matchIndex === -1) {
+        throw new BadRequestError(
+          `Unit type ${deduction.unitType} not found for item ${itemId}`,
+        );
+      }
+
       const deductedAmount =
         labeledItems[matchIndex].quantity - deduction.quantity;
-
-      console.log("Detucted Amount ", deductedAmount);
 
       //Amount checker
       if (deductedAmount < 0) {
@@ -77,30 +132,10 @@ const deductUnitAmount = async (
           `${deduction.unitType} amount is insufficient!`,
         );
       }
+
       labeledItems[matchIndex].quantity = deductedAmount;
 
-      if (matchIndex === 0) {
-        // Rank 1
-        labeledItems[1].quantity =
-          labeledItems[0].quantity * labeledItems[0].rate;
-        labeledItems[2].quantity =
-          labeledItems[1].quantity * labeledItems[1].rate;
-      } else if (matchIndex === 1) {
-        // Rank 2
-        labeledItems[0].quantity = Math.floor(
-          labeledItems[1].quantity / labeledItems[0].rate,
-        );
-        labeledItems[2].quantity =
-          labeledItems[1].quantity * labeledItems[1].rate;
-      } else {
-        // Rank 3
-        labeledItems[1].quantity = Math.floor(
-          labeledItems[2].quantity / labeledItems[1].rate,
-        );
-        labeledItems[0].quantity = Math.floor(
-          labeledItems[1].quantity / labeledItems[0].rate,
-        );
-      }
+      recalculateRelatedUnits(labeledItems, matchIndex);
     }
 
     const isZero = labeledItems.every((item) => item.quantity === 0);
