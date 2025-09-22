@@ -10,9 +10,12 @@ const PERMISSION_DEPENDENCIES: Record<
   Patient: [{ id: 26, action: "read", subject: "Location" }],
   Item: [{ id: 26, action: "read", subject: "Location" }],
   Invoice: [
+    { id: 22, action: "read", subject: "Item" },
     { id: 42, action: "read", subject: "Treatment" },
     { id: 14, action: "read", subject: "Doctor" },
     { id: 30, action: "read", subject: "Patient" },
+    { id: 26, action: "read", subject: "Location" },
+    { id: 38, action: "read", subject: "Service" },
   ],
 };
 
