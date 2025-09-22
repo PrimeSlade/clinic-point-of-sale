@@ -4,7 +4,7 @@ import { NotFoundError } from "../errors/NotFoundError";
 import * as invoiceModel from "../models/invoice.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
-import { calcInvoice } from "../utils/calcInvocie";
+import { calcInvoice } from "../utils/calcInvoice";
 import { deductUnitAmount } from "../utils/invoice.operations";
 import prisma from "../config/prisma.client";
 

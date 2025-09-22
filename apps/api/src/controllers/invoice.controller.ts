@@ -11,7 +11,9 @@ const createInvoice = async (
 
   const user = req.user;
 
-  if (!data || !invoiceItems || !invoiceServices) {
+  console.log("Services ", invoiceServices);
+
+  if (!data || !invoiceItems) {
     throw new BadRequestError("Required invoice data is missing");
   }
 

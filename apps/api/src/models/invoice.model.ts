@@ -2,7 +2,7 @@ import prisma from "../config/prisma.client";
 import { Prisma } from "../generated/prisma";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceModelInput } from "../types/invoice.type";
-import { calculatePriceWithIncrease } from "../utils/calcInvocie";
+import { calculatePriceWithIncrease } from "../utils/calcInvoice";
 
 const createInvoice = async (
   data: InvoiceModelInput,
@@ -27,7 +27,7 @@ const createInvoice = async (
         })),
       },
       invoiceServices: {
-        create: invoiceServices.map((service) => ({
+        create: invoiceServices?.map((service) => ({
           name: service.name,
           retailPrice: service.retailPrice,
         })),
