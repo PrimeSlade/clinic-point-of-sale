@@ -69,6 +69,9 @@ async function main() {
     { action: "read", subject: "Invoice" },
     { action: "update", subject: "Invoice" },
     { action: "delete", subject: "Invoice" },
+
+    // Report
+    { action: "read", subject: "Report" },
   ];
 
   for (const permission of permissions) {

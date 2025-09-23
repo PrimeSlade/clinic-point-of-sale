@@ -21,7 +21,12 @@ const getExpenses = async (abacFilter: PrismaQuery) => {
   try {
     const expenses = await expenseModel.getExpenses(abacFilter);
 
-    return expenses;
+    const parsedExpenses = expenses.map((expense) => ({
+      ...expense,
+      amount: expense.amount.toNumber(),
+    }));
+
+    return parsedExpenses;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError();

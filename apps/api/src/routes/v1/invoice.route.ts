@@ -10,16 +10,21 @@ router.post(
   invoiceController.createInvoice,
 );
 router.get("/", authorize("read", "Invoice"), invoiceController.getInvoices);
+
 router.get(
   "/:id",
   authorize("read", "Invoice"),
   invoiceController.getInvoiceById,
 );
-router.put(
-  "/:id",
-  authorize("update", "Invoice"),
-  invoiceController.updateInvoice,
-);
+
+// In my pos, user are not allowed to update
+
+// router.put(
+//   "/:id",
+//   authorize("update", "Invoice"),
+//   invoiceController.updateInvoice,
+// );
+
 router.delete(
   "/:id",
   authorize("delete", "Invoice"),

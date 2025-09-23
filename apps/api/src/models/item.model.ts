@@ -54,7 +54,7 @@ const getItems = async ({
   }
 
   //Admin can search all locations
-  if (user.role.name === "admin" && filter) {
+  if (user.role.name.toLowerCase() === "admin" && filter) {
     conditions.push({
       location: {
         name: { equals: filter, mode: "insensitive" },
