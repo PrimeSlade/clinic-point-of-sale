@@ -2,14 +2,11 @@ import prisma from "../config/prisma.client";
 import { AssignRoleFrom, RoleForm } from "../types/role.type";
 
 const addRole = async (data: RoleForm) => {
-  const defaultPermissionIds = [34, 26, 10]; //location,role,category
   return prisma.role.create({
     data: {
       name: data.name,
       permissions: {
         connect: [
-          // Add default permissions
-          //...defaultPermissionIds.map((id) => ({ id })),
           // Add user-selected permissions
           ...data.permissions.map((perm) => ({ id: perm.id })),
         ],
@@ -32,15 +29,12 @@ const getRoleById = async (id: number) => {
 };
 
 const updateRole = async (data: RoleForm, id: number) => {
-  const defaultPermissionIds = [34, 26, 10]; //location,role,category
   return prisma.role.update({
     where: { id },
     data: {
       name: data.name,
       permissions: {
         set: [
-          // Add default permissions
-          //...defaultPermissionIds.map((id) => ({ id })),
           // Add user-selected permissions
           ...data.permissions.map((perm) => ({ id: perm.id })),
         ],

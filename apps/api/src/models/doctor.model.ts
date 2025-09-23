@@ -41,6 +41,7 @@ const getDoctors = async (abacFilter: PrismaQuery) => {
       phoneNumber: true,
     },
     where: abacFilter,
+    orderBy: { id: "desc" },
   });
 };
 

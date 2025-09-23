@@ -1,4 +1,3 @@
-import { readSync } from "fs";
 import prisma from "../config/prisma.client";
 import { Prisma } from "../generated/prisma";
 import {
