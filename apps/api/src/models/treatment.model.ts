@@ -13,6 +13,7 @@ const addTreatment = async (data: Treatment) => {
     data: {
       doctorId: data.doctorId,
       patientId: data.patientId,
+      investigation: data.investigation,
       diagnosis: data.diagnosis,
       treatment: data.treatment,
     },
@@ -230,6 +231,7 @@ const updateTreatment = async (data: UpdateTreatment, id: number) => {
     data: {
       doctorId: data.doctorId,
       patientId: data.patientId,
+      investigation: data.investigation,
       diagnosis: data.diagnosis,
       treatment: data.treatment,
     },

@@ -4,8 +4,9 @@ import { UserInfo } from "./auth.type";
 type Treatment = {
   doctorId: string;
   patientId: number;
+  investigation?: string;
   diagnosis?: string;
-  treatment?: string;
+  treatment: string;
 };
 
 type TreatmentQueryParams = {

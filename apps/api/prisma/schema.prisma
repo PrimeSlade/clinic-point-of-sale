@@ -214,8 +214,10 @@ model Treatment {
 
   doctorId String @map("doctor_id")
   patientId Int @map("patient_id")
+
+  investigation String?
   diagnosis String?
-  treatment String?
+  treatment String
 
   //Relations
   doctor Doctor @relation(fields: [doctorId],references: [id])

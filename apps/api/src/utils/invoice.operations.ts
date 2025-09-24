@@ -2,7 +2,7 @@ import { BadRequestError } from "../errors/BadRequestError";
 import { InvoiceServiceInput } from "../types/invoice.type";
 import { Prisma } from "@prisma/client";
 import { updateItemUnit } from "../models/itemUnit.model";
-import { deleteItem, getItemById } from "../models/item.model";
+import { getItemById } from "../models/item.model";
 import { UnitType } from "../types/item.type";
 
 type AggregatedItem = {
@@ -138,13 +138,7 @@ const deductUnitAmount = async (
       recalculateRelatedUnits(labeledItems, matchIndex);
     }
 
-    const isZero = labeledItems.every((item) => item.quantity === 0);
-
-    if (isZero) {
-      await deleteItem(itemId, trx);
-    } else {
-      await updateItemUnit(labeledItems, trx);
-    }
+    await updateItemUnit(labeledItems, trx);
   }
 };
 
