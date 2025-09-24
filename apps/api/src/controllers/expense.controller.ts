@@ -31,15 +31,38 @@ const getExpenses = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
+  const search = String(req.query.search || "");
+  const startDate = String(req.query.startDate || "");
+  const endDate = String(req.query.endDate || "");
+
+  const offset = (page - 1) * limit;
   const abacFilter = req.abacFilter;
 
   try {
-    const expenses = await expenseService.getExpenses(abacFilter);
+    const { expenses, total } = await expenseService.getExpenses({
+      offset,
+      limit,
+      search,
+      startDate,
+      endDate,
+      abacFilter,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
 
     res.status(200).json({
       success: true,
       message: "Expenses fetched successfully!",
       data: expenses,
+      meta: {
+        page,
+        totalPages,
+        totalItems: total,
+        hasNextPage,
+      },
     });
   } catch (error: any) {
     next(error);

@@ -1,6 +1,7 @@
 import { PrismaQuery } from "@casl/prisma";
 import prisma from "../config/prisma.client";
-import { Expense } from "../types/expense.type";
+import { Prisma } from "../generated/prisma";
+import { Expense, ExpenseQueryParams, UpdateExpense } from "../types/expense.type";
 
 const addExpense = async (data: Expense) => {
   return prisma.expense.create({
@@ -8,18 +9,82 @@ const addExpense = async (data: Expense) => {
   });
 };
 
-const getExpenses = async (abacFilter: PrismaQuery) => {
-  return prisma.expense.findMany({
-    include: {
-      location: true,
-      category: true,
-    },
-    where: abacFilter,
-    orderBy: { id: "desc" },
-  });
+const getExpenses = async ({
+  offset,
+  limit,
+  search,
+  startDate,
+  endDate,
+  abacFilter,
+}: ExpenseQueryParams) => {
+  const conditions: Prisma.ExpenseWhereInput[] = [];
+
+  if (search) {
+    conditions.push({
+      OR: [
+        {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          category: {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+      ],
+    });
+  }
+
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    conditions.push({
+      date: {
+        gte: start,
+        lte: end,
+      },
+    });
+  }
+
+  const whereClause: Prisma.ExpenseWhereInput = {
+    AND: [
+      ...conditions,
+      abacFilter,
+    ],
+  };
+
+  const [expenses, total] = await Promise.all([
+    prisma.expense.findMany({
+      skip: offset,
+      take: limit,
+      include: {
+        location: true,
+        category: true,
+      },
+      where: whereClause,
+      orderBy: { id: "desc" },
+    }),
+
+    prisma.expense.count({ where: whereClause }),
+  ]);
+
+  return { expenses, total };
 };
 
-const updateExpense = async (data: Expense, id: number) => {
+const updateExpense = async (data: UpdateExpense, id: number) => {
   return prisma.expense.update({
     where: {
       id,

@@ -1,4 +1,4 @@
-import { Expense } from "../types/expense.type";
+import { Expense, ExpenseQueryParams, UpdateExpense } from "../types/expense.type";
 import * as expenseModel from "../models/expense.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { CustomError } from "../errors/CustomError";
@@ -17,16 +17,30 @@ const addExpense = async (data: Expense) => {
   }
 };
 
-const getExpenses = async (abacFilter: PrismaQuery) => {
+const getExpenses = async ({
+  offset,
+  limit,
+  search,
+  startDate,
+  endDate,
+  abacFilter,
+}: ExpenseQueryParams) => {
   try {
-    const expenses = await expenseModel.getExpenses(abacFilter);
+    const { expenses, total } = await expenseModel.getExpenses({
+      offset,
+      limit,
+      search,
+      startDate,
+      endDate,
+      abacFilter,
+    });
 
     const parsedExpenses = expenses.map((expense) => ({
       ...expense,
       amount: expense.amount.toNumber(),
     }));
 
-    return parsedExpenses;
+    return { expenses: parsedExpenses, total };
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError();
@@ -35,7 +49,7 @@ const getExpenses = async (abacFilter: PrismaQuery) => {
   }
 };
 
-const updateExpense = async (data: Expense, id: number) => {
+const updateExpense = async (data: UpdateExpense, id: number) => {
   try {
     const updatedExpense = await expenseModel.updateExpense(data, id);
 

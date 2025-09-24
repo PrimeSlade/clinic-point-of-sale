@@ -1,3 +1,5 @@
+import { PrismaQuery } from "@casl/prisma";
+
 type Expense = {
   name: string;
   amount: number;
@@ -7,4 +9,15 @@ type Expense = {
   categoryId: number;
 };
 
-export { Expense };
+type ExpenseQueryParams = {
+  offset: number;
+  limit: number;
+  search: string;
+  startDate?: string;
+  endDate?: string;
+  abacFilter: PrismaQuery;
+};
+
+type UpdateExpense = Partial<Expense>;
+
+export { Expense, ExpenseQueryParams, UpdateExpense };
