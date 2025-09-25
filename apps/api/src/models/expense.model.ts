@@ -13,6 +13,8 @@ const getExpenses = async ({
   offset,
   limit,
   search,
+  filter,
+  user,
   startDate,
   endDate,
   abacFilter,
@@ -43,6 +45,15 @@ const getExpenses = async ({
           },
         },
       ],
+    });
+  }
+
+  //Admin can search all locations
+  if (user.role.name.toLowerCase() === "admin" && filter) {
+    conditions.push({
+      location: {
+        name: { equals: filter, mode: "insensitive" },
+      },
     });
   }
 

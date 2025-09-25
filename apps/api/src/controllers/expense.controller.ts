@@ -34,10 +34,12 @@ const getExpenses = async (
   const page = Number(req.query.page);
   const limit = Number(req.query.limit);
   const search = String(req.query.search || "");
+  const filter = String(req.query.filter || "");
   const startDate = String(req.query.startDate || "");
   const endDate = String(req.query.endDate || "");
 
   const offset = (page - 1) * limit;
+  const user = req.user;
   const abacFilter = req.abacFilter;
 
   try {
@@ -45,6 +47,8 @@ const getExpenses = async (
       offset,
       limit,
       search,
+      filter,
+      user,
       startDate,
       endDate,
       abacFilter,
