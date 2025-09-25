@@ -16,6 +16,7 @@ const createInvoice = async (
       ...invoiceData,
       invoiceItems: {
         create: invoiceItems.map((item) => ({
+          itemId: item.itemId,
           itemName: item.itemName,
           quantity: item.quantity,
           retailPrice: calculatePriceWithIncrease(
@@ -132,57 +133,16 @@ const getInvoiceById = async (id: number) => {
   });
 };
 
-const updateInvoice = async (
-  id: number,
-  data: InvoiceModelInput,
-  user: UserInfo,
-) => {
-  const { invoiceItems, invoiceServices, ...invoiceData } = data;
-
-  return prisma.invoice.update({
+const deleteInvoice = async (id: number, trx: Prisma.TransactionClient) => {
+  return trx.invoice.delete({
     where: { id },
-    data: {
-      ...invoiceData,
-      invoiceItems: {
-        deleteMany: {},
-        create: invoiceItems.map((item) => ({
-          itemName: item.itemName,
-          quantity: item.quantity,
-          retailPrice: calculatePriceWithIncrease(
-            item.purchasePrice,
-            user.pricePercent,
-          ),
-          discountPrice: item.discountPrice,
-          unitType: item.unitType,
-        })),
-      },
-      invoiceServices: {
-        deleteMany: {},
-        create: invoiceServices.map((service) => ({
-          name: service.name,
-          retailPrice: service.retailPrice,
-        })),
-      },
-    },
     include: {
+      invoiceItems: true,
       location: true,
       treatment: true,
-      invoiceItems: true,
       invoiceServices: true,
     },
   });
 };
 
-const deleteInvoice = async (id: number) => {
-  return prisma.invoice.delete({
-    where: { id },
-  });
-};
-
-export {
-  createInvoice,
-  getInvoices,
-  getInvoiceById,
-  updateInvoice,
-  deleteInvoice,
-};
+export { createInvoice, getInvoices, getInvoiceById, deleteInvoice };

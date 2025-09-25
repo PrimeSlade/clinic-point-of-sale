@@ -17,14 +17,6 @@ router.get(
   invoiceController.getInvoiceById,
 );
 
-// In my pos, user are not allowed to update
-
-// router.put(
-//   "/:id",
-//   authorize("update", "Invoice"),
-//   invoiceController.updateInvoice,
-// );
-
 router.delete(
   "/:id",
   authorize("delete", "Invoice"),

@@ -259,6 +259,7 @@ model InvoiceItem {
   quantity Int
   retailPrice Decimal @map("retail_price") @db.Decimal(10,2)
   discountPrice Decimal @map("discount_price") @db.Decimal(10,2)
+  itemId Int @map("item_id")
 
   invoiceId Int @map("invoice_id") 
 

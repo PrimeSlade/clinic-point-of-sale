@@ -24,8 +24,7 @@ export enum UnitType {
 }
 
 type InvoiceItem = {
-  rate: number;
-  id: number;
+  itemId: number;
   invoiceId: number;
   itemName: string;
   unitType: UnitType;

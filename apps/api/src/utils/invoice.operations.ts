@@ -1,5 +1,5 @@
 import { BadRequestError } from "../errors/BadRequestError";
-import { InvoiceServiceInput } from "../types/invoice.type";
+import { InvoiceItem, InvoiceServiceInput } from "../types/invoice.type";
 import { Prisma } from "@prisma/client";
 import { updateItemUnit } from "../models/itemUnit.model";
 import { getItemById } from "../models/item.model";
@@ -57,14 +57,14 @@ const recalculateRelatedUnits = (
   }
 };
 
-const aggregateItem = (data: InvoiceServiceInput) => {
-  return data.invoiceItems.reduce(
+const aggregateItem = (data: InvoiceItem[]) => {
+  return data.reduce(
     (acc, invoiceItem) => {
-      const key = `${invoiceItem.id}-${invoiceItem.unitType}`;
+      const key = `${invoiceItem.itemId}-${invoiceItem.unitType}`;
 
       if (!acc[key]) {
         acc[key] = {
-          id: invoiceItem.id,
+          id: invoiceItem.itemId,
           unitType: invoiceItem.unitType,
           quantity: 0,
         };
@@ -81,12 +81,13 @@ const getUniqueItemId = (aggregatedItems: Record<string, AggregatedItem>) => {
   return [...new Set(Object.values(aggregatedItems).map((item) => item.id))];
 };
 
-const deductUnitAmount = async (
-  data: InvoiceServiceInput,
+const adjustUnitAmount = async (
+  invoiceItems: InvoiceItem[],
   trx: Prisma.TransactionClient,
+  operation: "deduct" | "restore",
 ) => {
   //combine quantity with same id and unit to reduce read and update
-  const aggregatedItem = aggregateItem(data);
+  const aggregatedItem = aggregateItem(invoiceItems);
 
   //get uniqueId => 1,1,2 => 1,2
   const uniqueItemId = getUniqueItemId(aggregatedItem);
@@ -105,35 +106,37 @@ const deductUnitAmount = async (
       (a, b) => unitRank[a.unitType] - unitRank[b.unitType],
     );
 
-    const itemDeductions = Object.values(aggregatedItem).filter(
+    const itemAdjustments = Object.values(aggregatedItem).filter(
       (item) => item.id === itemId,
     );
 
     //ded is just filtered values from data
     //id => 1,1,2
-    for (const deduction of itemDeductions) {
+    for (const adjustment of itemAdjustments) {
       const matchIndex = labeledItems.findIndex(
-        (item) => item.unitType === deduction.unitType,
+        (item) => item.unitType === adjustment.unitType,
       );
 
       //Error handling
       if (matchIndex === -1) {
         throw new BadRequestError(
-          `Unit type ${deduction.unitType} not found for item ${itemId}`,
+          `Unit type ${adjustment.unitType} not found for item ${itemId}`,
         );
       }
 
-      const deductedAmount =
-        labeledItems[matchIndex].quantity - deduction.quantity;
+      const adjustedAmount =
+        operation === "deduct"
+          ? labeledItems[matchIndex].quantity - adjustment.quantity
+          : labeledItems[matchIndex].quantity + adjustment.quantity;
 
       //Amount checker
-      if (deductedAmount < 0) {
+      if (adjustedAmount < 0 && operation === "deduct") {
         throw new BadRequestError(
-          `${deduction.unitType} amount is insufficient!`,
+          `${adjustment.unitType} amount is insufficient!`,
         );
       }
 
-      labeledItems[matchIndex].quantity = deductedAmount;
+      labeledItems[matchIndex].quantity = adjustedAmount;
 
       recalculateRelatedUnits(labeledItems, matchIndex);
     }
@@ -142,4 +145,4 @@ const deductUnitAmount = async (
   }
 };
 
-export { deductUnitAmount };
+export { adjustUnitAmount };

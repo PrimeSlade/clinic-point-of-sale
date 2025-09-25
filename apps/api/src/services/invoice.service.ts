@@ -5,13 +5,14 @@ import * as invoiceModel from "../models/invoice.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
 import { calcInvoice } from "../utils/calcInvoice";
-import { deductUnitAmount } from "../utils/invoice.operations";
+import { adjustUnitAmount } from "../utils/invoice.operations";
 import prisma from "../config/prisma.client";
+import { UnitType } from "../types/item.type";
 
 const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
   try {
     const invoice = await prisma.$transaction(async (trx) => {
-      await deductUnitAmount(data, trx);
+      await adjustUnitAmount(data.invoiceItems, trx, "deduct");
 
       const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
         data,
@@ -29,19 +30,7 @@ const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
       );
     });
 
-    const parsedInvoice = {
-      ...invoice,
-      totalAmount: invoice.totalAmount.toNumber(),
-      discountAmount: invoice.discountAmount.toNumber(),
-      subTotal: invoice.subTotal.toNumber(),
-      totalItemDiscount: invoice.totalItemDiscount.toNumber(),
-      invoiceItems: invoice.invoiceItems.map((item) => ({
-        ...item,
-        purchasePrice: item.retailPrice.toNumber(),
-        discountPrice: item.discountPrice.toNumber(),
-      })),
-    };
-    return parsedInvoice;
+    return invoice;
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Related data not found");
@@ -124,53 +113,24 @@ const getInvoiceById = async (id: number) => {
   }
 };
 
-const updateInvoice = async (
-  id: number,
-  data: InvoiceServiceInput,
-  user: UserInfo,
-) => {
-  try {
-    const { subTotal, totalItemDiscount, totalAmount } = calcInvoice(
-      data,
-      user,
-    );
-
-    const updatedInvoice = await invoiceModel.updateInvoice(
-      id,
-      {
-        ...data,
-        subTotal,
-        totalItemDiscount,
-        totalAmount,
-      },
-      user,
-    );
-
-    const parsedInvoice = {
-      ...updatedInvoice,
-      totalAmount: updatedInvoice.totalAmount.toNumber(),
-      discountAmount: updatedInvoice.discountAmount.toNumber(),
-      subTotal: updatedInvoice.subTotal.toNumber(),
-      totalItemDiscount: updatedInvoice.totalItemDiscount.toNumber(),
-      invoiceItems: updatedInvoice.invoiceItems.map((item) => ({
-        ...item,
-        purchasePrice: item.retailPrice.toNumber(),
-        discountPrice: item.discountPrice.toNumber(),
-      })),
-    };
-
-    return parsedInvoice;
-  } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Invoice not found");
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
-  }
-};
-
 const deleteInvoice = async (id: number) => {
   try {
-    await invoiceModel.deleteInvoice(id);
+    await prisma.$transaction(async (trx) => {
+      const deletedInvoice = await invoiceModel.deleteInvoice(id, trx);
+
+      const parsedInvoice = {
+        ...deletedInvoice,
+        invoiceItems: deletedInvoice.invoiceItems.map((item) => ({
+          ...item,
+          itemId: item.itemId,
+          unitType: item.unitType as UnitType,
+          purchasePrice: item.retailPrice.toNumber(),
+          discountPrice: item.discountPrice.toNumber(),
+        })),
+      };
+
+      await adjustUnitAmount(parsedInvoice.invoiceItems, trx, "restore");
+    });
   } catch (error: any) {
     if (error.code === "P2025") {
       throw new NotFoundError("Invoice not found");
@@ -179,10 +139,4 @@ const deleteInvoice = async (id: number) => {
   }
 };
 
-export {
-  createInvoice,
-  getInvoices,
-  getInvoiceById,
-  updateInvoice,
-  deleteInvoice,
-};
+export { createInvoice, getInvoices, getInvoiceById, deleteInvoice };
