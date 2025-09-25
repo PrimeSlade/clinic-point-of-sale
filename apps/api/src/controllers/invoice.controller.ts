@@ -45,9 +45,13 @@ const getInvoices = async (
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
   const search = String(req.query.search || "");
+  const filter = String(req.query.filter || "");
   const startDate = String(req.query.startDate || "");
   const endDate = String(req.query.endDate || "");
 
+  console.log(filter);
+
+  const user = req.user;
   const abacFilter = req.abacFilter;
 
   //pagination
@@ -58,6 +62,8 @@ const getInvoices = async (
       offset,
       limit,
       search,
+      filter,
+      user,
       abacFilter,
       startDate,
       endDate,
@@ -106,37 +112,6 @@ const getInvoiceById = async (
   }
 };
 
-const updateInvoice = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  const id = Number(req.params.id);
-  const updateData = req.body;
-
-  const user = req.user;
-
-  if (!id) {
-    throw new BadRequestError("Invalid invoice ID");
-  }
-
-  try {
-    const updatedInvoice = await invoiceService.updateInvoice(
-      id,
-      updateData,
-      user,
-    );
-
-    res.status(200).json({
-      success: true,
-      message: "Invoice updated successfully!",
-      data: updatedInvoice,
-    });
-  } catch (error: any) {
-    next(error);
-  }
-};
-
 const deleteInvoice = async (
   req: Request,
   res: Response,
@@ -160,10 +135,4 @@ const deleteInvoice = async (
   }
 };
 
-export {
-  createInvoice,
-  getInvoices,
-  getInvoiceById,
-  updateInvoice,
-  deleteInvoice,
-};
+export { createInvoice, getInvoices, getInvoiceById, deleteInvoice };

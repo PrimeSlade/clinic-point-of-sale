@@ -69,6 +69,8 @@ type InvoiceQueryParams = {
   offset: number;
   limit: number;
   search?: string;
+  filter?: string;
+  user: UserInfo;
   abacFilter?: PrismaQuery;
   startDate?: string;
   endDate?: string;

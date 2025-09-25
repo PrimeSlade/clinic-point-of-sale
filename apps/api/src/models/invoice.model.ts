@@ -47,6 +47,8 @@ const getInvoices = async ({
   offset,
   limit,
   search,
+  filter,
+  user,
   abacFilter,
   startDate,
   endDate,
@@ -76,6 +78,15 @@ const getInvoices = async ({
           },
         },
       ],
+    });
+  }
+
+  //Admin can search all locations
+  if (user.role.name.toLowerCase() === "admin" && filter) {
+    conditions.push({
+      location: {
+        name: { equals: filter, mode: "insensitive" },
+      },
     });
   }
 
