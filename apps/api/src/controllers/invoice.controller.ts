@@ -11,8 +11,6 @@ const createInvoice = async (
 
   const user = req.user;
 
-  console.log("Services ", invoiceServices);
-
   if (!data || !invoiceItems) {
     throw new BadRequestError("Required invoice data is missing");
   }
@@ -49,8 +47,6 @@ const getInvoices = async (
   const startDate = String(req.query.startDate || "");
   const endDate = String(req.query.endDate || "");
 
-  console.log(filter);
-
   const user = req.user;
   const abacFilter = req.abacFilter;
 
@@ -82,6 +78,39 @@ const getInvoices = async (
         totalItems: total,
         hasNextPage,
       },
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+const getReportInvoices = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const startDate = String(req.query.startDate || "");
+  const endDate = String(req.query.endDate || "");
+
+  const user = req.user;
+  const abacFilter = req.abacFilter;
+
+  if (!startDate || !endDate) {
+    throw new BadRequestError("Start date and end date are required");
+  }
+
+  try {
+    const invoices = await invoiceService.getReportInvoices({
+      user,
+      abacFilter,
+      startDate,
+      endDate,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Report invoices fetched successfully!",
+      data: invoices,
     });
   } catch (error: any) {
     next(error);
@@ -135,4 +164,10 @@ const deleteInvoice = async (
   }
 };
 
-export { createInvoice, getInvoices, getInvoiceById, deleteInvoice };
+export {
+  createInvoice,
+  getInvoices,
+  getReportInvoices,
+  getInvoiceById,
+  deleteInvoice,
+};

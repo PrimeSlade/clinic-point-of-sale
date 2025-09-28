@@ -12,6 +12,13 @@ router.post(
 router.get("/", authorize("read", "Invoice"), invoiceController.getInvoices);
 
 router.get(
+  "/report",
+  authorize("read", "Report"),
+  authorize("read", "Invoice"),
+  invoiceController.getReportInvoices,
+);
+
+router.get(
   "/:id",
   authorize("read", "Invoice"),
   invoiceController.getInvoiceById,

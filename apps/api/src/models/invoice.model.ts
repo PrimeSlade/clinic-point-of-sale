@@ -2,6 +2,7 @@ import prisma from "../config/prisma.client";
 import { Prisma } from "../generated/prisma";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceModelInput } from "../types/invoice.type";
+import { ReportQueryParams } from "../types/report.type";
 import { calculatePriceWithIncrease } from "../utils/calcInvoice";
 
 const createInvoice = async (
@@ -72,11 +73,6 @@ const getInvoices = async ({
             },
           },
         },
-        {
-          location: {
-            name: { contains: search, mode: "insensitive" },
-          },
-        },
       ],
     });
   }
@@ -144,6 +140,49 @@ const getInvoiceById = async (id: number) => {
   });
 };
 
+const getReportInvoices = async ({
+  user,
+  abacFilter,
+  startDate,
+  endDate,
+}: ReportQueryParams) => {
+  const conditions: Prisma.InvoiceWhereInput[] = [];
+
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    // Set end date to 23:59:59.999 to include the entire day
+    end.setHours(23, 59, 59, 999);
+
+    conditions.push({
+      createdAt: {
+        gte: start,
+        lte: end,
+      },
+    });
+  }
+
+  const whereClause: Prisma.InvoiceWhereInput = {
+    AND: [...[abacFilter as Prisma.InvoiceWhereInput], ...conditions],
+  };
+
+  return prisma.invoice.findMany({
+    where: whereClause,
+    include: {
+      location: true,
+      treatment: {
+        include: {
+          patient: true,
+          doctor: true,
+        },
+      },
+      invoiceItems: true,
+      invoiceServices: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+};
+
 const deleteInvoice = async (id: number, trx: Prisma.TransactionClient) => {
   return trx.invoice.delete({
     where: { id },
@@ -156,4 +195,4 @@ const deleteInvoice = async (id: number, trx: Prisma.TransactionClient) => {
   });
 };
 
-export { createInvoice, getInvoices, getInvoiceById, deleteInvoice };
+export { createInvoice, getInvoices, getReportInvoices, getInvoiceById, deleteInvoice };

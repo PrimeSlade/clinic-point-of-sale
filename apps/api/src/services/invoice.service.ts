@@ -4,6 +4,7 @@ import { NotFoundError } from "../errors/NotFoundError";
 import * as invoiceModel from "../models/invoice.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
+import { ReportQueryParams } from "../types/report.type";
 import { calcInvoice } from "../utils/calcInvoice";
 import { adjustUnitAmount } from "../utils/invoice.operations";
 import prisma from "../config/prisma.client";
@@ -117,6 +118,43 @@ const getInvoiceById = async (id: number) => {
   }
 };
 
+const getReportInvoices = async ({
+  user,
+  abacFilter,
+  startDate,
+  endDate,
+}: ReportQueryParams) => {
+  try {
+    const invoices = await invoiceModel.getReportInvoices({
+      user,
+      abacFilter,
+      startDate,
+      endDate,
+    });
+
+    const parsedInvoices = invoices.map((invoice) => ({
+      ...invoice,
+      totalAmount: invoice.totalAmount.toNumber(),
+      discountAmount: invoice.discountAmount.toNumber(),
+      subTotal: invoice.subTotal.toNumber(),
+      totalItemDiscount: invoice.totalItemDiscount.toNumber(),
+      invoiceItems: invoice.invoiceItems.map((item) => ({
+        ...item,
+        purchasePrice: item.retailPrice.toNumber(),
+        discountPrice: item.discountPrice.toNumber(),
+      })),
+    }));
+
+    return parsedInvoices;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError("Invoices not found");
+    }
+
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
 const deleteInvoice = async (id: number) => {
   try {
     await prisma.$transaction(async (trx) => {
@@ -143,4 +181,4 @@ const deleteInvoice = async (id: number) => {
   }
 };
 
-export { createInvoice, getInvoices, getInvoiceById, deleteInvoice };
+export { createInvoice, getInvoices, getReportInvoices, getInvoiceById, deleteInvoice };
