@@ -6,6 +6,14 @@ const router = Router();
 
 router.post("/add", authorize("create", "Expense"), expenseController.addExpense);
 router.get("/", authorize("read", "Expense"), expenseController.getExpenses);
+
+router.get(
+  "/report",
+  authorize("read", "Report"),
+  authorize("read", "Expense"),
+  expenseController.getReportExpenses,
+);
+
 router.put("/:id", authorize("update", "Expense"), expenseController.updateExpense);
 router.delete("/:id", authorize("delete", "Expense"), expenseController.deleteExpense);
 

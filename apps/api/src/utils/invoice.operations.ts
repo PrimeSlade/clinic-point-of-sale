@@ -110,7 +110,7 @@ const adjustUnitAmount = async (
       (item) => item.id === itemId,
     );
 
-    //ded is just filtered values from data
+    //adj is just filtered values from data
     //id => 1,1,2
     for (const adjustment of itemAdjustments) {
       const matchIndex = labeledItems.findIndex(

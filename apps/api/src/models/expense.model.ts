@@ -2,6 +2,7 @@ import { PrismaQuery } from "@casl/prisma";
 import prisma from "../config/prisma.client";
 import { Prisma } from "../generated/prisma";
 import { Expense, ExpenseQueryParams, UpdateExpense } from "../types/expense.type";
+import { ReportQueryParams } from "../types/report.type";
 
 const addExpense = async (data: Expense) => {
   return prisma.expense.create({
@@ -112,4 +113,42 @@ const deleteExpense = async (id: number) => {
   });
 };
 
-export { addExpense, getExpenses, updateExpense, deleteExpense };
+const getReportExpenses = async ({
+  user,
+  abacFilter,
+  startDate,
+  endDate,
+}: ReportQueryParams) => {
+  const conditions: Prisma.ExpenseWhereInput[] = [];
+
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    conditions.push({
+      date: {
+        gte: start,
+        lte: end,
+      },
+    });
+  }
+
+  const whereClause: Prisma.ExpenseWhereInput = {
+    AND: [
+      ...conditions,
+      abacFilter,
+    ],
+  };
+
+  return prisma.expense.findMany({
+    include: {
+      location: true,
+      category: true,
+    },
+    where: whereClause,
+    orderBy: { id: "desc" },
+  });
+};
+
+export { addExpense, getExpenses, updateExpense, deleteExpense, getReportExpenses };

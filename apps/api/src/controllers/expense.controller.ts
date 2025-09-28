@@ -122,4 +122,37 @@ const deleteExpense = async (
   }
 };
 
-export { addExpense, getExpenses, updateExpense, deleteExpense };
+const getReportExpenses = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const startDate = String(req.query.startDate || "");
+  const endDate = String(req.query.endDate || "");
+
+  const user = req.user;
+  const abacFilter = req.abacFilter;
+
+  if (!startDate || !endDate) {
+    throw new BadRequestError("Start date and end date are required");
+  }
+
+  try {
+    const expenses = await expenseService.getReportExpenses({
+      user,
+      abacFilter,
+      startDate,
+      endDate,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Report expenses fetched successfully!",
+      data: expenses,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export { addExpense, getExpenses, updateExpense, deleteExpense, getReportExpenses };

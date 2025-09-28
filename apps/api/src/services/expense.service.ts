@@ -1,4 +1,5 @@
 import { Expense, ExpenseQueryParams, UpdateExpense } from "../types/expense.type";
+import { ReportQueryParams } from "../types/report.type";
 import * as expenseModel from "../models/expense.model";
 import { NotFoundError } from "../errors/NotFoundError";
 import { CustomError } from "../errors/CustomError";
@@ -80,4 +81,32 @@ const deleteExpense = async (id: number) => {
   }
 };
 
-export { addExpense, getExpenses, updateExpense, deleteExpense };
+const getReportExpenses = async ({
+  user,
+  abacFilter,
+  startDate,
+  endDate,
+}: ReportQueryParams) => {
+  try {
+    const expenses = await expenseModel.getReportExpenses({
+      user,
+      abacFilter,
+      startDate,
+      endDate,
+    });
+
+    const parsedExpenses = expenses.map((expense) => ({
+      ...expense,
+      amount: expense.amount.toNumber(),
+    }));
+
+    return parsedExpenses;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError();
+    }
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
+export { addExpense, getExpenses, updateExpense, deleteExpense, getReportExpenses };
