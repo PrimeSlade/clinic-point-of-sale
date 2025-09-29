@@ -12,7 +12,7 @@ router.post(
 router.get("/", authorize("read", "Invoice"), invoiceController.getInvoices);
 
 router.get(
-  "/report",
+  "/reports",
   authorize("read", "Report"),
   authorize("read", "Invoice"),
   invoiceController.getReportInvoices,
