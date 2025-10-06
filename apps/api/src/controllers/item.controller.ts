@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import * as itemService from "../services/item.service";
 import { BadRequestError } from "../errors/BadRequestError";
 
+
 const addItem = async (
   req: Request,
   res: Response,
@@ -137,4 +138,46 @@ const deleteItem = async (
   }
 };
 
-export { addItem, getItems, getItemById, updateItem, deleteItem };
+const exportItem = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const users = [
+      { id: 1, name: "John Doe", email: "john@example.com", age: 30 },
+      { id: 2, name: "Jane Smith", email: "jane@example.com", age: 25 },
+      { id: 3, name: "Bob Johnson", email: "bob@example.com", age: 35 },
+    ];
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Users");
+
+    worksheet.columns = [
+      { header: "ID", key: "id" },
+      { header: "Name", key: "name" },
+      { header: "Email", key: "email" },
+      { header: "Age", key: "age" },
+    ];
+
+    users.forEach((user) => {
+      worksheet.addRow(user);
+    });
+
+    //header
+    worksheet.getRow(1).font = { bold: true };
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export { addItem, getItems, getItemById, updateItem, deleteItem, exportItem };

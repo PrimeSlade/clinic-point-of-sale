@@ -95,6 +95,15 @@ const getItemById = async (id: number) => {
   });
 };
 
+const getAllItems = async () => {
+  return prisma.item.findMany({
+    include: {
+      location: true,
+      itemUnits: true,
+    },
+  });
+};
+
 const updateItem = async (
   data: UpdateItem,
   unit: Array<UpdateUnit>,
@@ -143,4 +152,4 @@ const deleteItem = async (id: number, trx?: Prisma.TransactionClient) => {
   });
 };
 
-export { addItem, getItems, getItemById, updateItem, deleteItem };
+export { addItem, getItems, getItemById, getAllItems, updateItem, deleteItem };

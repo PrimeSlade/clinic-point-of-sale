@@ -1,5 +1,6 @@
 import { CustomError } from "../errors/CustomError";
 import { NotFoundError } from "../errors/NotFoundError";
+import ExcelJS from "exceljs";
 import {
   Item,
   ItemQueryParams,
@@ -112,4 +113,52 @@ const deleteItem = async (id: number) => {
   }
 };
 
-export { addItem, getItems, getItemById, updateItem, deleteItem };
+const exportItem = async () => {
+  try {
+    const items = await itemModel.getAllItems();
+
+    const parsedItems = items.map((item) => ({
+      ...item,
+      itemUnits: item.itemUnits.map((unit) => ({
+        ...unit,
+        purchasePrice: unit.purchasePrice.toNumber(),
+      })),
+    }));
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Items");
+
+    worksheet.columns = [
+      { header: "Warehouse", key: "warehouse" },
+      { header: "Item Name", key: "itemName" },
+      { header: "Barcode", key: "barcode" },
+      { header: "Item Description", key: "itemDescription" },
+      { header: "Expired Date", key: "expiredDate" },
+      { header: "Category", key: "category" },
+      { header: "Quantity1", key: "quantity1" },
+      { header: "Quantity2", key: "quantity2" },
+      { header: "Quantity3", key: "quantity3" },
+      { header: "Unit1", key: "unit1" },
+      { header: "Unit2", key: "unit2" },
+      { header: "Unit3", key: "unit3" },
+      { header: "Type1", key: "type1" },
+      { header: "Type2", key: "type2" },
+      { header: "Type3", key: "type3" },
+      { header: "Rate1", key: "rate1" },
+      { header: "Rate2", key: "rate2" },
+      { header: "Rate3", key: "rate3" },
+      { header: "Purchase Price1", key: "purchasePrice1" },
+      { header: "Purchase Price2", key: "purchasePrice2" },
+      { header: "Purchase Price3", key: "purchasePrice3" },
+    ];
+
+    return parsedItems;
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      throw new NotFoundError("Items not found");
+    }
+    throw new CustomError("Database operation failed", 500, { cause: error });
+  }
+};
+
+export { addItem, getItems, getItemById, exportItem, updateItem, deleteItem };

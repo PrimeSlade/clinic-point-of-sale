@@ -73,7 +73,7 @@ const getInvoices = async ({
       totalItemDiscount: invoice.totalItemDiscount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
-        purchasePrice: item.retailPrice.toNumber(),
+        retailPrice: item.retailPrice.toNumber(),
         discountPrice: item.discountPrice.toNumber(),
       })),
     }));
@@ -104,7 +104,7 @@ const getInvoiceById = async (id: number) => {
       totalItemDiscount: invoice.totalItemDiscount.toNumber(),
       invoiceItems: invoice.invoiceItems.map((item) => ({
         ...item,
-        purchasePrice: item.retailPrice.toNumber(),
+        retailPrice: item.retailPrice.toNumber(),
         discountPrice: item.discountPrice.toNumber(),
       })),
     };
@@ -181,4 +181,10 @@ const deleteInvoice = async (id: number) => {
   }
 };
 
-export { createInvoice, getInvoices, getReportInvoices, getInvoiceById, deleteInvoice };
+export {
+  createInvoice,
+  getInvoices,
+  getReportInvoices,
+  getInvoiceById,
+  deleteInvoice,
+};
