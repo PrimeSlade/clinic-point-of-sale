@@ -164,7 +164,7 @@ const deleteInvoice = async (id: number) => {
         ...deletedInvoice,
         invoiceItems: deletedInvoice.invoiceItems.map((item) => ({
           ...item,
-          itemId: item.itemId,
+          barcode: item.barcode,
           unitType: item.unitType as UnitType,
           purchasePrice: item.retailPrice.toNumber(),
           discountPrice: item.discountPrice.toNumber(),

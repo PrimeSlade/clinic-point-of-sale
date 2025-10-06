@@ -95,6 +95,18 @@ const getItemById = async (id: number) => {
   });
 };
 
+const getItemByBarcode = async (barcode: string) => {
+  return prisma.item.findUnique({
+    where: {
+      barcode: barcode,
+    },
+    include: {
+      location: true,
+      itemUnits: true,
+    },
+  });
+};
+
 const getAllItems = async () => {
   return prisma.item.findMany({
     include: {
@@ -152,4 +164,12 @@ const deleteItem = async (id: number, trx?: Prisma.TransactionClient) => {
   });
 };
 
-export { addItem, getItems, getItemById, getAllItems, updateItem, deleteItem };
+export {
+  addItem,
+  getItems,
+  getItemById,
+  getItemByBarcode,
+  getAllItems,
+  updateItem,
+  deleteItem,
+};

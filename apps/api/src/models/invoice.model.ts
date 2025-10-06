@@ -17,7 +17,7 @@ const createInvoice = async (
       ...invoiceData,
       invoiceItems: {
         create: invoiceItems.map((item) => ({
-          itemId: item.itemId,
+          barcode: item.barcode,
           itemName: item.itemName,
           quantity: item.quantity,
           retailPrice: calculatePriceWithIncrease(

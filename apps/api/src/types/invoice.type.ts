@@ -24,7 +24,7 @@ export enum UnitType {
 }
 
 type InvoiceItem = {
-  itemId: number;
+  barcode: string;
   invoiceId: number;
   itemName: string;
   unitType: UnitType;
