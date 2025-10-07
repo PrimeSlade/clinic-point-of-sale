@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import * as itemService from "../services/item.service";
 import { BadRequestError } from "../errors/BadRequestError";
 
-
 const addItem = async (
   req: Request,
   res: Response,
@@ -138,40 +137,42 @@ const deleteItem = async (
   }
 };
 
+const importItem = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.file) {
+      throw new BadRequestError("No file uploaded");
+    }
+
+    const result = await itemService.importItem(req.file.buffer);
+
+    res.status(201).json({
+      success: true,
+      message: "Items imported successfully!",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const exportItem = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const users = [
-      { id: 1, name: "John Doe", email: "john@example.com", age: 30 },
-      { id: 2, name: "Jane Smith", email: "jane@example.com", age: 25 },
-      { id: 3, name: "Bob Johnson", email: "bob@example.com", age: 35 },
-    ];
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Users");
-
-    worksheet.columns = [
-      { header: "ID", key: "id" },
-      { header: "Name", key: "name" },
-      { header: "Email", key: "email" },
-      { header: "Age", key: "age" },
-    ];
-
-    users.forEach((user) => {
-      worksheet.addRow(user);
-    });
-
-    //header
-    worksheet.getRow(1).font = { bold: true };
+    const abacFilter = req.abacFilter;
+    const workbook = await itemService.exportItem(abacFilter);
 
     res.setHeader(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
-    res.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
+    res.setHeader("Content-Disposition", "attachment; filename=items.xlsx");
 
     await workbook.xlsx.write(res);
     res.end();
@@ -180,4 +181,12 @@ const exportItem = async (
   }
 };
 
-export { addItem, getItems, getItemById, updateItem, deleteItem, exportItem };
+export {
+  addItem,
+  getItems,
+  getItemById,
+  updateItem,
+  deleteItem,
+  importItem,
+  exportItem,
+};

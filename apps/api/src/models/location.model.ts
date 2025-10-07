@@ -49,12 +49,20 @@ const updateLocation = async (data: UpdateLoation, id: number) => {
   });
 };
 
-const findLocationById = async (id: number) => {
+const getLocationById = async (id: number) => {
   return prisma.location.findUnique({
     where: {
       id,
     },
     include: { phoneNumber: true },
+  });
+};
+
+const getLocationByName = async (name: string) => {
+  return prisma.location.findUnique({
+    where: {
+      name,
+    },
   });
 };
 
@@ -69,6 +77,7 @@ export {
   addLocation,
   getAllLocations,
   updateLocation,
-  findLocationById,
+  getLocationById,
+  getLocationByName,
   deleteLocationAndPhone,
 };

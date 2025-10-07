@@ -19,6 +19,7 @@ type Item = {
   category: string;
   expiryDate: string;
   locationId: number;
+  barcode: string;
   description?: string; //option
 };
 

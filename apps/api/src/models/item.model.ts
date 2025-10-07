@@ -7,6 +7,7 @@ import {
   UpdateUnit,
 } from "../types/item.type";
 import { Prisma } from "../generated/prisma";
+import { PrismaQuery } from "@casl/prisma";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
   return prisma.item.create({
@@ -107,12 +108,13 @@ const getItemByBarcode = async (barcode: string) => {
   });
 };
 
-const getAllItems = async () => {
+const getAllItems = async (abacFilter: PrismaQuery) => {
   return prisma.item.findMany({
     include: {
       location: true,
       itemUnits: true,
     },
+    where: abacFilter,
   });
 };
 
@@ -164,6 +166,44 @@ const deleteItem = async (id: number, trx?: Prisma.TransactionClient) => {
   });
 };
 
+const importItems = async (items: Array<Item & { itemUnits: Array<Unit> }>) => {
+  return prisma.$transaction(
+    items.map((item) =>
+      prisma.item.upsert({
+        where: { barcode: item.barcode },
+        update: {
+          name: item.name,
+          category: item.category,
+          expiryDate: item.expiryDate,
+          description: item.description,
+          locationId: item.locationId,
+        },
+        create: {
+          name: item.name,
+          category: item.category,
+          expiryDate: item.expiryDate,
+          description: item.description,
+          locationId: item.locationId,
+          itemUnits: {
+            createMany: {
+              data: item.itemUnits.map((u) => ({
+                unitType: u.unitType,
+                rate: u.rate,
+                quantity: u.quantity,
+                purchasePrice: u.purchasePrice,
+              })),
+            },
+          },
+        },
+        include: {
+          location: true,
+          itemUnits: true,
+        },
+      }),
+    ),
+  );
+};
+
 export {
   addItem,
   getItems,
@@ -172,4 +212,5 @@ export {
   getAllItems,
   updateItem,
   deleteItem,
+  importItems,
 };
