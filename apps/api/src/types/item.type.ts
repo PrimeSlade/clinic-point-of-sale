@@ -34,6 +34,8 @@ type Unit = {
 
 type UpdateUnit = { id: number } & Partial<Unit>;
 
+type ImportUnit = Unit & { id?: number };
+
 type ItemQueryParams = {
   offset: number;
   limit: number;
@@ -43,4 +45,4 @@ type ItemQueryParams = {
   abacFilter: PrismaQuery;
 };
 
-export { Item, Unit, UpdateItem, UpdateUnit, ItemQueryParams };
+export { Item, Unit, UpdateItem, ImportUnit, UpdateUnit, ItemQueryParams };

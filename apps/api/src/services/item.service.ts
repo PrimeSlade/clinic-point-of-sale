@@ -12,6 +12,7 @@ import * as itemModel from "../models/item.model";
 import { transformImportedData, validateFile } from "../utils/item.util";
 import { BadRequestError } from "../errors/BadRequestError";
 import { PrismaQuery } from "@casl/prisma";
+import { randomUUID } from "crypto";
 
 type ExcelRow = {
   warehouse: string;
@@ -147,7 +148,7 @@ const importItem = async (buffer: Buffer) => {
         importedData.push({
           warehouse: row.getCell(1).value,
           itemName: row.getCell(2).value,
-          barcode: row.getCell(3).value,
+          barcode: row.getCell(3).value ?? randomUUID(),
           itemDescription: row.getCell(4).value,
           expiredDate: row.getCell(5).value,
           category: row.getCell(6).value,
@@ -163,6 +164,9 @@ const importItem = async (buffer: Buffer) => {
           purchasePrice1: row.getCell(16).value,
           purchasePrice2: row.getCell(17).value,
           purchasePrice3: row.getCell(18).value,
+          unitId1: row.getCell(19).value,
+          unitId2: row.getCell(20).value,
+          unitId3: row.getCell(21).value,
         });
       }
     });
@@ -176,6 +180,8 @@ const importItem = async (buffer: Buffer) => {
     if (error instanceof NotFoundError || error instanceof BadRequestError) {
       throw error;
     }
+
+    console.log(error);
 
     if (error.name === "PrismaClientValidationError") {
       throw new BadRequestError(
@@ -221,6 +227,9 @@ const exportItem = async (abacFilter: PrismaQuery) => {
       { header: "Purchase Price1", key: "purchasePrice1" },
       { header: "Purchase Price2", key: "purchasePrice2" },
       { header: "Purchase Price3", key: "purchasePrice3" },
+      { header: "_UnitID1", key: "unitId1", hidden: true },
+      { header: "_UnitID2", key: "unitId2", hidden: true },
+      { header: "_UnitID3", key: "unitId3", hidden: true },
     ];
 
     //header
@@ -238,7 +247,7 @@ const exportItem = async (abacFilter: PrismaQuery) => {
 
       for (let i = 0; i < item.itemUnits.length; i++) {
         const unit = item.itemUnits[i];
-
+        row[`unitId${i + 1}`] = unit.id;
         row[`quantity${i + 1}`] = unit.quantity;
         row[`unitType${i + 1}`] = unit?.unitType;
         row[`rate${i + 1}`] = unit?.rate;

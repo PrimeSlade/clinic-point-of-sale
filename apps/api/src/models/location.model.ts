@@ -59,9 +59,9 @@ const getLocationById = async (id: number) => {
 };
 
 const getLocationByName = async (name: string) => {
-  return prisma.location.findUnique({
+  return prisma.location.findFirst({
     where: {
-      name,
+      name: { equals: name, mode: "insensitive" },
     },
   });
 };

@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.client";
 import {
+  ImportUnit,
   Item,
   ItemQueryParams,
   Unit,
@@ -166,7 +167,9 @@ const deleteItem = async (id: number, trx?: Prisma.TransactionClient) => {
   });
 };
 
-const importItems = async (items: Array<Item & { itemUnits: Array<Unit> }>) => {
+const importItems = async (
+  items: Array<Item & { itemUnits: Array<ImportUnit> }>,
+) => {
   return prisma.$transaction(
     items.map((item) =>
       prisma.item.upsert({
@@ -177,6 +180,19 @@ const importItems = async (items: Array<Item & { itemUnits: Array<Unit> }>) => {
           expiryDate: item.expiryDate,
           description: item.description,
           locationId: item.locationId,
+          itemUnits: {
+            update: item.itemUnits.map((u) => ({
+              where: {
+                id: u.id || -1,
+              },
+              data: {
+                unitType: u.unitType,
+                rate: u.rate,
+                quantity: u.quantity,
+                purchasePrice: u.purchasePrice,
+              },
+            })),
+          },
         },
         create: {
           name: item.name,

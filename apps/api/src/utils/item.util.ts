@@ -1,18 +1,19 @@
 import { Worksheet } from "exceljs";
 import { NotFoundError } from "../errors/NotFoundError";
 import { getLocationByName } from "../models/location.model";
-import { Unit } from "../types/item.type";
+import { ImportUnit } from "../types/item.type";
 import { BadRequestError } from "../errors/BadRequestError";
 
 const transformImportedData = async (items: any) => {
   return Promise.all(
     items.map(async (item: any) => {
-      const units: Array<Unit> = [];
+      const units: Array<ImportUnit> = [];
 
       for (let i = 1; i <= 3; i++) {
         const unitType = item[`unitType${i}`];
         if (unitType) {
           units.push({
+            id: item[`unitId${i}`],
             unitType,
             rate: item[`rate${i}`],
             quantity: item[`quantity${i}`],
@@ -59,6 +60,9 @@ const validateFile = (worksheet: Worksheet) => {
     "Purchase Price1",
     "Purchase Price2",
     "Purchase Price3",
+    "_UnitID1",
+    "_UnitID2",
+    "_UnitID3",
   ];
 
   const headerRow = worksheet.getRow(1);
