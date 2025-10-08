@@ -72,6 +72,10 @@ async function main() {
 
     // Report
     { action: "read", subject: "Report" },
+
+    //Excel
+    { action: "export", subject: "Excel" },
+    { action: "import", subject: "Excel" },
   ];
 
   for (const permission of permissions) {

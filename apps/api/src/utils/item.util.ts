@@ -13,7 +13,7 @@ const transformImportedData = async (items: any) => {
         const unitType = item[`unitType${i}`];
         if (unitType) {
           units.push({
-            id: item[`unitId${i}`],
+            id: item[`unitId${i}`] ?? undefined,
             unitType,
             rate: item[`rate${i}`],
             quantity: item[`quantity${i}`],
@@ -29,10 +29,10 @@ const transformImportedData = async (items: any) => {
 
       return {
         name: item.itemName,
-        barcode: item.barcode,
+        barcode: item.barcode ?? undefined,
         category: item.category,
         expiryDate: item.expiredDate,
-        description: item.itemDescription,
+        description: item.itemDescription ?? undefined,
         locationId: location.id,
         itemUnits: units,
       };

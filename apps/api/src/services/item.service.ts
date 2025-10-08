@@ -12,7 +12,7 @@ import * as itemModel from "../models/item.model";
 import { transformImportedData, validateFile } from "../utils/item.util";
 import { BadRequestError } from "../errors/BadRequestError";
 import { PrismaQuery } from "@casl/prisma";
-import { randomUUID } from "crypto";
+import { validateItems } from "../utils/validation";
 
 type ExcelRow = {
   warehouse: string;
@@ -148,7 +148,7 @@ const importItem = async (buffer: Buffer) => {
         importedData.push({
           warehouse: row.getCell(1).value,
           itemName: row.getCell(2).value,
-          barcode: row.getCell(3).value ?? randomUUID(),
+          barcode: row.getCell(3).value,
           itemDescription: row.getCell(4).value,
           expiredDate: row.getCell(5).value,
           category: row.getCell(6).value,
@@ -173,7 +173,9 @@ const importItem = async (buffer: Buffer) => {
 
     const items = await transformImportedData(importedData);
 
-    const result = await itemModel.importItems(items);
+    const validatedItems = validateItems(items);
+
+    const result = await itemModel.importItems(validatedItems);
 
     return result;
   } catch (error: any) {
@@ -181,15 +183,7 @@ const importItem = async (buffer: Buffer) => {
       throw error;
     }
 
-    console.log(error);
-
-    if (error.name === "PrismaClientValidationError") {
-      throw new BadRequestError(
-        "Invalid unit type. Please check that all unit types match the allowed values in the system.",
-      );
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    throw new CustomError("Database operation failed", 500, { cause: error });
   }
 };
 

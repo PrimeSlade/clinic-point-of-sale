@@ -1,6 +1,6 @@
 import prisma from "../config/prisma.client";
 import {
-  ImportUnit,
+  ImportItems,
   Item,
   ItemQueryParams,
   Unit,
@@ -167,13 +167,11 @@ const deleteItem = async (id: number, trx?: Prisma.TransactionClient) => {
   });
 };
 
-const importItems = async (
-  items: Array<Item & { itemUnits: Array<ImportUnit> }>,
-) => {
+const importItems = async (items: ImportItems) => {
   return prisma.$transaction(
     items.map((item) =>
       prisma.item.upsert({
-        where: { barcode: item.barcode },
+        where: { barcode: item.barcode || " " },
         update: {
           name: item.name,
           category: item.category,
