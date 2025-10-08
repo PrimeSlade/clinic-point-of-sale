@@ -26,7 +26,7 @@ const subUnitSchema = z.object({
     .number({
       message: "Rate must be a number",
     })
-    .min(0, { message: "Quantity rate cannot be negative" }),
+    .min(1, { message: "Quantity rate cannot be negative or zero" }),
 
   quantity: z
     .number({
@@ -60,7 +60,12 @@ export const validateItems = (data: ImportItems) => {
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       const errorMessages = error.issues
-        .map((issue) => issue.message)
+        .map((issue) => {
+          const itemIndex = Number(issue.path[0]) + 1;
+          const fieldName = String(issue.path[issue.path.length - 1]);
+
+          return `Item ${itemIndex}-${fieldName}: ${issue.message}`;
+        })
         .join(", ");
       throw new BadRequestError(errorMessages);
     }
