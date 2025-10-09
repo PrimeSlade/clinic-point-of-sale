@@ -14,7 +14,7 @@ const authorize = (
     const userPermissions = req.user.role.permissions;
 
     //Create
-    if (action === "create") {
+    if (action === "create" || action === "import") {
       if (ability?.can(action as Actions, subject as Subjects)) {
         return next();
       }
@@ -23,7 +23,7 @@ const authorize = (
     const where = accessibleBy(ability, action as Actions);
 
     if (
-      action === "read" &&
+      (action === "read" || action === "export") &&
       ability?.can(action as Actions, subject as Subjects)
     ) {
       if (ability.can("manage", "all")) {

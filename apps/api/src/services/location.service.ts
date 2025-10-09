@@ -55,7 +55,7 @@ const updateLocation = async (data: UpdateLoation, id: number) => {
 
 const deleteLocation = async (id: number) => {
   try {
-    const location = await locationModel.findLocationById(id);
+    const location = await locationModel.getLocationById(id);
 
     if (!location || !location.phoneNumberId) {
       throw new NotFoundError("Location or phone number not found");

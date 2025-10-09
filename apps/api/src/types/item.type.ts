@@ -1,5 +1,7 @@
 import { PrismaQuery } from "@casl/prisma";
 import { UserInfo } from "./auth.type";
+import z from "zod";
+import { itemArraySchema } from "../utils/validation";
 
 export enum UnitType {
   BTL = "btl",
@@ -17,8 +19,9 @@ export enum UnitType {
 type Item = {
   name: string;
   category: string;
-  expiryDate: string;
+  expiryDate: Date;
   locationId: number;
+  barcode?: string;
   description?: string; //option
 };
 
@@ -33,6 +36,11 @@ type Unit = {
 
 type UpdateUnit = { id: number } & Partial<Unit>;
 
+type ImportUnit = Unit & { id?: number };
+
+//for importing from excel
+type ImportItems = z.infer<typeof itemArraySchema>;
+
 type ItemQueryParams = {
   offset: number;
   limit: number;
@@ -42,4 +50,12 @@ type ItemQueryParams = {
   abacFilter: PrismaQuery;
 };
 
-export { Item, Unit, UpdateItem, UpdateUnit, ItemQueryParams };
+export {
+  Item,
+  Unit,
+  UpdateItem,
+  ImportUnit,
+  UpdateUnit,
+  ItemQueryParams,
+  ImportItems,
+};

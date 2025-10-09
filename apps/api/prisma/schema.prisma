@@ -126,6 +126,7 @@ model Location {
 
 model Item{
   id Int @id @default(autoincrement())
+  barcode String @unique @default(uuid())
   name String
   category String
   expiryDate DateTime @map("expiry_date") @db.Date
@@ -222,7 +223,7 @@ model Treatment {
   //Relations
   doctor Doctor @relation(fields: [doctorId],references: [id])
   patient Patient @relation(fields: [patientId],references: [id])
-  invoice Invoice? 
+  invoice Invoice[]
 
   @@map("treatments")
 }
@@ -232,7 +233,7 @@ model Invoice {
   createdAt DateTime @default(now()) @map("created_at")
 
   locationId Int @map("location_id")
-  treatmentId Int? @unique @map("treatment_id") 
+  treatmentId Int? @map("treatment_id") 
 
   totalItemDiscount Decimal @map("total_item_discount") @db.Decimal(10,2)
   subTotal Decimal @map("sub_total") @db.Decimal(10,2)
@@ -254,12 +255,14 @@ model Invoice {
 
 model InvoiceItem {
   id Int @id @default(autoincrement())
+  
+  barcode String
+
   itemName String @map("item_name")
   unitType UnitType @map("unit_type") 
   quantity Int
   retailPrice Decimal @map("retail_price") @db.Decimal(10,2)
   discountPrice Decimal @map("discount_price") @db.Decimal(10,2)
-  itemId Int @map("item_id")
 
   invoiceId Int @map("invoice_id") 
 

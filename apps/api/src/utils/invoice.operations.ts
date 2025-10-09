@@ -2,11 +2,11 @@ import { BadRequestError } from "../errors/BadRequestError";
 import { InvoiceItem, InvoiceServiceInput } from "../types/invoice.type";
 import { Prisma } from "@prisma/client";
 import { updateItemUnit } from "../models/itemUnit.model";
-import { getItemById } from "../models/item.model";
+import { getItemByBarcode } from "../models/item.model";
 import { UnitType } from "../types/item.type";
 
 type AggregatedItem = {
-  id: number;
+  barcodeId: string;
   unitType: UnitType;
   quantity: number;
 };
@@ -60,11 +60,11 @@ const recalculateRelatedUnits = (
 const aggregateItem = (data: InvoiceItem[]) => {
   return data.reduce(
     (acc, invoiceItem) => {
-      const key = `${invoiceItem.itemId}-${invoiceItem.unitType}`;
+      const key = `${invoiceItem.barcode}-${invoiceItem.unitType}`;
 
       if (!acc[key]) {
         acc[key] = {
-          id: invoiceItem.itemId,
+          barcodeId: invoiceItem.barcode,
           unitType: invoiceItem.unitType,
           quantity: 0,
         };
@@ -77,8 +77,12 @@ const aggregateItem = (data: InvoiceItem[]) => {
   );
 };
 
-const getUniqueItemId = (aggregatedItems: Record<string, AggregatedItem>) => {
-  return [...new Set(Object.values(aggregatedItems).map((item) => item.id))];
+const getUniqueBarcodeIds = (
+  aggregatedItems: Record<string, AggregatedItem>,
+) => {
+  return [
+    ...new Set(Object.values(aggregatedItems).map((item) => item.barcodeId)),
+  ];
 };
 
 const adjustUnitAmount = async (
@@ -89,16 +93,17 @@ const adjustUnitAmount = async (
   //combine quantity with same id and unit to reduce read and update
   const aggregatedItem = aggregateItem(invoiceItems);
 
-  //get uniqueId => 1,1,2 => 1,2
-  const uniqueItemId = getUniqueItemId(aggregatedItem);
+  //get uniqueBarcode => abc,abe,abc => abc,abe
+  const uniqueBarcodeIds = getUniqueBarcodeIds(aggregatedItem);
 
-  //id => 1,2
-  for (let itemId of uniqueItemId) {
-    const item = await getItemById(itemId);
+  //id => abc,abe
+  for (let barcode of uniqueBarcodeIds) {
+    const item = await getItemByBarcode(barcode);
 
-    //Error handling
+    // If item not found, skip to the next one.
     if (!item) {
-      throw new BadRequestError(`Item with ID ${itemId} not found`);
+      // throw new BadRequestError(`Item with Barcode ID ${barcode} not found`);
+      continue;
     }
 
     //sort item
@@ -107,11 +112,11 @@ const adjustUnitAmount = async (
     );
 
     const itemAdjustments = Object.values(aggregatedItem).filter(
-      (item) => item.id === itemId,
+      (item) => item.barcodeId === barcode,
     );
 
     //adj is just filtered values from data
-    //id => 1,1,2
+    //id => abc,abc,abe
     for (const adjustment of itemAdjustments) {
       const matchIndex = labeledItems.findIndex(
         (item) => item.unitType === adjustment.unitType,
@@ -120,7 +125,7 @@ const adjustUnitAmount = async (
       //Error handling
       if (matchIndex === -1) {
         throw new BadRequestError(
-          `Unit type ${adjustment.unitType} not found for item ${itemId}`,
+          `Unit type ${adjustment.unitType} not found for item ${barcode}`,
         );
       }
 

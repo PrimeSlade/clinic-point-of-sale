@@ -137,4 +137,56 @@ const deleteItem = async (
   }
 };
 
-export { addItem, getItems, getItemById, updateItem, deleteItem };
+const importItem = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.file) {
+      throw new BadRequestError("No file uploaded");
+    }
+
+    const result = await itemService.importItem(req.file.buffer);
+
+    res.status(201).json({
+      success: true,
+      message: "Items imported successfully!",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const exportItem = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const abacFilter = req.abacFilter;
+    const workbook = await itemService.exportItem(abacFilter);
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=items.xlsx");
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export {
+  addItem,
+  getItems,
+  getItemById,
+  updateItem,
+  deleteItem,
+  importItem,
+  exportItem,
+};
