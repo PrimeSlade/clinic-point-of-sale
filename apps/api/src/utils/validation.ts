@@ -64,7 +64,7 @@ export const validateItems = (data: ImportItems) => {
           const itemIndex = Number(issue.path[0]) + 1;
           const fieldName = String(issue.path[issue.path.length - 1]);
 
-          return `Item ${itemIndex}-${fieldName}: ${issue.message}`;
+          return `Item${itemIndex} ${fieldName}: ${issue.message}`;
         })
         .join(", ");
       throw new BadRequestError(errorMessages);
