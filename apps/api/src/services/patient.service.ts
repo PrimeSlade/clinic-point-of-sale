@@ -5,6 +5,7 @@ import * as phoneNumberModel from "../models/phoneNumber.model";
 import prisma from "../config/prisma.client";
 import { ensurePhoneNumberExists } from "../utils/phoneNumber.util";
 import { PrismaQuery } from "@casl/prisma";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const addPatient = async (data: Patient) => {
   try {
@@ -12,11 +13,7 @@ const addPatient = async (data: Patient) => {
 
     return patient;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -26,10 +23,7 @@ const getPatients = async (abacFilter: PrismaQuery) => {
 
     return patients;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -39,10 +33,7 @@ const getPatientById = async (id: number, abacFilter: PrismaQuery) => {
 
     return patient;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Patient not found" });
   }
 };
 
@@ -64,10 +55,7 @@ const updatePatient = async (data: UpdatePatient, id: number) => {
 
     return patient;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Patient not found" });
   }
 };
 
@@ -84,10 +72,7 @@ const deletePatient = async (id: number) => {
 
     return patient;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Patient not found" });
   }
 };
 

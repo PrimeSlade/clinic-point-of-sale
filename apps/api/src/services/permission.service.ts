@@ -1,5 +1,6 @@
 import { CustomError, NotFoundError } from "../errors";
 import * as permissionModel from "../models/permission.model";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const getPermissions = async () => {
   try {
@@ -7,11 +8,7 @@ const getPermissions = async () => {
 
     return permissions;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Permissions not found");
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error);
   }
 };
 

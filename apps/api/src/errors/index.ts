@@ -28,3 +28,5 @@ export class BadRequestError extends Error {
     this.status = 400;
   }
 }
+
+export { handlePrismaError } from "./prismaHandler";

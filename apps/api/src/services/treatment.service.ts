@@ -6,6 +6,7 @@ import {
 } from "../types/treatment.type";
 import * as treatmentModel from "../models/treatment.model";
 import { NotFoundError, CustomError } from "../errors";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const addTreatment = async (data: Treatment) => {
   try {
@@ -13,11 +14,7 @@ const addTreatment = async (data: Treatment) => {
 
     return addedTreatment;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -41,11 +38,7 @@ const getTreatments = async ({
 
     return { treatments, total };
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -72,11 +65,7 @@ const getTreatmentsByCursor = async ({
 
     return { treatments, hasNextPage, nextCursor };
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -86,11 +75,7 @@ const getTreatmentById = async (id: number) => {
 
     return treatment;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Treatment not found" });
   }
 };
 
@@ -100,11 +85,7 @@ const updateTreatment = async (data: UpdateTreatment, id: number) => {
 
     return updatedTreatment;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Treatment not found" });
   }
 };
 
@@ -114,11 +95,7 @@ const deleteTreatment = async (id: number) => {
 
     return deletedTreatment;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Treatment not found" });
   }
 };
 
