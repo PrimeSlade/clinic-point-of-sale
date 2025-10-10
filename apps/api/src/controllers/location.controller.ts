@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as locationService from "../services/location.service";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 
 const addLocaiton = async (
   req: Request,

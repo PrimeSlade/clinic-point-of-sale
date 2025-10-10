@@ -1,9 +1,8 @@
-import { CustomError } from "../errors/CustomError";
+import { CustomError, NotFoundError } from "../errors";
 import { UserForm } from "../types/auth.type";
 import { generatePassword } from "../utils/auth";
 import * as userModel from "../models/user.model";
 import { PrismaQuery } from "@casl/prisma";
-import { NotFoundError } from "../errors/NotFoundError";
 
 const addUser = async (data: UserForm) => {
   try {

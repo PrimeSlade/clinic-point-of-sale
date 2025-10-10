@@ -1,5 +1,4 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { CustomError, NotFoundError } from "../errors";
 import { AssignRoleFrom, RoleForm } from "../types/role.type";
 import * as roleModel from "../models/role.model";
 

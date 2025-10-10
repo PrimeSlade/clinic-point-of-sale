@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { CustomError } from "../errors/CustomError";
+import { CustomError } from "../errors";
 import { Actions, AppAbility, Subjects } from "./abilities";
 import { accessibleBy } from "@casl/prisma";
 import fetchLocation from "../utils/fetchLocation";

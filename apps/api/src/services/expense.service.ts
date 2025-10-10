@@ -1,8 +1,7 @@
 import { Expense, ExpenseQueryParams, UpdateExpense } from "../types/expense.type";
 import { ReportQueryParams } from "../types/report.type";
 import * as expenseModel from "../models/expense.model";
-import { NotFoundError } from "../errors/NotFoundError";
-import { CustomError } from "../errors/CustomError";
+import { NotFoundError, CustomError } from "../errors";
 import { PrismaQuery } from "@casl/prisma";
 
 const addExpense = async (data: Expense) => {

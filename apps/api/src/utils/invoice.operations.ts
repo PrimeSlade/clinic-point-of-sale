@@ -1,4 +1,4 @@
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 import { InvoiceItem, InvoiceServiceInput } from "../types/invoice.type";
 import { Prisma } from "@prisma/client";
 import { updateItemUnit } from "../models/itemUnit.model";

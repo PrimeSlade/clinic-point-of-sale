@@ -1,8 +1,7 @@
 import { LoginCredentials, UserForm } from "../types/auth.type";
 import * as authModel from "../models/auth.model";
-import { NotFoundError } from "../errors/NotFoundError";
+import { NotFoundError, CustomError } from "../errors";
 import { generatePassword, generateToken, verfiyPassword } from "../utils/auth";
-import { CustomError } from "../errors/CustomError";
 
 const login = async (data: LoginCredentials) => {
   try {

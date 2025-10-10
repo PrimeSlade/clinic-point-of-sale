@@ -5,8 +5,7 @@ import {
   UpdateTreatment,
 } from "../types/treatment.type";
 import * as treatmentModel from "../models/treatment.model";
-import { NotFoundError } from "../errors/NotFoundError";
-import { CustomError } from "../errors/CustomError";
+import { NotFoundError, CustomError } from "../errors";
 
 const addTreatment = async (data: Treatment) => {
   try {

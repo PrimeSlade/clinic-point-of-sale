@@ -1,6 +1,6 @@
 import { PrismaQuery } from "@casl/prisma";
 import prisma from "../config/prisma.client";
-import { NotFoundError } from "../errors/NotFoundError";
+import { NotFoundError } from "../errors";
 import { Request } from "express";
 
 const fetchLocation = async (

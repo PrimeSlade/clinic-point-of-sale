@@ -1,7 +1,6 @@
 import { Category } from "../types/category.type";
 import * as categoryModel from "../models/category.model";
-import { NotFoundError } from "../errors/NotFoundError";
-import { CustomError } from "../errors/CustomError";
+import { NotFoundError, CustomError } from "../errors";
 import { PrismaQuery } from "@casl/prisma";
 
 const addCategory = async (data: Category) => {

@@ -1,5 +1,4 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { CustomError, NotFoundError } from "../errors";
 import { Location, UpdateLoation } from "../types/location.type";
 import * as locationModel from "../models/location.model";
 import { PrismaQuery } from "@casl/prisma";

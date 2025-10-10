@@ -1,5 +1,4 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { CustomError, NotFoundError } from "../errors";
 import { Patient, UpdatePatient } from "../types/patient.type";
 import * as patientModel from "../models/patient.model";
 import * as phoneNumberModel from "../models/phoneNumber.model";

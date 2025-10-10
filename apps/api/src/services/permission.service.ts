@@ -1,5 +1,4 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { CustomError, NotFoundError } from "../errors";
 import * as permissionModel from "../models/permission.model";
 
 const getPermissions = async () => {

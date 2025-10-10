@@ -1,6 +1,4 @@
-import { BadRequestError } from "../errors/BadRequestError";
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { BadRequestError, CustomError, NotFoundError } from "../errors";
 import * as invoiceModel from "../models/invoice.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";

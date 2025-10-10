@@ -1,7 +1,6 @@
 import { Doctor, UpdateDoctor } from "../types/doctor.type";
 import * as doctorModel from "../models/doctor.model";
-import { NotFoundError } from "../errors/NotFoundError";
-import { CustomError } from "../errors/CustomError";
+import { NotFoundError, CustomError } from "../errors";
 import prisma from "../config/prisma.client";
 import * as phoneNumberModel from "../models/phoneNumber.model";
 import { ensurePhoneNumberExists } from "../utils/phoneNumber.util";
