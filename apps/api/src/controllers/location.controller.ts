@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as locationService from "../services/location.service";
 import { BadRequestError } from "../errors";
+import { sendResponse } from "../utils/response";
 
 const addLocaiton = async (
   req: Request,
@@ -16,11 +17,7 @@ const addLocaiton = async (
   try {
     const location = await locationService.addLocation(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Location created successfully!",
-      data: location,
-    });
+    sendResponse(res, 201, "Location created successfully", location);
   } catch (error) {
     next(error);
   }
@@ -36,11 +33,7 @@ const getLocations = async (
   try {
     const locations = await locationService.getAllLocations(abacFilter);
 
-    res.status(200).json({
-      success: true,
-      message: "Locations fetched successfully!",
-      data: locations,
-    });
+    sendResponse(res, 200, "Locations fetched successfully", locations);
   } catch (error) {
     next(error);
   }
@@ -65,11 +58,7 @@ const updateLocation = async (
       Number(id),
     );
 
-    res.status(200).json({
-      success: true,
-      message: "Location updated successfully!",
-      data: updatedLocation,
-    });
+    sendResponse(res, 200, "Location updated successfully", updatedLocation);
   } catch (error) {
     next(error);
   }
@@ -85,11 +74,7 @@ const deleteLocation = async (
   try {
     const deletedLocation = await locationService.deleteLocation(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Location deleted successfully!",
-      data: deletedLocation,
-    });
+    sendResponse(res, 200, "Location deleted successfully", deletedLocation);
   } catch (error) {
     next(error);
   }

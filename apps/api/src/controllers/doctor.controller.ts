@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as doctorService from "../services/doctor.service";
 import { BadRequestError } from "../errors";
+import { sendResponse } from "../utils/response";
 
 const addDoctor = async (
   req: Request,
@@ -16,11 +17,7 @@ const addDoctor = async (
   try {
     const addedDoctor = await doctorService.addDoctor(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Doctor added successfully!",
-      data: addedDoctor,
-    });
+    sendResponse(res, 201, "Doctor added successfully", addedDoctor);
   } catch (error: any) {
     next(error);
   }
@@ -36,11 +33,7 @@ const getDoctors = async (
   try {
     const doctors = await doctorService.getDoctors(abacFilter);
 
-    res.status(200).json({
-      success: true,
-      message: "Doctors fetched successfully!",
-      data: doctors,
-    });
+    sendResponse(res, 200, "Doctors fetched successfully", doctors);
   } catch (error: any) {
     next(error);
   }
@@ -57,11 +50,7 @@ const updateDoctor = async (
   try {
     const updatedDoctor = await doctorService.updateDoctor(data, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Doctor updated successfully!",
-      data: updatedDoctor,
-    });
+    sendResponse(res, 200, "Doctor updated successfully", updatedDoctor);
   } catch (error: any) {
     next(error);
   }
@@ -77,11 +66,7 @@ const deleteDoctor = async (
   try {
     const deletedDoctor = await doctorService.deleteDoctor(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Doctor deleted successfully!",
-      data: deletedDoctor,
-    });
+    sendResponse(res, 200, "Doctor deleted successfully", deletedDoctor);
   } catch (error: any) {
     next(error);
   }

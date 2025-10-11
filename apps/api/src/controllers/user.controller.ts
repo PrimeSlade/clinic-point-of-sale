@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as userService from "../services/user.service";
 import { BadRequestError } from "../errors";
+import { sendResponse } from "../utils/response";
 
 const addUser = async (
   req: Request,
@@ -16,11 +17,7 @@ const addUser = async (
   try {
     const user = await userService.addUser(data);
 
-    res.status(201).json({
-      success: true,
-      message: "User created successfully!",
-      data: user,
-    });
+    sendResponse(res, 201, "User created successfully", user);
   } catch (error: any) {
     next(error);
   }
@@ -36,11 +33,7 @@ const getMe = async (
   try {
     const user = await userService.getUserById(userId);
 
-    res.status(200).json({
-      success: true,
-      message: "User fetched successfully!",
-      data: user,
-    });
+    sendResponse(res, 200, "User fetched successfully", user);
   } catch (error: any) {
     next(error);
   }
@@ -56,11 +49,7 @@ const getUsers = async (
   try {
     const users = await userService.getUsers(abacFilter);
 
-    res.status(200).json({
-      success: true,
-      message: "Users fetched successfully!",
-      data: users,
-    });
+    sendResponse(res, 200, "Users fetched successfully", users);
   } catch (error: any) {
     next(error);
   }
@@ -81,11 +70,7 @@ const updateUser = async (
   try {
     const updatedUser = await userService.updateUser(userId, data);
 
-    res.status(200).json({
-      success: true,
-      message: "User updated successfully!",
-      data: updatedUser,
-    });
+    sendResponse(res, 200, "User updated successfully", updatedUser);
   } catch (error: any) {
     next(error);
   }
@@ -105,11 +90,7 @@ const deleteUser = async (
   try {
     const deletedUser = await userService.deleteUser(userId);
 
-    res.status(200).json({
-      success: true,
-      message: "User deleted successfully!",
-      data: deletedUser,
-    });
+    sendResponse(res, 200, "User deleted successfully", deletedUser);
   } catch (error: any) {
     next(error);
   }

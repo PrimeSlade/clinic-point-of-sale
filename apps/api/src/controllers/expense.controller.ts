@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { BadRequestError } from "../errors";
 import * as expenseService from "../services/expense.service";
+import { sendResponse } from "../utils/response";
 
 const addExpense = async (
   req: Request,
@@ -16,11 +17,7 @@ const addExpense = async (
   try {
     const addedExpense = await expenseService.addExpense(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Expense created successfully!",
-      data: addedExpense,
-    });
+    sendResponse(res, 201, "Expense created successfully", addedExpense);
   } catch (error: any) {
     next(error);
   }
@@ -57,16 +54,11 @@ const getExpenses = async (
     const totalPages = Math.ceil(total / limit);
     const hasNextPage = page < totalPages;
 
-    res.status(200).json({
-      success: true,
-      message: "Expenses fetched successfully!",
-      data: expenses,
-      meta: {
-        page,
-        totalPages,
-        totalItems: total,
-        hasNextPage,
-      },
+    sendResponse(res, 200, "Expenses fetched successfully", expenses, {
+      page,
+      totalPages: totalPages,
+      totalItems: total,
+      hasNextPage,
     });
   } catch (error: any) {
     next(error);
@@ -88,11 +80,7 @@ const updateExpense = async (
   try {
     const updatedExpense = await expenseService.updateExpense(data, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Expense updated successfully!",
-      data: updatedExpense,
-    });
+    sendResponse(res, 200, "Expense updated successfully", updatedExpense);
   } catch (error: any) {
     next(error);
   }
@@ -112,11 +100,7 @@ const deleteExpense = async (
   try {
     const deletedExpense = await expenseService.deleteExpense(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Expense deleted successfully!",
-      data: deletedExpense,
-    });
+    sendResponse(res, 200, "Expense deleted successfully", deletedExpense);
   } catch (error: any) {
     next(error);
   }
@@ -145,14 +129,16 @@ const getReportExpenses = async (
       endDate,
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Report expenses fetched successfully!",
-      data: expenses,
-    });
+    sendResponse(res, 200, "Report expenses fetched successfully", expenses);
   } catch (error: any) {
     next(error);
   }
 };
 
-export { addExpense, getExpenses, updateExpense, deleteExpense, getReportExpenses };
+export {
+  addExpense,
+  getExpenses,
+  updateExpense,
+  deleteExpense,
+  getReportExpenses,
+};

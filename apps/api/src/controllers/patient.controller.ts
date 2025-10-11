@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../errors";
 import * as patientService from "../services/patient.service";
+import { sendResponse } from "../utils/response";
 
 const addPatient = async (
   req: Request,
@@ -16,11 +17,7 @@ const addPatient = async (
   try {
     const addedPatient = await patientService.addPatient(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Patient created successfully!",
-      data: addedPatient,
-    });
+    sendResponse(res, 201, "Patient created successfully", addedPatient);
   } catch (error: any) {
     next(error);
   }
@@ -36,11 +33,7 @@ const getPatients = async (
   try {
     const patients = await patientService.getPatients(abacFilter);
 
-    res.status(200).json({
-      success: true,
-      message: "Patients fetched successfully!",
-      data: patients,
-    });
+    sendResponse(res, 200, "Patients fetched successfully", patients);
   } catch (error: any) {
     next(error);
   }
@@ -61,11 +54,7 @@ const getPatientById = async (
   try {
     const patient = await patientService.getPatientById(id, abacFilter);
 
-    res.status(200).json({
-      success: true,
-      message: "Patient fetched successfully!",
-      data: patient,
-    });
+    sendResponse(res, 200, "Patient fetched successfully", patient);
   } catch (error: any) {
     next(error);
   }
@@ -86,11 +75,7 @@ const updatePatient = async (
   try {
     const updatePatient = await patientService.updatePatient(data, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Patient updated successfully!",
-      data: updatePatient,
-    });
+    sendResponse(res, 200, "Patient updated successfully", updatePatient);
   } catch (error: any) {
     next(error);
   }
@@ -106,11 +91,7 @@ const deletePatient = async (
   try {
     const deletedPatient = await patientService.deletePatient(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Patient deleted successfully!",
-      data: deletedPatient,
-    });
+    sendResponse(res, 200, "Patient deleted successfully", deletedPatient);
   } catch (error: any) {
     next(error);
   }
