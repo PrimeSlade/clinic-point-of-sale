@@ -34,7 +34,7 @@ const updateDoctor = async (data: UpdateDoctor, id: string) => {
         await ensurePhoneNumberExists(data.phoneNumber, trx);
       }
 
-      const updateDoctor = doctorModel.updateDoctor(data, id, trx);
+      const updateDoctor = await doctorModel.updateDoctor(data, id, trx);
 
       await phoneNumberModel.deleteUnrefNumbers(trx);
 
@@ -49,13 +49,7 @@ const updateDoctor = async (data: UpdateDoctor, id: string) => {
 
 const deleteDoctor = async (id: string) => {
   try {
-    const doctor = await prisma.$transaction(async (trx) => {
-      const deletedDoctor = await doctorModel.deleteDoctor(id, trx);
-
-      await phoneNumberModel.deleteUnrefNumbers(trx);
-
-      return deletedDoctor;
-    });
+    const doctor = await doctorModel.softDeleteDcotor(id);
     return doctor;
   } catch (error: any) {
     handlePrismaError(error, { P2025: "Doctor not found" });

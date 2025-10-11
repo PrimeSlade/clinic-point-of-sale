@@ -1,7 +1,7 @@
-import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.client";
 import { Doctor, UpdateDoctor } from "../types/doctor.type";
 import { PrismaQuery } from "@casl/prisma";
+import { Prisma } from "../generated/prisma";
 
 const addDoctor = async (data: Doctor) => {
   return prisma.doctor.create({
@@ -35,12 +35,16 @@ const addDoctor = async (data: Doctor) => {
 };
 
 const getDoctors = async (abacFilter: PrismaQuery) => {
+  const whereClause: Prisma.DoctorWhereInput = {
+    AND: [...[abacFilter as Prisma.DoctorWhereInput], { deletedAt: null }],
+  };
+
   return prisma.doctor.findMany({
     include: {
       location: true,
       phoneNumber: true,
     },
-    where: abacFilter,
+    where: whereClause,
     orderBy: { id: "desc" },
   });
 };
@@ -53,6 +57,7 @@ const updateDoctor = async (
   return trx.doctor.update({
     where: {
       id,
+      deletedAt: null,
     },
     data: {
       name: data.name,
@@ -78,16 +83,26 @@ const updateDoctor = async (
   });
 };
 
-const deleteDoctor = async (id: string, trx: Prisma.TransactionClient) => {
-  return trx.doctor.delete({
-    where: {
-      id,
-    },
-    include: {
-      location: true,
-      phoneNumber: true,
+//Not needed
+// const deleteDoctor = async (id: string, trx: Prisma.TransactionClient) => {
+//   return trx.doctor.delete({
+//     where: {
+//       id,
+//     },
+//     include: {
+//       location: true,
+//       phoneNumber: true,
+//     },
+//   });
+// };
+
+const softDeleteDcotor = async (id: string) => {
+  return prisma.doctor.update({
+    where: { id, deletedAt: null },
+    data: {
+      deletedAt: new Date(),
     },
   });
 };
 
-export { addDoctor, getDoctors, updateDoctor, deleteDoctor };
+export { addDoctor, getDoctors, updateDoctor, softDeleteDcotor };
