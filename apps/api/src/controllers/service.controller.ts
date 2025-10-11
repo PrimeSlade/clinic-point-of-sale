@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as serviceService from "../services/service.service";
 import { BadRequestError } from "../errors";
+import { sendResponse } from "../utils/response";
 
 const addService = async (
   req: Request,
@@ -16,11 +17,7 @@ const addService = async (
   try {
     const addedService = await serviceService.addService(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Service created successfully!",
-      data: addedService,
-    });
+    sendResponse(res, 201, "Service created successfully", addedService);
   } catch (error: any) {
     next(error);
   }
@@ -34,11 +31,7 @@ const getServices = async (
   try {
     const services = await serviceService.getServices();
 
-    res.status(200).json({
-      success: true,
-      message: "Services fetched successfully!",
-      data: services,
-    });
+    sendResponse(res, 200, "Services fetched successfully", services);
   } catch (error: any) {
     next(error);
   }
@@ -55,11 +48,7 @@ const updateService = async (
   try {
     const updatedService = await serviceService.updateService(data, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Service updated successfully!",
-      data: updatedService,
-    });
+    sendResponse(res, 200, "Service updated successfully", updatedService);
   } catch (error: any) {
     next(error);
   }
@@ -75,11 +64,7 @@ const deleteService = async (
   try {
     const deletedService = await serviceService.deleteService(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Service deleted successfully!",
-      data: deletedService,
-    });
+    sendResponse(res, 200, "Service deleted successfully", deletedService);
   } catch (error: any) {
     next(error);
   }

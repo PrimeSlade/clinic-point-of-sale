@@ -31,7 +31,7 @@ const transformImportedData = async (items: any) => {
         barcode: item.barcode ?? undefined,
         category: item.category,
         expiryDate: item.expiredDate,
-        description: item.itemDescription ?? undefined,
+        description: item.itemDescription ?? "",
         locationId: location.id,
         itemUnits: units,
       };

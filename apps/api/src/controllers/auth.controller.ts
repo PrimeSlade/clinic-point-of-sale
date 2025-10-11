@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as authService from "../services/auth.service";
-import { NotFoundError } from "../errors";
+import { sendResponse } from "../utils/response";
 
 const cookieOptions = {
   httpOnly: true,
@@ -18,11 +18,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
     res.cookie("posToken", token, cookieOptions);
 
-    res.status(200).json({
-      success: true,
-      message: "Successfully logged in!",
-      data: user,
-    });
+    sendResponse(res, 200, "Successfully logged in", user);
   } catch (error: any) {
     next(error);
   }
@@ -34,10 +30,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await authService.signup(data);
 
-    res.status(201).json({
-      success: true,
-      message: "User successfully created!",
-    });
+    sendResponse(res, 201, "User successfully created", null);
   } catch (error: any) {
     next(error);
   }
@@ -46,10 +39,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
 const logout = async (req: Request, res: Response, next: NextFunction) => {
   res.clearCookie("posToken");
 
-  res.status(200).json({
-    success: true,
-    message: "Successfully logged out!",
-  });
+  sendResponse(res, 200, "Successfully logged out", null);
 };
 
 export { login, signup, logout };

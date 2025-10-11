@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { BadRequestError } from "../errors";
 import * as categoryService from "../services/category.service";
+import { sendResponse } from "../utils/response";
 
 const addCategory = async (
   req: Request,
@@ -16,11 +17,7 @@ const addCategory = async (
   try {
     const addedCategory = await categoryService.addCategory(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Category created successfully!",
-      data: addedCategory,
-    });
+    sendResponse(res, 201, "Category created successfully", addedCategory);
   } catch (error: any) {
     next(error);
   }
@@ -36,11 +33,7 @@ const getCategories = async (
   try {
     const categories = await categoryService.getCategories(abacFilter);
 
-    res.status(200).json({
-      success: true,
-      message: "Categories fetched successfully!",
-      data: categories,
-    });
+    sendResponse(res, 200, "Categories fetched successfully", categories);
   } catch (error: any) {
     next(error);
   }
@@ -61,11 +54,7 @@ const updateCategory = async (
   try {
     const updatedCategory = await categoryService.updateCategory(data, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Categories updated successfully!",
-      data: updatedCategory,
-    });
+    sendResponse(res, 200, "Categories updated successfully", updatedCategory);
   } catch (error: any) {
     next(error);
   }
@@ -87,11 +76,7 @@ const deleteCategory = async (
   try {
     const deletedCategory = await categoryService.deleteCategory(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Category deleted successfully!",
-      data: deletedCategory,
-    });
+    sendResponse(res, 200, "Category deleted successfully", deletedCategory);
   } catch (error: any) {
     next(error);
   }

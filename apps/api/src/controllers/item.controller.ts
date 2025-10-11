@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as itemService from "../services/item.service";
 import { BadRequestError } from "../errors";
+import { sendResponse } from "../utils/response";
 
 const addItem = async (
   req: Request,
@@ -16,11 +17,7 @@ const addItem = async (
   try {
     const addedItem = await itemService.addItem(item, itemUnits);
 
-    res.status(201).json({
-      success: true,
-      message: "Item created successfully!",
-      data: addedItem,
-    });
+    sendResponse(res, 201, "Item created successfully", addedItem);
   } catch (error: any) {
     next(error);
   }
@@ -56,16 +53,11 @@ const getItems = async (
     const totalPages = Math.ceil(total / limit);
     const hasNextPage = page < totalPages;
 
-    res.status(200).json({
-      success: true,
-      message: "Items fetched successfully!",
-      data: items,
-      meta: {
-        page,
-        totalPages,
-        totalItems: total,
-        hasNextPage,
-      },
+    sendResponse(res, 200, "Items fetched successfully", items, {
+      page,
+      totalPages: totalPages,
+      totalItems: total,
+      hasNextPage,
     });
   } catch (error: any) {
     next(error);
@@ -82,11 +74,7 @@ const getItemById = async (
   try {
     const item = await itemService.getItemById(id);
 
-    res.status(200).json({
-      success: true,
-      messge: "Item fetched successfully!",
-      data: item,
-    });
+    sendResponse(res, 200, "Item fetched successfully", item);
   } catch (error: any) {
     next(error);
   }
@@ -107,11 +95,7 @@ const updateItem = async (
   try {
     const updatedItem = await itemService.updateItem(item, itemUnits, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Item updated successfully!",
-      data: updatedItem,
-    });
+    sendResponse(res, 200, "Item updated successfully", updatedItem);
   } catch (error: any) {
     next(error);
   }
@@ -127,11 +111,7 @@ const deleteItem = async (
   try {
     const deletedItem = await itemService.deleteItem(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Item deleted successfully!",
-      data: deletedItem,
-    });
+    sendResponse(res, 200, "Item deleted successfully", deletedItem);
   } catch (error: any) {
     next(error);
   }
@@ -149,11 +129,7 @@ const importItem = async (
 
     const result = await itemService.importItem(req.file.buffer);
 
-    res.status(201).json({
-      success: true,
-      message: "Items imported successfully!",
-      data: result,
-    });
+    sendResponse(res, 201, "Items imported successfully", result);
   } catch (error) {
     next(error);
   }

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as invoiceService from "../services/invoice.service";
 import { BadRequestError } from "../errors";
+import { sendResponse } from "../utils/response";
 
 const createInvoice = async (
   req: Request,
@@ -25,11 +26,7 @@ const createInvoice = async (
       user,
     );
 
-    res.status(201).json({
-      success: true,
-      message: "Invoice created successfully!",
-      data: invoice,
-    });
+    sendResponse(res, 201, "Invoice created successfully", invoice);
   } catch (error: any) {
     next(error);
   }
@@ -68,16 +65,11 @@ const getInvoices = async (
     const totalPages = Math.ceil(total / limit);
     const hasNextPage = page < totalPages;
 
-    res.status(200).json({
-      success: true,
-      message: "Invoices fetched successfully!",
-      data: invoices,
-      meta: {
-        page,
-        totalPages,
-        totalItems: total,
-        hasNextPage,
-      },
+    sendResponse(res, 200, "Invoices fetched successfully", invoices, {
+      page,
+      totalPages: totalPages,
+      totalItems: total,
+      hasNextPage,
     });
   } catch (error: any) {
     next(error);
@@ -107,11 +99,7 @@ const getReportInvoices = async (
       endDate,
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Report invoices fetched successfully!",
-      data: invoices,
-    });
+    sendResponse(res, 200, "Report invoices fetched successfully", invoices);
   } catch (error: any) {
     next(error);
   }
@@ -131,11 +119,7 @@ const getInvoiceById = async (
   try {
     const invoice = await invoiceService.getInvoiceById(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Invoice fetched successfully!",
-      data: invoice,
-    });
+    sendResponse(res, 200, "Invoice fetched successfully", invoice);
   } catch (error: any) {
     next(error);
   }
@@ -155,10 +139,7 @@ const deleteInvoice = async (
   try {
     await invoiceService.deleteInvoice(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Invoice deleted successfully!",
-    });
+    sendResponse(res, 200, "Invoice deleted successfully", null);
   } catch (error: any) {
     next(error);
   }

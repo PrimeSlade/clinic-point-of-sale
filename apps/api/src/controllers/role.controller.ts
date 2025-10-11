@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { BadRequestError } from "../errors";
 import * as roleService from "../services/role.service";
+import { sendResponse } from "../utils/response";
 
 const addRole = async (
   req: Request,
@@ -16,11 +17,7 @@ const addRole = async (
   try {
     const addedRole = await roleService.addRole(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Role created successfully!",
-      data: addedRole,
-    });
+    sendResponse(res, 201, "Role created successfully", addedRole);
   } catch (error: any) {
     next(error);
   }
@@ -34,11 +31,7 @@ const getRoles = async (
   try {
     const roles = await roleService.getRoles();
 
-    res.status(200).json({
-      success: true,
-      message: "Roles fetched successfully!",
-      data: roles,
-    });
+    sendResponse(res, 200, "Roles fetched successfully", roles);
   } catch (error: any) {
     next(error);
   }
@@ -58,11 +51,7 @@ const getRoleById = async (
   try {
     const role = await roleService.getRoleById(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Role fetched successfully!",
-      data: role,
-    });
+    sendResponse(res, 200, "Role fetched successfully", role);
   } catch (error: any) {
     next(error);
   }
@@ -83,11 +72,7 @@ const updateRole = async (
   try {
     const updatedRole = await roleService.updateRole(data, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Roles updated successfully!",
-      data: updatedRole,
-    });
+    sendResponse(res, 200, "Roles updated successfully", updatedRole);
   } catch (error: any) {
     next(error);
   }
@@ -107,11 +92,7 @@ const deleteRole = async (
   try {
     const deletedRole = await roleService.deleteRole(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Role deleted successfully!",
-      data: deletedRole,
-    });
+    sendResponse(res, 200, "Role deleted successfully", deletedRole);
   } catch (error: any) {
     next(error);
   }
@@ -135,11 +116,7 @@ const assignRole = async (
       ...data,
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Role assigned successfully!",
-      data: assignedRole,
-    });
+    sendResponse(res, 200, "Role assigned successfully", assignedRole);
   } catch (error: any) {
     next(error);
   }

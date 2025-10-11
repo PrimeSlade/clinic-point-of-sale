@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../errors";
 import * as treatmentService from "../services/treatment.service";
+import { sendResponse } from "../utils/response";
 
 const addTreatment = async (
   req: Request,
@@ -16,11 +17,7 @@ const addTreatment = async (
   try {
     const addedTreatment = await treatmentService.addTreatment(data);
 
-    res.status(201).json({
-      success: true,
-      message: "Treatment created successfully!",
-      data: addedTreatment,
-    });
+    sendResponse(res, 201, "Treatment created successfully", addedTreatment);
   } catch (error: any) {
     next(error);
   }
@@ -56,16 +53,11 @@ const getTreatments = async (
     const totalPages = Math.ceil(total / limit);
     const hasNextPage = page < totalPages;
 
-    res.status(200).json({
-      success: true,
-      message: "Treatments fetched successfully!",
-      data: treatments,
-      meta: {
-        page,
-        totalPages,
-        totalItems: total,
-        hasNextPage,
-      },
+    sendResponse(res, 200, "Treatments fetched successfully", treatments, {
+      page,
+      totalPages: totalPages,
+      totalItems: total,
+      hasNextPage,
     });
   } catch (error: any) {
     next(error);
@@ -98,14 +90,9 @@ const getTreatmentsByCursor = async (
         abacFilter,
       });
 
-    res.status(200).json({
-      success: true,
-      message: "Treatments fetched successfully!",
-      data: treatments,
-      meta: {
-        hasNextPage,
-        nextCursor,
-      },
+    sendResponse(res, 200, "Treatments fetched successfully", treatments, {
+      hasNextPage,
+      nextCursor,
     });
   } catch (error: any) {
     next(error);
@@ -126,11 +113,7 @@ const getTreatmentById = async (
   try {
     const treatment = await treatmentService.getTreatmentById(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Treatment fetched successfully!",
-      data: treatment,
-    });
+    sendResponse(res, 200, "Treatment fetched successfully", treatment);
   } catch (error: any) {
     next(error);
   }
@@ -151,11 +134,7 @@ const updateTreatment = async (
   try {
     const updatedTreatment = await treatmentService.updateTreatment(data, id);
 
-    res.status(200).json({
-      success: true,
-      message: "Treatment updated successfully!",
-      data: updatedTreatment,
-    });
+    sendResponse(res, 200, "Treatment updated successfully", updatedTreatment);
   } catch (error: any) {
     next(error);
   }
@@ -171,11 +150,7 @@ const deleteTreatment = async (
   try {
     const deletedTreatment = await treatmentService.deleteTreatment(id);
 
-    res.status(200).json({
-      success: true,
-      message: "Treatment deleted successfully!",
-      data: deletedTreatment,
-    });
+    sendResponse(res, 200, "Treatment deleted successfully", deletedTreatment);
   } catch (error: any) {
     next(error);
   }
