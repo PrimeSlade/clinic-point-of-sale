@@ -1,5 +1,5 @@
-import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.client";
+import { Prisma } from "../generated/prisma";
 import { Patient, UpdatePatient } from "../types/patient.type";
 import { PrismaQuery } from "@casl/prisma";
 
@@ -39,6 +39,10 @@ const addPatient = async (data: Patient) => {
 };
 
 const getPatients = async (abacFilter: PrismaQuery) => {
+  const whereClause: Prisma.PatientWhereInput = {
+    AND: [...[abacFilter as Prisma.PatientWhereInput], { deletedAt: null }],
+  };
+
   return prisma.patient.findMany({
     include: {
       phoneNumber: true,
@@ -49,14 +53,22 @@ const getPatients = async (abacFilter: PrismaQuery) => {
         },
       },
     },
-    where: abacFilter,
+    where: whereClause,
     orderBy: { id: "desc" },
   });
 };
 
 const getPatientById = async (id: number, abacFilter: PrismaQuery) => {
-  return prisma.patient.findUnique({
-    where: { id, ...abacFilter.Patient },
+  const whereClause: Prisma.PatientWhereInput = {
+    AND: [
+      ...[abacFilter as Prisma.PatientWhereInput],
+      { deletedAt: null },
+      { id },
+    ],
+  };
+
+  return prisma.patient.findFirst({
+    where: whereClause,
     include: {
       phoneNumber: true,
       location: true,
@@ -78,7 +90,7 @@ const updatePatient = async (
   trx: Prisma.TransactionClient,
 ) => {
   return trx.patient.update({
-    where: { id },
+    where: { id, deletedAt: null },
     data: {
       name: data.name,
       email: data.email,
@@ -108,12 +120,24 @@ const updatePatient = async (
   });
 };
 
-const deletePatient = async (id: number, trx: Prisma.TransactionClient) => {
-  return trx.patient.delete({
-    where: { id },
-    include: {
-      location: true,
-      phoneNumber: true,
+// const deletePatient = async (id: number, trx: Prisma.TransactionClient) => {
+//   return trx.patient.delete({
+//     where: { id },
+//     include: {
+//       location: true,
+//       phoneNumber: true,
+//     },
+//   });
+// };
+
+const softDeletePatient = async (id: number) => {
+  return prisma.patient.update({
+    where: {
+      id,
+      deletedAt: null,
+    },
+    data: {
+      deletedAt: new Date(),
     },
   });
 };
@@ -123,5 +147,5 @@ export {
   getPatients,
   getPatientById,
   updatePatient,
-  deletePatient,
+  softDeletePatient,
 };

@@ -1,4 +1,3 @@
-import { CustomError, NotFoundError } from "../errors";
 import { Patient, UpdatePatient } from "../types/patient.type";
 import * as patientModel from "../models/patient.model";
 import * as phoneNumberModel from "../models/phoneNumber.model";
@@ -61,14 +60,7 @@ const updatePatient = async (data: UpdatePatient, id: number) => {
 
 const deletePatient = async (id: number) => {
   try {
-    const patient = await prisma.$transaction(async (trx) => {
-      const deletedPatient = await patientModel.deletePatient(id, trx);
-
-      //clean up
-      await phoneNumberModel.deleteUnrefNumbers(trx);
-
-      return deletedPatient;
-    });
+    const patient = await patientModel.softDeletePatient(id);
 
     return patient;
   } catch (error: any) {
