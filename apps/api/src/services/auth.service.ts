@@ -1,8 +1,8 @@
 import { LoginCredentials, UserForm } from "../types/auth.type";
 import * as authModel from "../models/auth.model";
-import { NotFoundError } from "../errors/NotFoundError";
+import { NotFoundError, CustomError } from "../errors";
 import { generatePassword, generateToken, verfiyPassword } from "../utils/auth";
-import { CustomError } from "../errors/CustomError";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const login = async (data: LoginCredentials) => {
   try {
@@ -28,8 +28,7 @@ const login = async (data: LoginCredentials) => {
     if (error instanceof CustomError || error instanceof NotFoundError) {
       throw error;
     }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -40,10 +39,7 @@ const signup = async (data: UserForm) => {
 
     return user;
   } catch (error: any) {
-    if (error.code === "P2002") {
-      throw new CustomError("Email already exists", 409);
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2002: "Email already exists" });
   }
 };
 
@@ -64,7 +60,7 @@ const findInfo = async (id: string) => {
       throw error;
     }
 
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 

@@ -1,5 +1,4 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { CustomError, handlePrismaError, NotFoundError } from "../errors";
 import { AssignRoleFrom, RoleForm } from "../types/role.type";
 import * as roleModel from "../models/role.model";
 
@@ -9,7 +8,7 @@ const addRole = async (data: RoleForm) => {
 
     return addedRole;
   } catch (error: any) {
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error);
   }
 };
 
@@ -19,11 +18,7 @@ const getRoles = async () => {
 
     return roles;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Roles not found");
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Roles not found" });
   }
 };
 
@@ -40,8 +35,7 @@ const getRoleById = async (id: number) => {
     if (error instanceof NotFoundError) {
       throw error;
     }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error);
   }
 };
 
@@ -51,11 +45,7 @@ const updateRole = async (data: RoleForm, id: number) => {
 
     return updatedRole;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Role not found" });
   }
 };
 
@@ -65,17 +55,11 @@ const deleteRole = async (id: number) => {
 
     return deletedRole;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    if (error.code === "P2003") {
-      throw new CustomError(
+    handlePrismaError(error, {
+      P2025: "Role not found",
+      P2003:
         "Cannot delete role because there are users linked to it. Please remove or reassign those users first.",
-        409,
-      );
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    });
   }
 };
 
@@ -85,10 +69,7 @@ const assignRole = async (data: AssignRoleFrom) => {
 
     return assignedRole;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error);
   }
 };
 

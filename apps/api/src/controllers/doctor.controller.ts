@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as doctorService from "../services/doctor.service";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 
 const addDoctor = async (
   req: Request,

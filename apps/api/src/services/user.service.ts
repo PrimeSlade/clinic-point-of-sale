@@ -1,9 +1,8 @@
-import { CustomError } from "../errors/CustomError";
+import { CustomError, handlePrismaError, NotFoundError } from "../errors";
 import { UserForm } from "../types/auth.type";
 import { generatePassword } from "../utils/auth";
 import * as userModel from "../models/user.model";
 import { PrismaQuery } from "@casl/prisma";
-import { NotFoundError } from "../errors/NotFoundError";
 
 const addUser = async (data: UserForm) => {
   try {
@@ -12,10 +11,7 @@ const addUser = async (data: UserForm) => {
 
     return user;
   } catch (error: any) {
-    if (error.code === "P2002") {
-      throw new CustomError("Email already exists", 409);
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2002: "Email already exists" });
   }
 };
 
@@ -24,14 +20,17 @@ const getUserById = async (id: string) => {
     const user = await userModel.getUserById(id);
 
     if (!user) {
-      throw new NotFoundError("User not found!");
+      throw new NotFoundError("User not found");
     }
 
     const { password: _, ...userData } = user;
 
     return userData;
   } catch (error: any) {
-    throw new CustomError("Database operation failed", 500);
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    handlePrismaError(error);
   }
 };
 
@@ -41,11 +40,7 @@ const getUsers = async (abacFilter: PrismaQuery) => {
 
     return users;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Users not found");
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Users not found" });
   }
 };
 
@@ -59,11 +54,7 @@ const updateUser = async (id: string, data: UserForm) => {
 
     return user;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Users not found" });
   }
 };
 
@@ -73,11 +64,7 @@ const deleteUser = async (id: string) => {
 
     return user;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "User not found" });
   }
 };
 

@@ -1,6 +1,4 @@
-import { BadRequestError } from "../errors/BadRequestError";
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { BadRequestError, CustomError, NotFoundError } from "../errors";
 import * as invoiceModel from "../models/invoice.model";
 import { UserInfo } from "../types/auth.type";
 import { InvoiceQueryParams, InvoiceServiceInput } from "../types/invoice.type";
@@ -9,6 +7,7 @@ import { calcInvoice } from "../utils/calcInvoice";
 import { adjustUnitAmount } from "../utils/invoice.operations";
 import prisma from "../config/prisma.client";
 import { UnitType } from "../types/item.type";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
   try {
@@ -33,13 +32,10 @@ const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {
 
     return invoice;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Related data not found");
-    }
     if (error instanceof BadRequestError) {
       throw error;
     }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Related data not found" });
   }
 };
 
@@ -80,11 +76,7 @@ const getInvoices = async ({
 
     return { invoices: parsedInvoices, total };
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Invoices not found");
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -111,10 +103,7 @@ const getInvoiceById = async (id: number) => {
 
     return parsedInvoice;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Invoice not found");
-    }
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Invoice not found" });
   }
 };
 
@@ -147,11 +136,7 @@ const getReportInvoices = async ({
 
     return parsedInvoices;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Invoices not found");
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -174,10 +159,7 @@ const deleteInvoice = async (id: number) => {
       await adjustUnitAmount(parsedInvoice.invoiceItems, trx, "restore");
     });
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Invoice not found");
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Invoice not found" });
   }
 };
 

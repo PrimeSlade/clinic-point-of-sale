@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as userService from "../services/user.service";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 
 const addUser = async (
   req: Request,

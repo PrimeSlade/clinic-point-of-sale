@@ -1,7 +1,7 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { CustomError, NotFoundError } from "../errors";
 import { Service, UpdateService } from "../types/service.type";
 import * as serviceModel from "../models/service.model";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const addService = async (data: Service) => {
   try {
@@ -9,11 +9,7 @@ const addService = async (data: Service) => {
 
     return addedService;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error);
   }
 };
 
@@ -28,11 +24,7 @@ const getServices = async () => {
 
     return parsedServices;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Services not found");
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error);
   }
 };
 
@@ -42,11 +34,7 @@ const updateService = async (data: UpdateService, id: number) => {
 
     return updatedService;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Service not found" });
   }
 };
 
@@ -56,11 +44,7 @@ const deleteService = async (id: number) => {
 
     return deletedService;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Service not found" });
   }
 };
 

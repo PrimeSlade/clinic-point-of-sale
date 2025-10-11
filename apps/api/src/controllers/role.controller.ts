@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 import * as roleService from "../services/role.service";
 
 const addRole = async (

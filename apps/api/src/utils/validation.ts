@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 import { ImportItems } from "../types/item.type";
 
 const unitType = [

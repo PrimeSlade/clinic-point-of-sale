@@ -1,5 +1,4 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { CustomError, NotFoundError, BadRequestError } from "../errors";
 import ExcelJS from "exceljs";
 import {
   Item,
@@ -10,9 +9,9 @@ import {
 } from "../types/item.type";
 import * as itemModel from "../models/item.model";
 import { transformImportedData, validateFile } from "../utils/item.util";
-import { BadRequestError } from "../errors/BadRequestError";
 import { PrismaQuery } from "@casl/prisma";
 import { validateItems } from "../utils/validation";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 type ExcelRow = {
   warehouse: string;
@@ -30,10 +29,7 @@ const addItem = async (data: Item, unit: Array<Unit>) => {
 
     return addedItem;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -66,10 +62,7 @@ const getItems = async ({
 
     return { items: parsedItems, total };
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Items not found");
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -88,10 +81,7 @@ const getItemById = async (id: number) => {
 
     return parsedItem;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Items not found");
-    }
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Item not found" });
   }
 };
 
@@ -105,11 +95,7 @@ const updateItem = async (
 
     return updated;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Item not found" });
   }
 };
 
@@ -119,11 +105,7 @@ const deleteItem = async (id: number) => {
 
     return deleted;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, { P2025: "Item not found" });
   }
 };
 
@@ -182,8 +164,7 @@ const importItem = async (buffer: Buffer) => {
     if (error instanceof NotFoundError || error instanceof BadRequestError) {
       throw error;
     }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -255,10 +236,7 @@ const exportItem = async (abacFilter: PrismaQuery) => {
 
     return workbook;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Items not found");
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 

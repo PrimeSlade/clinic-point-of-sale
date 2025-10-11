@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as invoiceService from "../services/invoice.service";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 
 const createInvoice = async (
   req: Request,

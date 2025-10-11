@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as authService from "../services/auth.service";
-import { NotFoundError } from "../errors/NotFoundError";
+import { NotFoundError } from "../errors";
 
 const cookieOptions = {
   httpOnly: true,

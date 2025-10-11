@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError, CustomError } from "../errors";
 import { verfiyToken } from "../utils/auth";
-import { CustomError } from "../errors/CustomError";
 import defineAbilities from "../abilities/abilities";
 import * as authService from "../services/auth.service";
 import { resolvePermissionDependencies } from "../utils/roleMapping";

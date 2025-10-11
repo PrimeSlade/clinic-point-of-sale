@@ -1,9 +1,11 @@
-import { Expense, ExpenseQueryParams, UpdateExpense } from "../types/expense.type";
+import {
+  Expense,
+  ExpenseQueryParams,
+  UpdateExpense,
+} from "../types/expense.type";
 import { ReportQueryParams } from "../types/report.type";
 import * as expenseModel from "../models/expense.model";
-import { NotFoundError } from "../errors/NotFoundError";
-import { CustomError } from "../errors/CustomError";
-import { PrismaQuery } from "@casl/prisma";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const addExpense = async (data: Expense) => {
   try {
@@ -11,10 +13,7 @@ const addExpense = async (data: Expense) => {
 
     return addedExpense;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -47,10 +46,7 @@ const getExpenses = async ({
 
     return { expenses: parsedExpenses, total };
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -60,10 +56,7 @@ const updateExpense = async (data: UpdateExpense, id: number) => {
 
     return updatedExpense;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Expense not found" });
   }
 };
 
@@ -73,11 +66,7 @@ const deleteExpense = async (id: number) => {
 
     return deletedExpense;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Expense not found" });
   }
 };
 
@@ -102,11 +91,14 @@ const getReportExpenses = async ({
 
     return parsedExpenses;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
-export { addExpense, getExpenses, updateExpense, deleteExpense, getReportExpenses };
+export {
+  addExpense,
+  getExpenses,
+  updateExpense,
+  deleteExpense,
+  getReportExpenses,
+};

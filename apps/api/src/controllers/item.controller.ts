@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as itemService from "../services/item.service";
-import { BadRequestError } from "../errors/BadRequestError";
+import { BadRequestError } from "../errors";
 
 const addItem = async (
   req: Request,

@@ -1,11 +1,11 @@
 import { Doctor, UpdateDoctor } from "../types/doctor.type";
 import * as doctorModel from "../models/doctor.model";
-import { NotFoundError } from "../errors/NotFoundError";
-import { CustomError } from "../errors/CustomError";
+import { NotFoundError, CustomError } from "../errors";
 import prisma from "../config/prisma.client";
 import * as phoneNumberModel from "../models/phoneNumber.model";
 import { ensurePhoneNumberExists } from "../utils/phoneNumber.util";
 import { PrismaQuery } from "@casl/prisma";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const addDoctor = async (data: Doctor) => {
   try {
@@ -13,10 +13,7 @@ const addDoctor = async (data: Doctor) => {
 
     return addedDoctor;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -26,10 +23,7 @@ const getDoctors = async (abacFilter: PrismaQuery) => {
 
     return doctors;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -49,10 +43,7 @@ const updateDoctor = async (data: UpdateDoctor, id: string) => {
 
     return doctor;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Doctor not found" });
   }
 };
 
@@ -67,10 +58,7 @@ const deleteDoctor = async (id: string) => {
     });
     return doctor;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Doctor not found" });
   }
 };
 

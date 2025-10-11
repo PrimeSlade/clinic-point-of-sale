@@ -1,8 +1,8 @@
-import { CustomError } from "../errors/CustomError";
-import { NotFoundError } from "../errors/NotFoundError";
+import { NotFoundError } from "../errors";
 import { Location, UpdateLoation } from "../types/location.type";
 import * as locationModel from "../models/location.model";
 import { PrismaQuery } from "@casl/prisma";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const addLocation = async (data: Location) => {
   try {
@@ -10,15 +10,9 @@ const addLocation = async (data: Location) => {
 
     return addedLocation;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    if (error.code === "P2002") {
-      throw new CustomError("This Phone Number already exists.", 409);
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, {
+      P2002: "This Phone Number or location already exists.",
+    });
   }
 };
 
@@ -27,11 +21,7 @@ const getAllLocations = async (abacFilter: PrismaQuery) => {
     const locations = await locationModel.getAllLocations(abacFilter);
     return locations;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError("Locations not found");
-    }
-
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -41,15 +31,10 @@ const updateLocation = async (data: UpdateLoation, id: number) => {
 
     return updated;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-
-    if (error.code === "P2002") {
-      throw new CustomError("This Phone Number already exists.", 409);
-    }
-
-    throw new CustomError("Database operation failed", 500);
+    handlePrismaError(error, {
+      P2025: "Loation not found",
+      P2002: "This Phone Number already exists.",
+    });
   }
 };
 
@@ -65,12 +50,13 @@ const deleteLocation = async (id: number) => {
 
     return location;
   } catch (error: any) {
-    if (error.code === "P2003") {
-      throw new CustomError(
-        "Cannot delete location because there are items linked to it. Please remove or reassign those items first.",
-        409,
-      );
+    if (error instanceof NotFoundError) {
+      throw error;
     }
+    handlePrismaError(error, {
+      P2003:
+        "Cannot delete location because there are items linked to it. Please remove or reassign those items first.",
+    });
   }
 };
 

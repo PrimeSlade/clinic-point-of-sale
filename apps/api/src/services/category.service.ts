@@ -1,8 +1,7 @@
 import { Category } from "../types/category.type";
 import * as categoryModel from "../models/category.model";
-import { NotFoundError } from "../errors/NotFoundError";
-import { CustomError } from "../errors/CustomError";
 import { PrismaQuery } from "@casl/prisma";
+import { handlePrismaError } from "../errors/prismaHandler";
 
 const addCategory = async (data: Category) => {
   try {
@@ -10,10 +9,7 @@ const addCategory = async (data: Category) => {
 
     return addedCategory;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -23,10 +19,7 @@ const getCategories = async (abacFilter: PrismaQuery) => {
 
     return categories;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error);
   }
 };
 
@@ -36,10 +29,7 @@ const updateCategory = async (data: Category, id: number) => {
 
     return updatedCategory;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    handlePrismaError(error, { P2025: "Category not found" });
   }
 };
 
@@ -49,16 +39,10 @@ const deleteCategory = async (id: number) => {
 
     return deletedCategory;
   } catch (error: any) {
-    if (error.code === "P2025") {
-      throw new NotFoundError();
-    }
-    if (error.code === "P2003") {
-      throw new CustomError(
+    handlePrismaError(error, {
+      P2003:
         "Cannot delete category because there are expenses linked to it. Please remove or reassign those expenses first.",
-        409,
-      );
-    }
-    throw new CustomError("Database operation failed", 500, { cause: error });
+    });
   }
 };
 
