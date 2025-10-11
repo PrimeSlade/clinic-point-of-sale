@@ -30,7 +30,7 @@ export const sendResponse = <T>(
 ) => {
   const response: ApiResponse<T> = {
     success: true,
-    message: message,
+    message,
     data,
     ...(meta ? { meta } : {}),
   };
