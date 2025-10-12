@@ -17,6 +17,7 @@ const PERMISSION_DEPENDENCIES: Record<
     { id: 26, action: "read", subject: "Location" },
     { id: 38, action: "read", subject: "Service" },
   ],
+  Category: [{ id: 26, action: "read", subject: "Location" }],
 };
 
 export const resolvePermissionDependencies = (user: UserInfo): UserInfo => {
