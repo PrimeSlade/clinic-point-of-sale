@@ -9,10 +9,17 @@ import { handlePrismaError } from "../errors/prismaHandler";
 
 const addDoctor = async (data: Doctor) => {
   try {
+    const hasEmail = await doctorModel.findEmail(data.email);
+
+    if (hasEmail) throw new CustomError("Email already exists", 409);
+
     const addedDoctor = await doctorModel.addDoctor(data);
 
     return addedDoctor;
   } catch (error: any) {
+    if (error instanceof CustomError) {
+      throw error;
+    }
     handlePrismaError(error);
   }
 };
@@ -29,6 +36,10 @@ const getDoctors = async (abacFilter: PrismaQuery) => {
 
 const updateDoctor = async (data: UpdateDoctor, id: string) => {
   try {
+    const hasEmail = await doctorModel.findEmail(data.email!, id);
+
+    if (hasEmail) throw new CustomError("Email already exists", 409);
+
     const doctor = await prisma.$transaction(async (trx) => {
       if (data.phoneNumber) {
         await ensurePhoneNumberExists(data.phoneNumber, trx);
@@ -43,6 +54,9 @@ const updateDoctor = async (data: UpdateDoctor, id: string) => {
 
     return doctor;
   } catch (error: any) {
+    if (error instanceof CustomError) {
+      throw error;
+    }
     handlePrismaError(error, { P2025: "Doctor not found" });
   }
 };

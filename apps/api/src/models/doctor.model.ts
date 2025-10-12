@@ -105,4 +105,14 @@ const softDeleteDcotor = async (id: string) => {
   });
 };
 
-export { addDoctor, getDoctors, updateDoctor, softDeleteDcotor };
+const findEmail = async (email: string, id?: string) => {
+  return prisma.doctor.findFirst({
+    where: {
+      email,
+      deletedAt: null,
+      ...(id ? { id: { not: id } } : {}),
+    },
+  });
+};
+
+export { addDoctor, getDoctors, updateDoctor, softDeleteDcotor, findEmail };

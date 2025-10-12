@@ -213,6 +213,7 @@ model Doctor {
   treatments Treatment[]
 
   @@index([deletedAt])
+  @@index([email])
 
   @@map("doctors")
 

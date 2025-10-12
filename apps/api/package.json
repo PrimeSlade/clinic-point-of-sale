@@ -22,8 +22,10 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint .",
-    "seed": "ts-node prisma/seed.ts",
-    "permission-seed": "ts-node prisma/permissions.seed.ts"
+    "seed": "ts-node prisma/seeds/seed.ts",
+    "permission-seed": "ts-node prisma/seeds/permissions.seed.ts",
+    "user-seed": "ts-node prisma/seeds/user.seed.ts",
+    "data-seed": "ts-node prisma/seeds/data.seed.ts"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
