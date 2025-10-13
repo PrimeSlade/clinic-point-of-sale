@@ -1,5 +1,5 @@
-import prisma from "../src/config/prisma.client";
 import bcryptjs from "bcryptjs";
+import prisma from "../../src/config/prisma.client";
 
 async function main() {
   console.log("Starting user seed...");
@@ -24,7 +24,7 @@ async function main() {
 
   // 3. Create user (hash password with bcrypt)
   const hashedPassword = await bcryptjs.hash("11111", 12);
-  
+
   // Get admin role (assuming it exists from role seed)
   const adminRole = await prisma.role.findFirst({
     where: { name: "admin" },

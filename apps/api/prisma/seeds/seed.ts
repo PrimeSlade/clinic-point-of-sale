@@ -1,4 +1,4 @@
-import prisma from "../src/config/prisma.client";
+import prisma from "../../src/config/prisma.client";
 
 async function main() {
   // Admin role with full access
