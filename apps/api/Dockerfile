@@ -1,13 +1,12 @@
-FROM node:24.2.0-alpine
+FROM node:24-alpine AS base
 
-WORKDIR /usr/src/Point-of-Sale-Backend
+RUN corepack enable pnpm
 
-COPY package*.json ./
-RUN npm install
+WORKDIR /app
 
-# COPY prisma ./prisma/
+COPY package.json pnpm-lock.yaml ./
 
-# RUN npx prisma generate
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
