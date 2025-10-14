@@ -21,7 +21,7 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(helmet());
+// app.use(helmet());
 
 app.get("/api", (req, res) => {
   res.json({
