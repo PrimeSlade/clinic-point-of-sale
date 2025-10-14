@@ -13,6 +13,8 @@ jobs:
       - run: corepack enable pnpm
       - run: echo "Installing dependencies"
       - run: pnpm install --no-lockfile
+      - run: echo "Generating Prisma Client"
+      - run: pnpm prisma generate
       # - run: echo "Linting"
       # - run: npm run lint
       # - run: echo "Type checking"
