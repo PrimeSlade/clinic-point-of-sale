@@ -10,13 +10,15 @@ jobs:
     steps:
       - checkout
       - run: echo "Installing dependencies"
-      - run: npm ci
+      - run: corepack enable pnpm
+      - run: echo "Installing dependencies"
+      - run: pnpm install --no-lockfile
       # - run: echo "Linting"
       # - run: npm run lint
       - run: echo "Type checking"
-      - run: npx tsc --noEmit
+      - run: pnpm exec tsc --noEmit
       - run: echo "Building project"
-      - run: CI=true npm run build
+      - run: CI=true pnpm run build
 
 workflows:
   version: 2.1
