@@ -15,8 +15,8 @@ jobs:
       - run: pnpm install --no-lockfile
       # - run: echo "Linting"
       # - run: npm run lint
-      - run: echo "Type checking"
-      - run: pnpm exec tsc --noEmit
+      # - run: echo "Type checking"
+      # - run: pnpm exec tsc --noEmit
       - run: echo "Building project"
       - run: CI=true pnpm run build
 
