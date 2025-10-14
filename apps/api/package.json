@@ -21,8 +21,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "postinstall": "pnpm prisma generate",
-    "build": "pnpm prisma generate && tsup",
-    "start": "node dist/index.mjs",
+    "build": "tsup",
+    "start": "node dist/index.js",
     "lint": "eslint .",
     "seed": "ts-node prisma/seeds/seed.ts",
     "permission-seed": "ts-node prisma/seeds/permissions.seed.ts",
