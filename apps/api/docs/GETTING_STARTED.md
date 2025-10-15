@@ -12,7 +12,7 @@ Before starting, make sure you have these tools installed on your computer.
 
 **PostgreSQL** (version 16 or higher)
 
-**npm** (comes with Node.js)
+**pnpm** (package manager)
 
 ### Optional Software
 
@@ -46,7 +46,7 @@ cd Point-Of-Sale-Backend
 ### Step 2: Install Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Step 3: Set Up Environment Variables
@@ -120,7 +120,7 @@ Now let's add some initial data. Run these commands **in this exact order**:
 #### 1. Seed Permissions (Required First)
 
 ```bash
-npm run permission-seed
+pnpm run permission-seed
 ```
 
 This creates all the permission records that define what actions can be performed.
@@ -128,7 +128,7 @@ This creates all the permission records that define what actions can be performe
 #### 2. Seed Roles
 
 ```bash
-npm run seed
+pnpm run seed
 ```
 
 This creates the Admin and User roles with their permissions.
@@ -136,7 +136,7 @@ This creates the Admin and User roles with their permissions.
 #### 3. Seed Initial User and Location
 
 ```bash
-npm run user-seed
+pnpm run user-seed
 ```
 
 This creates:
@@ -148,7 +148,7 @@ This creates:
 #### 4. Seed Sample Data (Optional)
 
 ```bash
-npm run data-seed
+pnpm run data-seed
 ```
 
 This adds sample data for testing:
@@ -160,7 +160,7 @@ You can skip this if you want to add your own data.
 Start the development server:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 You should see:
