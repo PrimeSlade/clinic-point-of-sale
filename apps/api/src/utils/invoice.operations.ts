@@ -1,9 +1,9 @@
 import { BadRequestError } from "../errors";
 import { InvoiceItem, InvoiceServiceInput } from "../types/invoice.type";
-import { Prisma } from "@prisma/client";
 import { updateItemUnit } from "../models/itemUnit.model";
 import { getItemByBarcode } from "../models/item.model";
 import { UnitType } from "../types/item.type";
+import { Prisma } from "../generated/prisma";
 
 type AggregatedItem = {
   barcodeId: string;
