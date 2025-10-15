@@ -52,16 +52,22 @@ async function main() {
           createMany: {
             data: [
               {
-                unitType: "tab",
-                rate: 100,
-                quantity: 1000,
+                unitType: "pkg",
+                rate: 10,
+                quantity: 10,
                 purchasePrice: 50,
               },
               {
-                unitType: "strip",
-                rate: 1000,
+                unitType: "cap",
+                rate: 10,
                 quantity: 100,
-                purchasePrice: 450,
+                purchasePrice: 5,
+              },
+              {
+                unitType: "pcs",
+                rate: 1,
+                quantity: 1000,
+                purchasePrice: 0.5,
               },
             ],
           },
@@ -80,16 +86,22 @@ async function main() {
           createMany: {
             data: [
               {
-                unitType: "cap",
-                rate: 200,
-                quantity: 500,
+                unitType: "pkg",
+                rate: 10,
+                quantity: 10,
                 purchasePrice: 150,
               },
               {
-                unitType: "box",
-                rate: 2000,
-                quantity: 50,
-                purchasePrice: 1500,
+                unitType: "cap",
+                rate: 10,
+                quantity: 100,
+                purchasePrice: 15,
+              },
+              {
+                unitType: "pcs",
+                rate: 1,
+                quantity: 1000,
+                purchasePrice: 1.5,
               },
             ],
           },
@@ -108,10 +120,22 @@ async function main() {
           createMany: {
             data: [
               {
-                unitType: "tab",
-                rate: 150,
-                quantity: 800,
+                unitType: "pkg",
+                rate: 10,
+                quantity: 10,
                 purchasePrice: 100,
+              },
+              {
+                unitType: "cap",
+                rate: 10,
+                quantity: 100,
+                purchasePrice: 10,
+              },
+              {
+                unitType: "pcs",
+                rate: 1,
+                quantity: 1000,
+                purchasePrice: 1,
               },
             ],
           },

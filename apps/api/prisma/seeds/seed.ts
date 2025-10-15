@@ -8,7 +8,7 @@ async function main() {
       name: "admin",
       permissions: {
         connect: {
-          id: 8,
+          id: 1,
         },
       },
     },
