@@ -43,13 +43,21 @@ git clone <your-repository-url>
 cd Point-Of-Sale-Backend
 ```
 
-### Step 2: Install Dependencies
+### Step 2: Enable Corepack
+
+Corepack allows you to use pnpm without installing it globally:
+
+```bash
+corepack enable
+```
+
+### Step 3: Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### Step 3: Set Up Environment Variables
+### Step 4: Set Up Environment Variables
 
 The application needs some configuration to run. Create a file named `.env` in the root folder:
 
@@ -70,7 +78,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 COOKIE_SECRET=your-cookie-secret-change-this-in-production
 ```
 
-### Step 4: Set Up the Database
+### Step 5: Set Up the Database
 
 Make sure PostgreSQL is running on your computer before continuing.
 
@@ -113,7 +121,7 @@ This applies all migrations and sets up your database structure. You'll see each
 
 > **Alternative for Development**: If you're developing and want to reset everything, use `npx prisma migrate dev` instead.
 
-### Step 5: Seed the Database
+### Step 6: Seed the Database
 
 Now let's add some initial data. Run these commands **in this exact order**:
 
@@ -155,7 +163,7 @@ This adds sample data for testing:
 
 You can skip this if you want to add your own data.
 
-### Step 6: Start the Server
+### Step 7: Start the Server
 
 Start the development server:
 
@@ -171,7 +179,7 @@ app is listening on port 3000
 
 The server is now running!
 
-### Step 7: Test the API
+### Step 8: Test the API
 
 Open your browser and visit:
 

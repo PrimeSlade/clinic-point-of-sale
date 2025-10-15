@@ -2,6 +2,14 @@
 
 A complete backend system for managing medical clinics and pharmacies with attribute-based access control (ABAC), inventory management, and financial tracking.
 
+## Live Demo
+
+**Frontend Application**: [https://medpos.primeslade.dev](https://medpos.primeslade.dev)
+
+Test credentials:
+- Email: `sai@email.com`
+- Password: `11111`
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -82,10 +90,13 @@ This backend system is designed for medical facilities and pharmacies, providing
 git clone <your-repository-url>
 cd Point-Of-Sale-Backend
 
-# 2. Install dependencies
+# 2. Enable Corepack (for pnpm)
+corepack enable
+
+# 3. Install dependencies
 pnpm install
 
-# 3. Set up environment variables
+# 4. Set up environment variables
 cp .env.example .env
 # Edit .env with your database credentials
 
