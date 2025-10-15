@@ -6,24 +6,67 @@ orbs:
 jobs:
   build:
     docker:
-      - image: cimg/node:current
+      - image: cimg/node:20.7 # Pin a stable Node.js version
     steps:
       - checkout
-      - run: echo "Installing dependencies"
-      - run: corepack enable pnpm
-      - run: echo "Installing dependencies"
-      - run: pnpm install --no-lockfile
-      - run: echo "Generating Prisma Client"
-      - run: pnpm prisma generate
-      # - run: echo "Linting"
-      # - run: npm run lint
-      # - run: echo "Type checking"
-      # - run: pnpm exec tsc --noEmit
-      - run: echo "Building project"
-      - run: CI=true pnpm run build
+
+      # Ensure pnpm is available (cimg/node images come with Corepack + pnpm)
+      - run:
+          name: Verify pnpm
+          command: |
+            pnpm --version
+
+      - run:
+          name: Installing dependencies
+          command: pnpm install --no-lockfile
+
+      - run:
+          name: Generating Prisma Client
+          command: pnpm prisma generate
+
+      # Optional lint/type-check steps
+      # - run:
+      #     name: Linting
+      #     command: pnpm run lint
+      # - run:
+      #     name: Type checking
+      #     command: pnpm exec tsc --noEmit
+
+      - run:
+          name: Building project
+          command: CI=true pnpm run build
 
 workflows:
   version: 2.1
   build_only:
     jobs:
       - build
+# version: 2.1
+
+# orbs:
+#   node: circleci/node@7.1.0
+
+# jobs:
+#   build:
+#     docker:
+#       - image: cimg/node:current
+#     steps:
+#       - checkout
+#       - run: echo "Installing dependencies"
+#       - run: corepack enable pnpm
+#       - run: echo "Installing dependencies"
+#       - run: pnpm install --no-lockfile
+#       - run: echo "Generating Prisma Client"
+#       - run: pnpm prisma generate
+#       # - run: echo "Linting"
+#       # - run: npm run lint
+#       # - run: echo "Type checking"
+#       # - run: pnpm exec tsc --noEmit
+#       - run: echo "Building project"
+#       - run: CI=true pnpm run build
+
+# workflows:
+#   version: 2.1
+#   build_only:
+#     jobs:
+#       - build
