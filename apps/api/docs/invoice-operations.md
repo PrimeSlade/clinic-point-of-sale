@@ -284,6 +284,109 @@ await adjustUnitAmount(parsedInvoice.invoiceItems, trx, "restore");
 
 ## Unit Adjustment Operations
 
+### Why Nested Loops Are Required
+
+The nested loop structure in `adjustUnitAmount` (`invoice.operations.ts`) is essential for maintaining data consistency within database transactions when processing items with multiple unit types.
+
+#### The Problem: Race Condition with Uncommitted Transactions
+
+**Scenario**: Consider a barcode "ABC" with these aggregated items from an invoice:
+- ABC with unitType "box" (quantity: 2)
+- ABC with unitType "tab" (quantity: 5)
+
+#### Why Single Loop + Inner DB Fetch Fails
+
+If we removed the outer loop and fetched items inside the inner loop, we'd encounter a **race condition** with uncommitted transactions:
+
+```typescript
+// ❌ PROBLEMATIC APPROACH (single loop with DB fetch inside)
+for (const adjustment of aggregatedItems) {
+  const item = await getItemByBarcode(adjustment.barcodeId); // Fetches from DB
+  // ... process adjustment ...
+  await updateItemUnit(item.itemUnits, trx); // Update committed
+}
+```
+
+**The Issue**:
+1. First iteration: Fetch ABC from DB (current quantity: 100 tabs)
+2. Process "box" adjustment, calculate new quantities
+3. Update to DB within transaction (not yet committed)
+4. Second iteration: Fetch ABC from DB **again**
+5. **Problem**: The fetch returns the **original** quantity (100 tabs) because the transaction hasn't committed yet
+6. Process "tab" adjustment using stale data
+7. Result: Second update overwrites first update, losing data
+
+#### The Solution: Nested Loop Architecture
+
+```typescript
+// ✅ CORRECT APPROACH (nested loops)
+for (let barcode of uniqueBarcodeIds) {
+  const item = await getItemByBarcode(barcode); // Fetch ONCE per barcode
+  const labeledItems = [...item.itemUnits].sort(...);
+  
+  const itemAdjustments = Object.values(aggregatedItem).filter(
+    (item) => item.barcodeId === barcode,
+  );
+  
+  // Inner loop: Process ALL adjustments for this barcode
+  for (const adjustment of itemAdjustments) {
+    // Works with in-memory labeledItems array
+    const matchIndex = labeledItems.findIndex(...);
+    labeledItems[matchIndex].quantity = adjustedAmount;
+    recalculateRelatedUnits(labeledItems, matchIndex);
+  }
+  
+  // Update ONCE per barcode after all adjustments
+  await updateItemUnit(labeledItems, trx);
+}
+```
+
+**How It Works**:
+1. **Outer loop**: Iterate through unique barcodes (ABC, DEF, etc.)
+2. **Fetch once**: Get item data from DB for current barcode
+3. **Inner loop**: Process ALL adjustments for this barcode using the in-memory array
+4. Each adjustment modifies the same `labeledItems` array
+5. `recalculateRelatedUnits` updates related unit quantities in memory
+6. **Update once**: Write all changes to DB in a single update
+
+#### Benefits
+
+**Transaction Consistency**: All adjustments for a barcode are calculated against the same baseline data, preventing race conditions.
+
+**Performance Optimization**: Reduces database reads (1 read per unique barcode instead of 1 read per adjustment) and writes (1 write per unique barcode instead of 1 write per adjustment). Example: If invoice has same item with 5 different units, we do 1 read + 1 write instead of 5 reads + 5 writes.
+
+**Data Integrity**: The in-memory calculations ensure that interdependent unit conversions (via `recalculateRelatedUnits`) work with consistent data.
+
+#### Example Walkthrough
+
+**Invoice items**:
+```
+- Barcode: ABC, Unit: box, Quantity: 2
+- Barcode: ABC, Unit: tab, Quantity: 5
+- Barcode: DEF, Unit: btl, Quantity: 3
+```
+
+**Processing flow**:
+
+1. Aggregate items: `{ABC-box: 2, ABC-tab: 5, DEF-btl: 3}`
+2. Get unique barcodes: `[ABC, DEF]`
+3. **Outer loop iteration 1 (ABC)**:
+   - Fetch ABC item from DB (current: 10 boxes, 200 tabs)
+   - Create in-memory `labeledItems` array
+   - **Inner loop iteration 1 (ABC-box)**:
+     - Adjust box quantity: 10 - 2 = 8
+     - Recalculate related units (tabs): 8 × 25 = 200 tabs
+   - **Inner loop iteration 2 (ABC-tab)**:
+     - Adjust tab quantity: 200 - 5 = 195
+     - Recalculate related units (boxes): 195 ÷ 25 = 7 boxes (rounded down)
+   - Update ABC to DB: 7 boxes, 195 tabs
+4. **Outer loop iteration 2 (DEF)**:
+   - Fetch DEF item from DB
+   - Process bottle adjustment
+   - Update DEF to DB
+
+The nested loop architecture ensures transactional integrity when processing inventory adjustments for items with multiple unit types. Removing the outer loop would introduce race conditions that could lead to data corruption.
+
 ### Price Percent Markup System
 
 The system uses a **user-based markup percentage** (`pricePercent`) to convert purchase prices to retail prices automatically during invoice creation.
