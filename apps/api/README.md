@@ -178,9 +178,9 @@ Point-Of-Sale-Backend/
 
 ### Core Guides
 
-- **[User Flow](docs/USER_FLOW.md)** - Complete user workflows and interaction patterns for all system features
-- **[Authorization (ABAC)](docs/AUTHORIZATION.md)** - Attribute-based access control system with location-based multi-tenancy
-- **[Database Schema](docs/DATABASE.md)** - Complete database documentation with relationships and models
+- [User Flow](docs/USER_FLOW.md) - Complete user workflows and interaction patterns for all system features
+- [Authorization (ABAC)](docs/AUTHORIZATION.md) - Attribute-based access control system with location-based multi-tenancy
+- [Database Schema](docs/DATABASE.md) - Complete database documentation with relationships and models
 - [Invoice Operations](docs/INVOICE_OPERATIONS.md) - Invoice creation/deletion flow with inventory adjustment logic
 - [Authentication Module](docs/modules/authentication.md) - User authentication and JWT token management
 
