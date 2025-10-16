@@ -159,9 +159,10 @@ Point-Of-Sale-Backend/
 │   ├── api/                    # API endpoint documentation
 │   ├── modules/                # Module-specific docs
 │   ├── GETTING_STARTED.md      # Installation guide
-│   ├── authorization.md        # ABAC system documentation
-│   ├── database.md             # Database schema guide
-│   └── invoice-operations.md  # Invoice system documentation
+│   ├── USER_FLOW.md            # User workflows and interaction patterns
+│   ├── AUTHORIZATION.md        # ABAC system documentation
+│   ├── DATABASE.md             # Database schema guide
+│   └── INVOICE_OPERATIONS.md  # Invoice system documentation
 ├── .env                        # Environment variables
 ├── docker-compose.yml          # Docker configuration
 ├── Dockerfile                 # Docker image definition
@@ -177,9 +178,10 @@ Point-Of-Sale-Backend/
 
 ### Core Guides
 
-- [Authorization (ABAC)](docs/authorization.md) - Attribute-based access control system with location-based multi-tenancy
-- [Database Schema](docs/database.md) - Complete database documentation with relationships and models
-- [Invoice Operations](docs/invoice-operations.md) - Invoice creation/deletion flow with inventory adjustment logic
+- **[User Flow](docs/USER_FLOW.md)** ⭐ - **Complete user workflows and interaction patterns for all system features**
+- [Authorization (ABAC)](docs/AUTHORIZATION.md) - Attribute-based access control system with location-based multi-tenancy
+- [Database Schema](docs/DATABASE.md) - Complete database documentation with relationships and models
+- [Invoice Operations](docs/INVOICE_OPERATIONS.md) - Invoice creation/deletion flow with inventory adjustment logic
 - [Authentication Module](docs/modules/authentication.md) - User authentication and JWT token management
 
 ### API Documentation
