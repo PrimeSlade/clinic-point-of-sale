@@ -5,8 +5,8 @@ import { sendResponse } from "../utils/response";
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  // sameSite: "strict" as const,
-  sameSite: "none", //for production
+  sameSite: "strict" as const,
+  // sameSite: "none", //for production
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
   signed: true,
 };
