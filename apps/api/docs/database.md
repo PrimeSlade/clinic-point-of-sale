@@ -165,6 +165,7 @@ Stores phone numbers used across the system.
 | `createdAt` | DateTime   | Default: now()              | Creation timestamp |
 
 **Relations:**
+
 - Has one `Location`
 - Has many `Patient`
 - Has many `Doctor`
@@ -189,6 +190,7 @@ Represents different physical locations/branches.
 | `phoneNumberId` | Int    | Unique, Foreign Key, Required | Associated phone number |
 
 **Relations:**
+
 - Belongs to one `PhoneNumber`
 - Has many `Item`
 - Has many `Patient`
@@ -222,6 +224,7 @@ Represents inventory items (medicines, supplies, etc.).
 | `locationId`  | Int    | Foreign Key, Required       | Associated location |
 
 **Relations:**
+
 - Belongs to one `Location`
 - Has many `ItemUnit`
 
@@ -247,6 +250,7 @@ Represents different unit types and pricing for items.
 | `itemId`        | Int           | Foreign Key, Required       | Associated item               |
 
 **Relations:**
+
 - Belongs to one `Item` (cascade delete)
 
 ---
@@ -264,9 +268,11 @@ Represents medical services offered.
 | `retailPrice` | Decimal(10,2) | Required                    | Service price     |
 
 **Relations:**
+
 - None (standalone, data copied to `InvoiceService`)
 
 **Indexes:**
+
 - Unique index on `name`
 
 ---
@@ -295,11 +301,13 @@ Stores patient information.
 | `locationId`       | Int              | Foreign Key, Required       | Registered location       |
 
 **Relations:**
+
 - Belongs to one `PhoneNumber`
 - Belongs to one `Location`
 - Has many `Treatment`
 
 **Indexes:**
+
 - Index on `deletedAt`
 
 ---
@@ -323,11 +331,13 @@ Stores doctor information.
 | `phoneNumberId` | Int           | Foreign Key, Required | Contact number               |
 
 **Relations:**
+
 - Belongs to one `PhoneNumber`
 - Belongs to one `Location`
 - Has many `Treatment`
 
 **Indexes:**
+
 - Index on `deletedAt`
 - Index on `email`
 
@@ -350,6 +360,7 @@ Records medical treatments provided to patients.
 | `treatment`     | String   | Required                    | Treatment provided          |
 
 **Relations:**
+
 - Belongs to one `Doctor`
 - Belongs to one `Patient`
 - Has many `Invoice`
@@ -377,6 +388,7 @@ Represents billing invoices.
 | `note`               | String        | Optional                    | Additional notes           |
 
 **Relations:**
+
 - Belongs to one `Location`
 - Belongs to one `Treatment` (optional)
 - Has many `InvoiceItem` (cascade delete)
@@ -402,6 +414,7 @@ Individual product/medicine entries on an invoice (e.g., "Medicine A, 2 bottles,
 | `invoiceId`     | Int           | Foreign Key, Required       | Associated invoice    |
 
 **Relations:**
+
 - Belongs to one `Invoice` (cascade delete)
 
 **Note:** Item data denormalized to preserve invoice integrity.
@@ -422,6 +435,7 @@ Individual service entries on an invoice (e.g., "Consultation, $50").
 | `invoiceId`   | Int           | Foreign Key, Required       | Associated invoice      |
 
 **Relations:**
+
 - Belongs to one `Invoice` (cascade delete)
 
 **Note:** Service data denormalized to preserve invoice integrity.
@@ -446,10 +460,12 @@ System users with authentication and authorization.
 | `roleId`       | Int      | Foreign Key, Required | User role                   |
 
 **Relations:**
+
 - Belongs to one `Location`
 - Belongs to one `Role`
 
 **Indexes:**
+
 - Unique index on `email`
 
 **Note:** Authorization uses ABAC (CASL) with location-based conditions.
@@ -469,6 +485,7 @@ User roles for attribute-based access control (ABAC).
 | `createdAt` | DateTime | Default: now()              | Role creation timestamp |
 
 **Relations:**
+
 - Has many `User`
 - Has many `Permission` (many-to-many)
 
@@ -491,6 +508,7 @@ Permissions for attribute-based access control (ABAC).
 | `subject` | String | Required                    | Subject/resource type                  |
 
 **Relations:**
+
 - Has many `Role` (many-to-many)
 
 ---
@@ -510,6 +528,7 @@ Expense categories for financial tracking.
 | `createdAt`   | DateTime | Default: now()              | Category creation timestamp |
 
 **Relations:**
+
 - Belongs to one `Location`
 - Has many `Expense`
 
@@ -551,6 +570,7 @@ PhoneNumber (1:N) Doctor
 ### Location-Based Multi-Tenancy
 
 Most entities belong to a `Location`:
+
 - Items
 - Patients
 - Doctors
@@ -562,6 +582,7 @@ Most entities belong to a `Location`:
 ### Soft Deletes
 
 Models with soft delete support:
+
 - `Patient`
 - `Doctor`
 

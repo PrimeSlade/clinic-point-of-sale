@@ -258,10 +258,10 @@ Result from `accessibleBy()`:
 ```typescript
 const where = accessibleBy(ability, "read");
 
-// Patient, Doctor, Item, Location, etc. are the subjects 
+// Patient, Doctor, Item, Location, etc. are the subjects
 // that have "read" action permissions defined in your ability.
 
-// Returns: 
+// Returns:
 {
   Patient: { locationId: 5 },
   Doctor: { locationId: 5 },
