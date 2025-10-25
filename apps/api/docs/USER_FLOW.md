@@ -24,23 +24,14 @@ The system supports multiple user roles with different permission levels:
 1. User navigates to login page
 2. User enters email and password
 3. System validates credentials
-4. System generates JWT access token and refresh token
-5. Access token stored in memory, refresh token in HTTP-only cookie
-6. User redirected to dashboard based on role and permissions
-
-#### Session Management
-
-1. Access token expires after 15 minutes
-2. Client automatically requests new access token using refresh token
-3. Refresh token expires after 7 days
-4. User must re-login after refresh token expiry
+4. System generates JWT token
+5. User redirected to dashboard based on role and permissions
 
 #### Logout Process
 
 1. User clicks logout button
-2. System clears refresh token cookie
-3. Client removes access token from memory
-4. User redirected to login page
+2. System clears token cookie
+3. User redirected to login page
 
 ---
 
@@ -70,8 +61,6 @@ The system supports multiple user roles with different permission levels:
 4. System displays patient details including:
    - Personal information
    - Treatment history
-   - Invoice history
-   - Total spending
 
 #### Patient Update
 
@@ -104,13 +93,12 @@ The system supports multiple user roles with different permission levels:
 2. Doctor clicks "Add Treatment" on patient profile
 3. System displays treatment form
 4. Doctor enters treatment details:
-   - Chief complaint
    - Diagnosis
    - Prescribed medications (with dosage, frequency)
    - Additional notes
 5. System validates treatment data
 6. System saves treatment record linked to patient and doctor
-7. Treatment appears in patient's history
+7. Treatment appears in patient's history and treatment page
 
 #### Treatment Review
 
@@ -134,37 +122,16 @@ The system supports multiple user roles with different permission levels:
 3. Pharmacist enters item information:
    - Item name
    - Category
-   - Initial stock quantity
-   - Unit type (bottle, ampule, tablet, etc.)
-   - Price per unit
+   - Barcode (auto-generated UUID if not provided)
    - Expiry date
-   - Reorder level (minimum stock alert)
+   - Description (optional)
+   - Unit type (bottle, ampule, tube, strip, capsule, pieces, sachet, box, package, tablet)
+   - Rate (conversion rate for the unit)
+   - Initial stock quantity
+   - Purchase price per unit
 4. System validates input
-5. System creates item record for current location
+5. System creates item record for current location if user is not an admin (admin can select locations)
 6. Item appears in inventory list
-
-#### Stock Management
-
-1. Pharmacist views inventory dashboard
-2. System displays items with:
-   - Current stock levels
-   - Items below reorder level (highlighted)
-   - Items near expiry (warning indicators)
-3. Pharmacist clicks "Update Stock" on item
-4. Pharmacist enters stock adjustment:
-   - Quantity to add/remove
-   - Reason for adjustment
-5. System updates inventory level
-6. System logs stock movement
-
-#### Low Stock Alerts
-
-1. System automatically monitors stock levels
-2. When item quantity falls below reorder level:
-   - System highlights item in inventory list
-   - System displays notification badge
-3. Manager reviews low stock items
-4. Manager initiates purchase order
 
 ---
 
@@ -175,11 +142,8 @@ The system supports multiple user roles with different permission levels:
 1. Administrator/Manager creates new service
 2. Enters service details:
    - Service name (e.g., "X-Ray", "Blood Test")
-   - Category
    - Price
-   - Description
-3. System saves service to location
-4. Service becomes available for invoicing
+3. Service becomes available for invoicing
 
 #### Service Pricing Updates
 
@@ -204,7 +168,8 @@ The system supports multiple user roles with different permission levels:
    - Search and select item from inventory
    - Specify quantity
    - System shows available stock
-   - System calculates line total (quantity × unit price)
+   - System calculates retail price from purchase price using user's price percentage markup (retail price = purchase price + (purchase price × pricePercent / 100))
+   - System calculates line total (quantity × retail price)
    - System checks if sufficient stock available
 
    **Adding Services:**
@@ -227,7 +192,6 @@ The system supports multiple user roles with different permission levels:
     - Deducts items from inventory
     - Records payment
     - Generates invoice number
-    - Updates patient spending history
 11. System displays success message with invoice number
 12. Cashier can print receipt
 
@@ -242,7 +206,6 @@ The system supports multiple user roles with different permission levels:
    - Returns items to inventory
    - Reverses payment record
    - Marks invoice as deleted
-   - Logs deletion action with user and timestamp
 7. System displays success message
 
 ---
@@ -263,21 +226,17 @@ The system supports multiple user roles with different permission levels:
 5. Expense appears in expense list
 6. System updates financial dashboard
 
-#### Sales Reports
+#### Invoice Reports
 
 1. Manager navigates to Reports section
-2. Manager selects "Sales Report"
+2. Manager selects "Invoice Report"
 3. Manager sets date range:
    - Start date
    - End date
 4. System generates report showing:
    - Total sales amount
    - Number of invoices
-   - Sales by payment method
-   - Top selling items
-   - Sales by category
-5. Manager can export to Excel
-6. Manager can print report
+5. Manager can print report
 
 #### Expense Reports
 
@@ -285,42 +244,27 @@ The system supports multiple user roles with different permission levels:
 2. Manager selects "Expense Report"
 3. Manager sets date range and filters:
    - Date range
-   - Category filter (optional)
-   - Payment method filter (optional)
 4. System generates report showing:
    - Total expenses
-   - Breakdown by category
-   - Breakdown by payment method
-   - Expense trends
-5. Manager can export to Excel
-
-#### Profit/Loss Analysis
-
-1. Manager views financial dashboard
-2. System displays:
-   - Total revenue (from invoices)
-   - Total expenses
-   - Net profit/loss
-   - Period comparison
-3. Manager can drill down into:
-   - Revenue sources
-   - Expense categories
-   - Profit margins by item/service
-
----
 
 ### 8. Multi-Location Management Flow
 
 #### Location Setup
 
-1. Administrator creates new location/branch
-2. Administrator enters location details:
+1. Administrator or user with location create permission creates new location/branch
+2. User enters location details:
    - Location name
    - Address
    - Phone number
-   - Operating hours
 3. System creates location
-4. Administrator assigns users to location
+4. Administrator or user with appropriate permissions assigns users to location
+
+#### Location Management
+
+1. Administrator or user with location read permission can view locations
+2. Administrator or user with location update permission can edit location details
+3. Administrator or user with location delete permission can remove locations
+4. System enforces role-based access control for all location operations
 
 #### Location-Based Data Filtering
 
@@ -331,9 +275,8 @@ The system supports multiple user roles with different permission levels:
    - Inventory is location-specific
    - Invoices show only location's sales
    - Reports generated for user's location only
-4. Administrator with "manage all" permission can:
+4. Administrator or user with "manage all" permission can:
    - Switch between locations
-   - View consolidated reports
    - Manage cross-location data
 
 ---
@@ -342,9 +285,9 @@ The system supports multiple user roles with different permission levels:
 
 #### Creating New User
 
-1. Administrator navigates to Users section
-2. Administrator clicks "Add User"
-3. Administrator enters user details:
+1. Administrator or user with user create permission navigates to Users section
+2. User clicks "Add User"
+3. User enters user details:
    - Name
    - Email
    - Initial password
@@ -352,30 +295,21 @@ The system supports multiple user roles with different permission levels:
    - Location assignment
 4. System validates input
 5. System creates user account with hashed password
-6. System assigns role permissions
+6. Administrator or user with role management permission assigns role permissions
 7. New user receives credentials
-8. User can login and must change password on first login
+8. User can login
 
 #### Role & Permission Management
 
-1. Administrator views Roles list
-2. Administrator clicks on role to edit
+1. Administrator or user with role read permission views Roles list
+2. Administrator or user with role update permission clicks on role to edit
 3. System displays permissions matrix:
    - Actions: Create, Read, Update, Delete, Manage
-   - Subjects: Patients, Items, Invoices, Users, etc.
+   - Subjects: Patients, Items, Invoices, Users, Locations, Roles, etc.
    - Conditions: Own data only, Location-based, All data
-4. Administrator toggles permissions
+4. User toggles permissions
 5. System updates role
 6. Changes apply to all users with that role immediately
-
-#### User Deactivation
-
-1. Administrator searches for user
-2. Administrator clicks "Deactivate"
-3. System confirms action
-4. System deactivates user account
-5. User cannot login until reactivated
-6. User's historical data preserved
 
 ---
 
@@ -395,163 +329,10 @@ The system supports multiple user roles with different permission levels:
 
 #### Category Assignment
 
-1. When creating items, services, or expenses
+1. When creating expenses
 2. User selects category from dropdown
 3. System links entity to category
 4. Reports can be filtered by category
-
----
-
-## Advanced Workflows
-
-### Daily Opening Procedure
-
-1. Cashier/Receptionist logs in
-2. System displays dashboard with:
-   - Pending appointments
-   - Low stock alerts
-   - Daily summary
-3. Staff reviews notifications
-4. Staff prepares for patient visits
-
-### End of Day Procedure
-
-1. Manager runs daily sales report
-2. Manager verifies cash reconciliation:
-   - Compare actual cash with system records
-   - Record any discrepancies
-3. Manager reviews pending invoices
-4. Manager backs up critical data
-5. Staff logs out
-
-### Prescription to Sale Flow (Complete)
-
-1. Patient visits clinic
-2. Receptionist registers/updates patient
-3. Doctor examines patient and creates treatment record
-4. Doctor prescribes medications in treatment notes
-5. Patient goes to pharmacy
-6. Pharmacist reviews treatment notes
-7. Pharmacist creates invoice:
-   - Adds prescribed medicines
-   - Adds any medical supplies used
-   - Adds consultation service fee
-8. Patient makes payment
-9. Pharmacist dispenses medication
-10. System updates all records automatically
-
-### Inventory Reorder Flow
-
-1. System alerts low stock items
-2. Pharmacist reviews reorder list
-3. Pharmacist checks vendor catalogs
-4. Pharmacist places order with supplier
-5. Upon delivery:
-   - Pharmacist verifies items against order
-   - Pharmacist updates stock levels
-   - Pharmacist records expiry dates
-6. System updates inventory
-
----
-
-## Error Handling & Edge Cases
-
-### Insufficient Stock During Invoice Creation
-
-1. Cashier attempts to add item to invoice
-2. System checks available stock
-3. If insufficient stock:
-   - System displays error message
-   - System shows available quantity
-   - Cashier can adjust quantity or remove item
-
-### Duplicate Patient Detection
-
-1. Receptionist enters new patient details
-2. System checks for existing patients with same phone number
-3. If potential duplicate found:
-   - System displays warning with existing patient details
-   - Receptionist can view existing patient
-   - Receptionist can proceed with new registration if confirmed different person
-
-### Expired Medicine Handling
-
-1. System monitors item expiry dates
-2. Items expiring within 30 days highlighted with warning
-3. System prevents use of expired items in invoices
-4. Pharmacist must remove expired items from inventory
-
-### Payment Failure Recovery
-
-1. During invoice creation, payment processing fails
-2. System does not finalize invoice
-3. Inventory not deducted
-4. Cashier retries payment or cancels invoice
-5. No partial transactions recorded
-
-### Session Timeout Handling
-
-1. User inactive for extended period
-2. Access token expires
-3. System attempts refresh
-4. If refresh fails:
-   - System saves draft data (if applicable)
-   - System redirects to login
-   - User can resume after re-authentication
-
----
-
-## Mobile/Responsive Considerations
-
-### Mobile Access
-
-1. System responsive design adapts to screen size
-2. Key mobile workflows:
-   - Quick patient lookup
-   - Simple invoice creation
-   - Stock level checking
-   - Treatment documentation
-3. Touch-optimized interfaces for frequently used actions
-4. Barcode scanning support for inventory management
-
----
-
-## Security & Audit Trail
-
-### Permission Checks
-
-1. Every action validated against user permissions
-2. Location-based data isolation enforced
-3. Sensitive operations require re-authentication
-4. Failed permission attempts logged
-
-### Audit Logging
-
-1. System logs critical actions:
-   - Invoice creation/deletion
-   - Inventory adjustments
-   - User management changes
-   - Permission modifications
-2. Logs include:
-   - User performing action
-   - Timestamp
-   - Action details
-   - Before/after values
-3. Administrators can review audit logs
-
----
-
-## Integration Points
-
-### Future Integration Capabilities
-
-1. Lab systems integration for test results
-2. Appointment scheduling system
-3. SMS notifications for patients
-4. Email receipts for invoices
-5. Accounting software export
-6. Government health reporting systems
-7. Insurance claim processing
 
 ---
 
