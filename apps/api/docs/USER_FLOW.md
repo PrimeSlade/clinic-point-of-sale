@@ -247,6 +247,8 @@ The system supports multiple user roles with different permission levels:
 4. System generates report showing:
    - Total expenses
 
+---
+
 ### 8. Multi-Location Management Flow
 
 #### Location Setup
