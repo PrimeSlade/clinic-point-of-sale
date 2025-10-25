@@ -2,19 +2,7 @@ import { PrismaQuery } from "@casl/prisma";
 import { UserInfo } from "./auth.type";
 import z from "zod";
 import { itemArraySchema } from "../utils/validation";
-
-export enum UnitType {
-  BTL = "btl",
-  AMP = "amp",
-  TUBE = "tube",
-  STRIP = "strip",
-  CAP = "cap",
-  PCS = "pcs",
-  SAC = "sac",
-  BOX = "box",
-  PKG = "pkg",
-  TAB = "tab",
-}
+import { UnitType } from "../generated/prisma";
 
 type Item = {
   name: string;
@@ -34,7 +22,7 @@ type Unit = {
   rate: number;
 };
 
-type UpdateUnit = { id: number } & Partial<Unit>;
+type UpdateUnit = { id: number; isChanged?: boolean } & Partial<Unit>;
 
 type ImportUnit = Unit & { id?: number };
 
