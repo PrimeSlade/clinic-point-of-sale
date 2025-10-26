@@ -14,7 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum UnitType {
   btl
   amp
@@ -90,11 +89,16 @@ enum PaymentMethod {
   others
 }
 
+enum ItemAction {
+  edit
+  import
+}
+
 model PhoneNumber {
-  id        Int       @id @default(autoincrement())
-  number    String    @unique @db.VarChar(30)
-  createdAt DateTime  @default(now()) @map("created_at")
-  
+  id        Int      @id @default(autoincrement())
+  number    String   @unique @db.VarChar(30)
+  createdAt DateTime @default(now()) @map("created_at")
+
   // Relations
   location Location?
   patients Patient[]
@@ -104,39 +108,40 @@ model PhoneNumber {
 }
 
 model Location {
-  id Int @id @default(autoincrement())
-  name String @unique
-  address String? 
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  address String?
 
   phoneNumberId Int @unique @map("phone_number_id")
 
   //Relations
-  phoneNumber PhoneNumber @relation(fields: [phoneNumberId],references: [id])
+  phoneNumber PhoneNumber @relation(fields: [phoneNumberId], references: [id])
 
-  items Item[]
-  patients Patient[]
-  doctors Doctor[]
-  invoices Invoice[]
-  users User[]
-  expenses Expense[]
+  items      Item[]
+  patients   Patient[]
+  doctors    Doctor[]
+  invoices   Invoice[]
+  users      User[]
+  expenses   Expense[]
   categories Category[]
-  
+
   @@map("locations")
 }
 
-model Item{
-  id Int @id @default(autoincrement())
-  barcode String @unique @default(uuid())
-  name String
-  category String
-  expiryDate DateTime @map("expiry_date") @db.Date
+model Item {
+  id          Int      @id @default(autoincrement())
+  barcode     String   @unique @default(uuid())
+  name        String
+  category    String
+  expiryDate  DateTime @map("expiry_date") @db.Date
   description String?
 
   locationId Int @map("location_id")
 
   //Relations
-  location Location @relation(fields: [locationId],references: [id])
-  itemUnits ItemUnit[]
+  location      Location      @relation(fields: [locationId], references: [id])
+  itemUnits     ItemUnit[]
+  itemHistories ItemHistory[]
 
   @@map("items")
 }
@@ -144,140 +149,178 @@ model Item{
 model ItemUnit {
   id Int @id @default(autoincrement())
 
-  unitType UnitType @map("unit_type")
-  rate Int 
-  quantity Int 
-  purchasePrice Decimal @map("purchase_price") @db.Decimal(10,2)
+  unitType      UnitType @map("unit_type")
+  rate          Int
+  quantity      Int
+  purchasePrice Decimal  @map("purchase_price") @db.Decimal(10, 2)
 
   itemId Int @map("item_id")
 
   //Realtions
-  item Item @relation(fields: [itemId],references: [id],onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@map("item_units")
 }
 
-model Service {
+model ItemHistory {
   id Int @id @default(autoincrement())
-  name String @unique
-  retailPrice Decimal @map("retail_price") @db.Decimal(10,2) 
+
+  userName  String     @map("user_name")
+  createdAt DateTime   @default(now()) @map("created_at")
+  action    ItemAction
+
+  userId String? @map("user_id")
+  itemId Int     @map("item_id")
+
+  //Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  item Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  itemHistoryDetails ItemHistoryDetail[]
+
+  @@map("item_histories")
+}
+
+model ItemHistoryDetail {
+  id Int @id @default(autoincrement())
+
+  oldUnitType UnitType @map("old_unit_type")
+  newUnitType UnitType @map("new_unit_type")
+
+  oldRate Int @map("old_rate")
+  newRate Int @map("new_rate")
+
+  oldQuantity Int @map("old_quantity")
+  newQuantity Int @map("new_quantity")
+
+  oldPurchasePrice Decimal @map("old_purchase_price") @db.Decimal(10, 2)
+  newPurchasePrice Decimal @map("new_purchase_price") @db.Decimal(10, 2)
+
+  itemHistoryId Int @map("item_history_id")
+
+  //Relations
+  itemHistory ItemHistory @relation(fields: [itemHistoryId], references: [id], onDelete: Cascade)
+
+  @@map("item_history_details")
+}
+
+model Service {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  retailPrice Decimal @map("retail_price") @db.Decimal(10, 2)
 
   @@map("services")
 }
 
 model Patient {
-  id Int @id @default(autoincrement())
-  name String
-  gender Gender
-  dateOfBirth DateTime @map("date_of_birth") @db.Date
-  address String?
-  email String?
-  patientStatus PatientStatus @map("patient_status")
+  id               Int              @id @default(autoincrement())
+  name             String
+  gender           Gender
+  dateOfBirth      DateTime         @map("date_of_birth") @db.Date
+  address          String?
+  email            String?
+  patientStatus    PatientStatus    @map("patient_status")
   patientCondition PatientCondition @map("patient_condition")
-  patientType PatientType @map("patient_type")
-  department Department 
-  registeredAt DateTime @default(now()) @map("registered_at")
+  patientType      PatientType      @map("patient_type")
+  department       Department
+  registeredAt     DateTime         @default(now()) @map("registered_at")
 
   deletedAt DateTime? @map("deleted_at")
-  
+
   phoneNumberId Int @map("phone_number_id")
-  locationId Int @map("location_id")
+  locationId    Int @map("location_id")
 
   //Relations
-  phoneNumber PhoneNumber @relation(fields: [phoneNumberId],references: [id])
-  location Location @relation(fields: [locationId],references: [id])
-  treatments Treatment[]
+  phoneNumber PhoneNumber @relation(fields: [phoneNumberId], references: [id])
+  location    Location    @relation(fields: [locationId], references: [id])
+  treatments  Treatment[]
 
   @@index([deletedAt])
-
   @@map("patients")
 }
 
 model Doctor {
-  id String @id @default(uuid())
-  name String
-  email String
-  commission Decimal @db.Decimal(10,2)
-  address String?
+  id          String  @id @default(uuid())
+  name        String
+  email       String
+  commission  Decimal @db.Decimal(10, 2)
+  address     String?
   description String?
 
   deletedAt DateTime? @map("deleted_at")
 
-  locationId Int @map("location_id")
+  locationId    Int @map("location_id")
   phoneNumberId Int @map("phone_number_id")
 
-
   //Relations
-  phoneNumber PhoneNumber @relation(fields: [phoneNumberId],references: [id])
-  location Location @relation(fields: [locationId],references: [id])
-  treatments Treatment[]
+  phoneNumber PhoneNumber @relation(fields: [phoneNumberId], references: [id])
+  location    Location    @relation(fields: [locationId], references: [id])
+  treatments  Treatment[]
 
   @@index([deletedAt])
   @@index([email])
-
   @@map("doctors")
-
 }
 
 model Treatment {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now()) @map("created_at")
 
-  doctorId String @map("doctor_id")
-  patientId Int @map("patient_id")
+  doctorId  String @map("doctor_id")
+  patientId Int    @map("patient_id")
 
   investigation String?
-  diagnosis String?
-  treatment String
+  diagnosis     String?
+  treatment     String
 
   //Relations
-  doctor Doctor @relation(fields: [doctorId],references: [id])
-  patient Patient @relation(fields: [patientId],references: [id])
+  doctor  Doctor    @relation(fields: [doctorId], references: [id])
+  patient Patient   @relation(fields: [patientId], references: [id])
   invoice Invoice[]
 
   @@map("treatments")
 }
 
 model Invoice {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now()) @map("created_at")
 
-  locationId Int @map("location_id")
-  treatmentId Int? @map("treatment_id") 
+  locationId  Int  @map("location_id")
+  treatmentId Int? @map("treatment_id")
 
-  totalItemDiscount Decimal @map("total_item_discount") @db.Decimal(10,2)
-  subTotal Decimal @map("sub_total") @db.Decimal(10,2)
-  totalAmount Decimal @map("total_amount") @db.Decimal(10,2)
-  discountAmount Decimal @map("discount_amount") @db.Decimal(10,2)
+  totalItemDiscount Decimal @map("total_item_discount") @db.Decimal(10, 2)
+  subTotal          Decimal @map("sub_total") @db.Decimal(10, 2)
+  totalAmount       Decimal @map("total_amount") @db.Decimal(10, 2)
+  discountAmount    Decimal @map("discount_amount") @db.Decimal(10, 2)
 
-  paymentMethod PaymentMethod @map("payment_method")
-  paymentDescription String?  @map("payment_description")
-  note String?
+  paymentMethod      PaymentMethod @map("payment_method")
+  paymentDescription String?       @map("payment_description")
+  note               String?
 
   //Relations
-  invoiceItems InvoiceItem[]
+  invoiceItems    InvoiceItem[]
   invoiceServices InvoiceService[]
-  location  Location  @relation(fields: [locationId], references: [id])
-  treatment Treatment? @relation(fields: [treatmentId], references: [id])
+  location        Location         @relation(fields: [locationId], references: [id])
+  treatment       Treatment?       @relation(fields: [treatmentId], references: [id])
 
   @@map("invoices")
 }
 
 model InvoiceItem {
   id Int @id @default(autoincrement())
-  
+
   barcode String
 
-  itemName String @map("item_name")
-  unitType UnitType @map("unit_type") 
-  quantity Int
-  retailPrice Decimal @map("retail_price") @db.Decimal(10,2)
-  discountPrice Decimal @map("discount_price") @db.Decimal(10,2)
+  itemName      String   @map("item_name")
+  unitType      UnitType @map("unit_type")
+  quantity      Int
+  retailPrice   Decimal  @map("retail_price") @db.Decimal(10, 2)
+  discountPrice Decimal  @map("discount_price") @db.Decimal(10, 2)
 
-  invoiceId Int @map("invoice_id") 
+  invoiceId Int @map("invoice_id")
 
   //Relations
-  invoice Invoice @relation(fields: [invoiceId],references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("invoice_items")
 }
@@ -285,51 +328,52 @@ model InvoiceItem {
 model InvoiceService {
   id Int @id @default(autoincrement())
 
-  name String
-  retailPrice Decimal @map("retail_price") @db.Decimal(10,2) 
+  name        String
+  retailPrice Decimal @map("retail_price") @db.Decimal(10, 2)
 
   invoiceId Int @map("invoice_id")
 
   //Relations
-  invoice Invoice @relation(fields: [invoiceId],references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("invoice_services")
 }
 
-
 model User {
-  id String @id @default(uuid())
-  name String
-  email String @unique
-  password String
-  createdAt DateTime @default(now()) @map("created_at")
-  pricePercent Int @map("price_percent") 
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  createdAt    DateTime @default(now()) @map("created_at")
+  pricePercent Int      @map("price_percent")
 
   locationId Int @map("location_id")
-  roleId Int @map("role_id")
+  roleId     Int @map("role_id")
 
   //Relations
   location Location @relation(fields: [locationId], references: [id])
-  role Role @relation(fields: [roleId],references: [id])
+  role     Role     @relation(fields: [roleId], references: [id])
+
+  itemHistory ItemHistory[]
 
   @@map("users")
 }
 
-model Role{
-  id Int @id @default(autoincrement())
-  name String @unique
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  users User[]
+  users       User[]
   permissions Permission[]
 
   @@map("roles")
 }
 
 model Permission {
-  id Int @id @default(autoincrement())
-  action String
+  id      Int    @id @default(autoincrement())
+  action  String
   subject String
 
   //Relations
@@ -342,12 +386,12 @@ model Category {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  locationId Int @map("location_id")
-  createdAt DateTime @default(now()) @map("created_at")
+  locationId  Int      @map("location_id")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   // Relations
-  location Location @relation(fields: [locationId], references: [id])
-  expenses  Expense[]
+  location Location  @relation(fields: [locationId], references: [id])
+  expenses Expense[]
 
   @@map("categories")
 }
@@ -364,8 +408,7 @@ model Expense {
 
   //Relations
   category Category @relation(fields: [categoryId], references: [id])
-  location Location @relation(fields: [locationId],references: [id])
+  location Location @relation(fields: [locationId], references: [id])
 
   @@map("expenses")
 }
-
