@@ -7,8 +7,9 @@ import {
   UpdateItem,
   UpdateUnit,
 } from "../types/item.type";
-import { Prisma } from "../generated/prisma";
+import { HistoryAction, Prisma } from "../generated/prisma";
 import { PrismaQuery } from "@casl/prisma";
+import { UserInfo } from "../types/auth.type";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
   return prisma.item.create({
@@ -123,8 +124,9 @@ const updateItem = async (
   data: UpdateItem,
   unit: Array<UpdateUnit>,
   id: number,
+  trx: Prisma.TransactionClient,
 ) => {
-  return prisma.item.update({
+  return trx.item.update({
     where: {
       id: id,
     },
@@ -218,6 +220,64 @@ const importItems = async (items: ImportItems) => {
   );
 };
 
+const addItemHistory = (
+  newUnit: Array<UpdateUnit>,
+  oldUnit: Array<UpdateUnit>,
+  user: UserInfo,
+  action: HistoryAction,
+  itemId: number,
+  trx: Prisma.TransactionClient,
+) => {
+  return trx.itemHistory.create({
+    data: {
+      userName: user.name,
+      userId: user.id,
+      action: action,
+      itemId: itemId,
+      itemHistoryDetails: {
+        createMany: {
+          data: newUnit
+            .filter((unit) => unit.isChanged)
+            .map((unit) => {
+              const matchOldUnit = oldUnit.find((o) => o.id === unit.id)!;
+              return {
+                oldUnitType: matchOldUnit.unitType,
+                newUnitType: unit.unitType,
+                oldRate: matchOldUnit.rate,
+                newRate: unit.rate,
+                oldQuantity: matchOldUnit.quantity,
+                newQuantity: unit.quantity,
+                oldPurchasePrice: matchOldUnit.purchasePrice,
+                newPurchasePrice: unit.purchasePrice,
+              };
+            }),
+        },
+      },
+    },
+  });
+};
+
+const getItemHistoriesById = async (itemId: number) => {
+  return prisma.itemHistory.findMany({
+    where: {
+      itemId,
+    },
+    include: {
+      itemHistoryDetails: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 export {
   addItem,
   getItems,
@@ -227,4 +287,6 @@ export {
   updateItem,
   deleteItem,
   importItems,
+  addItemHistory,
+  getItemHistoriesById,
 };

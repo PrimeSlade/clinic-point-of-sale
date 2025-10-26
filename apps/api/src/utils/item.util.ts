@@ -1,7 +1,7 @@
 import { Worksheet } from "exceljs";
 import { NotFoundError, BadRequestError } from "../errors";
 import { getLocationByName } from "../models/location.model";
-import { ImportUnit } from "../types/item.type";
+import { ImportUnit, UpdateUnit } from "../types/item.type";
 
 const transformImportedData = async (items: any) => {
   return Promise.all(
@@ -92,4 +92,22 @@ const validateFile = (worksheet: Worksheet) => {
   }
 };
 
-export { transformImportedData, validateFile };
+const markIsChangedUnit = (
+  newUnit: Array<UpdateUnit>,
+  oldUnit: Array<UpdateUnit>,
+) => {
+  return newUnit.map((unit) => {
+    const matchOldUnit = oldUnit.find((o) => o.id === unit.id);
+
+    if (matchOldUnit) {
+      unit.isChanged =
+        unit.unitType !== matchOldUnit.unitType ||
+        unit.rate !== matchOldUnit.rate ||
+        unit.quantity !== matchOldUnit.quantity ||
+        unit.purchasePrice !== matchOldUnit.purchasePrice;
+    }
+    return unit;
+  });
+};
+
+export { transformImportedData, validateFile, markIsChangedUnit };

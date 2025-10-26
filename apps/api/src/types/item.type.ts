@@ -22,7 +22,7 @@ type Unit = {
   rate: number;
 };
 
-type UpdateUnit = { id: number; isChanged?: boolean } & Partial<Unit>;
+type UpdateUnit = { id: number; isChanged?: boolean } & Unit;
 
 type ImportUnit = Unit & { id?: number };
 

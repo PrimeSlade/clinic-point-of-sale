@@ -8,10 +8,16 @@ import {
   UpdateUnit,
 } from "../types/item.type";
 import * as itemModel from "../models/item.model";
-import { transformImportedData, validateFile } from "../utils/item.util";
+import {
+  markIsChangedUnit,
+  transformImportedData,
+  validateFile,
+} from "../utils/item.util";
 import { PrismaQuery } from "@casl/prisma";
 import { validateItems } from "../utils/validation";
 import { handlePrismaError } from "../errors/prismaHandler";
+import { UserInfo } from "../types/auth.type";
+import prisma from "../config/prisma.client";
 
 type ExcelRow = {
   warehouse: string;
@@ -89,9 +95,34 @@ const updateItem = async (
   data: UpdateItem,
   unit: Array<UpdateUnit>,
   id: number,
+  user: UserInfo,
 ) => {
   try {
-    const updated = await itemModel.updateItem(data, unit, id);
+    const oldItem = await itemModel.getItemById(id);
+
+    //change string to number
+    const parsedOldItem = {
+      ...oldItem,
+      itemUnits: oldItem?.itemUnits.map((unit) => ({
+        ...unit,
+        purchasePrice: unit.purchasePrice.toNumber(),
+      })),
+    };
+
+    const newUnit = markIsChangedUnit(unit, parsedOldItem.itemUnits!);
+
+    const updated = await prisma.$transaction(async (trx) => {
+      await itemModel.addItemHistory(
+        newUnit,
+        parsedOldItem.itemUnits!,
+        user,
+        "edit",
+        id,
+        trx,
+      );
+
+      return itemModel.updateItem(data, unit, id, trx);
+    });
 
     return updated;
   } catch (error: any) {
@@ -240,6 +271,25 @@ const exportItem = async (abacFilter: PrismaQuery) => {
   }
 };
 
+const getItemHistoriesById = async (itemId: number) => {
+  try {
+    const histories = await itemModel.getItemHistoriesById(itemId);
+
+    const parsedHistories = histories.map((history) => ({
+      ...history,
+      itemHistoryDetails: history.itemHistoryDetails.map((detail) => ({
+        ...detail,
+        oldPurchasePrice: detail.oldPurchasePrice.toNumber(),
+        newPurchasePrice: detail.newPurchasePrice.toNumber(),
+      })),
+    }));
+
+    return parsedHistories;
+  } catch (error: any) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   addItem,
   getItems,
@@ -248,4 +298,5 @@ export {
   exportItem,
   updateItem,
   deleteItem,
+  getItemHistoriesById,
 };
