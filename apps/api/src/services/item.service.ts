@@ -273,6 +273,9 @@ const exportItem = async (abacFilter: PrismaQuery) => {
 
 const getItemHistoriesById = async (itemId: number) => {
   try {
+    const item = await itemModel.getItemById(itemId);
+    if (!item) throw new NotFoundError("Item not found");
+
     const histories = await itemModel.getItemHistoriesById(itemId);
 
     const parsedHistories = histories.map((history) => ({
@@ -286,6 +289,9 @@ const getItemHistoriesById = async (itemId: number) => {
 
     return parsedHistories;
   } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
     handlePrismaError(error);
   }
 };
