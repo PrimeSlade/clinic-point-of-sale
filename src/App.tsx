@@ -34,6 +34,7 @@ import Loading from "./components/loading/Loading";
 import DynamicIndex from "./routes/DynamicIndex";
 import ItemHistoryPage from "./pages/inventory/ItemHistoryPage";
 import HelpPage from "./pages/help/HelpPage";
+import ItemHistoryPage from "./pages/Inventory/ItemHistoryPage";
 
 // Lazy load PDF-heavy page
 const InvoiceDetailsPage = lazy(

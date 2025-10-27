@@ -1,15 +1,7 @@
 import type { ItemHistory } from "@/types/ItemType";
 import { formatDate } from "@/utils/formatDate";
-import { Clock, Layers, User } from "lucide-react";
+import { Clock, Layers } from "lucide-react";
 import React from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { toUpperCase as toFirstUpperCase } from "@/utils/formatText";
-import ItemHistroyDetailsCard from "./ItemHistroyDetailsCard";
 
 type InventoryAction = "EDIT" | "IMPORT";
 
@@ -27,52 +19,55 @@ const ItemHistoryCard = ({ history }: ItemHistoryCardProps) => {
     return styles[action];
   };
 
-  return (
-    <Accordion type="single" collapsible className="mb-4">
-      <AccordionItem
-        value={history.id.toString()}
-        className="bg-white rounded-lg shadow border"
-      >
-        <AccordionTrigger className="px-6 py-4 hover:no-underline">
-          <div className="flex items-start justify-between w-full pr-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <User className="w-5 h-5 text-[var(--primary-color)]" />
-              </div>
-              <div>
-                <p className="flex gap-2">
-                  <span className="font-semibold  text-gray-900">
-                    {history.userName}
-                  </span>
+  const renderFieldChange = (
+    oldVal: string | number,
+    newVal: string | number,
+    isPrice = false
+  ) => {
+    if (oldVal === newVal || (isPrice && Number(oldVal) === Number(newVal))) {
+      return <span className="text-gray-700 font-medium">{newVal}</span>;
+    }
 
-                  <span className="text-gray-500">
-                    ({toFirstUpperCase(history.user.role.name)})
-                  </span>
-                </p>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Clock className="w-4 h-4" />
-                  {formatDate(new Date(history?.createdAt), true)}
-                </div>
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-gray-400 line-through text-sm">{oldVal}</span>
+        <span className="text-gray-900 font-semibold">{newVal}</span>
+      </div>
+    );
+  };
+
+  return (
+    <div className="mb-5">
+      <div className="bg-white rounded-lg shadow border transition-shadow overflow-hidden">
+        <div className="flex items-start justify-between p-6 pb-4">
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="font-semibold text-gray-900">{history.userName}</p>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Clock className="w-4 h-4" />
+                {formatDate(new Date(history?.createdAt))}
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {history.itemHistoryDetails.length > 1 && (
-                <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                  <Layers className="w-3 h-3" />
-                  {history.itemHistoryDetails.length} Units
-                </span>
-              )}
-              <span
-                className={`px-3 py-1 rounded text-xs font-semibold ${getActionBadge(
-                  history.action.toUpperCase() as InventoryAction
-                )}`}
-              >
-                {history.action.toUpperCase()}
-              </span>
             </div>
           </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-6 pb-6">
+          <div className="flex items-center gap-2">
+            {history.itemHistoryDetails.length > 1 && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
+                <Layers className="w-3 h-3" />
+                {history.itemHistoryDetails.length} Units
+              </span>
+            )}
+            <span
+              className={`px-3 py-1 rounded text-xs font-semibold ${getActionBadge(
+                history.action.toUpperCase() as InventoryAction
+              )}`}
+            >
+              {history.action.toUpperCase()}
+            </span>
+          </div>
+        </div>
+
+        {/* Unit Type Changes Table */}
+        <div className="px-6 pb-6">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -99,14 +94,50 @@ const ItemHistoryCard = ({ history }: ItemHistoryCardProps) => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {history.itemHistoryDetails.map((detail) => (
-                  <ItemHistroyDetailsCard detail={detail} />
+                  <tr
+                    key={detail.id}
+                    className="hover:bg-gray-50 transition-colors bg-blue-50/30"
+                  >
+                    <td className="py-3 px-3">
+                      {detail.oldUnitType !== detail.newUnitType ? (
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded text-sm font-medium uppercase line-through">
+                            {detail.oldUnitType}
+                          </span>
+                          <span className="px-2 py-1 rounded text-sm font-semibold uppercase">
+                            {detail.newUnitType}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="px-2 py- rounded text-sm font-medium uppercase">
+                          {detail.newUnitType}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-3">
+                      {renderFieldChange(detail.oldRate, detail.newRate)}
+                    </td>
+                    <td className="py-3 px-3">
+                      {renderFieldChange(
+                        detail.oldQuantity,
+                        detail.newQuantity
+                      )}
+                    </td>
+                    <td className="py-3 px-3">
+                      {renderFieldChange(
+                        detail.oldPurchasePrice,
+                        detail.newPurchasePrice,
+                        true
+                      )}
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        </div>
+      </div>
+    </div>
   );
 };
 
