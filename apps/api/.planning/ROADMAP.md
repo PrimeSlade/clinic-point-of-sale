@@ -12,7 +12,7 @@ This roadmap extends the existing single-item history tracking functionality to 
 
 ## Phases
 
-- [ ] **Phase 1: Core History Integration** - Record change history for each updated item during bulk imports with full transactional consistency
+- [x] **Phase 1: Core History Integration** - ✅ COMPLETE (8/8 FRs, 21 tests)
 - [ ] **Phase 2: Performance & Reliability** - Optimize for large imports through chunked processing and enhanced error handling
 - [ ] **Phase 3: Observability & Verification** - Add comprehensive testing, logging, and validation to ensure production readiness
 
@@ -48,7 +48,7 @@ This roadmap extends the existing single-item history tracking functionality to 
 
 Plans:
 
-- [ ] 01-PLAN.md — Core history integration with transactional consistency
+- [x] ✅ 01-PLAN.md — Core history integration with transactional consistency (COMPLETE)
 
 ---
 
@@ -119,11 +119,11 @@ Plans:
 
 ## Progress Tracking
 
-| Phase                           | Plans Complete | Status      | Completed |
-| ------------------------------- | -------------- | ----------- | --------- |
-| 1. Core History Integration     | 0/1            | Planned     | -         |
-| 2. Performance & Reliability    | 0/?            | Not started | -         |
-| 3. Observability & Verification | 0/?            | Not started | -         |
+| Phase                           | Plans Complete | Status    | Completed  |
+| ------------------------------- | -------------- | --------- | ---------- |
+| 1. Core History Integration     | 1/1            | ✅ DONE   | 2026-03-19 |
+| 2. Performance & Reliability    | 0/?            | Planned   | -          |
+| 3. Observability & Verification | 0/?            | Not ready | -          |
 
 ## Coverage Map
 
