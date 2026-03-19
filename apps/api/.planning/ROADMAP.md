@@ -47,6 +47,7 @@ This roadmap extends the existing single-item history tracking functionality to 
 **Plans:** 1 plan (6 waves)
 
 Plans:
+
 - [ ] 01-PLAN.md — Core history integration with transactional consistency
 
 ---

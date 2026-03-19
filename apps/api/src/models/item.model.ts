@@ -241,13 +241,13 @@ const getItemByBarcodeWithTrx = async (
  * Import items from Excel with history tracking for bulk operations.
  * Uses callback-based transaction for sequential processing to enable
  * change detection and history recording for each item.
- * 
+ *
  * Features:
  * - Pre-fetches existing items to detect changes
  * - Records history only for items with actual changes
  * - Returns summary with created/updated/skipped counts
  * - Maintains transactional consistency (full rollback on error)
- * 
+ *
  * @param items - Validated import items (from Excel transformation)
  * @param user - Authenticated user (for history attribution)
  * @param trx - Prisma transaction client
@@ -336,7 +336,7 @@ const importItemsWithTransaction = async (
         itemUnits: true,
       },
     });
-    
+
     // 4. Record history for updated items with changes
     if (existingItem && hasChanges) {
       await addItemHistory(
@@ -348,31 +348,29 @@ const importItemsWithTransaction = async (
         trx,
       );
     }
-    
+
     // Store result with action metadata
     results.push({
       item: result,
-      action: existingItem 
-        ? (hasChanges ? 'updated' : 'skipped')
-        : 'created',
+      action: existingItem ? (hasChanges ? "updated" : "skipped") : "created",
     });
   }
-  
+
   // Generate summary
   const summary = {
-    created: results.filter(r => r.action === 'created').length,
-    updated: results.filter(r => r.action === 'updated').length,
-    skipped: results.filter(r => r.action === 'skipped').length,
+    created: results.filter((r) => r.action === "created").length,
+    updated: results.filter((r) => r.action === "updated").length,
+    skipped: results.filter((r) => r.action === "skipped").length,
     errors: [] as string[],
   };
-  
+
   return { results, summary };
 };
 
 /**
  * Records item history with before/after values for changed units.
  * Creates history entry with details for each unit that has changes.
- * 
+ *
  * @param newUnit - Array of units with new values (must have isChanged flag)
  * @param oldUnit - Array of units with old values (for comparison)
  * @param user - User performing the action (for attribution)
@@ -421,7 +419,7 @@ const addItemHistory = (
 /**
  * Retrieves item history records by item ID, ordered by most recent first.
  * Includes history details (before/after values) and user information.
- * 
+ *
  * @param itemId - ID of the item to get history for
  * @param trx - Optional Prisma transaction client (for testing)
  * @returns Array of history records with details and user info
@@ -431,7 +429,7 @@ const getItemHistoriesById = async (
   trx?: Prisma.TransactionClient,
 ) => {
   const client = trx || prisma;
-  
+
   return client.itemHistory.findMany({
     where: {
       itemId,
