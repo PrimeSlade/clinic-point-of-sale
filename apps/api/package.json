@@ -23,6 +23,9 @@
     "build": "tsup",
     "start": "node dist/index.js",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "seed": "ts-node prisma/seeds/seed.ts",
     "permission-seed": "ts-node prisma/seeds/permissions.seed.ts",
     "user-seed": "ts-node prisma/seeds/user.seed.ts",
@@ -36,6 +39,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.7",
+    "@vitest/ui": "^4.1.0",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.1",
@@ -44,6 +48,8 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.35.0"
-  }
+    "typescript-eslint": "^8.35.0",
+    "vitest": "^4.1.0"
+  },
+  "packageManager": "pnpm@10.29.2+sha512.bef43fa759d91fd2da4b319a5a0d13ef7a45bb985a3d7342058470f9d2051a3ba8674e629672654686ef9443ad13a82da2beb9eeb3e0221c87b8154fff9d74b8"
 }
