@@ -18,6 +18,7 @@ import { validateItems } from "../utils/validation";
 import { handlePrismaError } from "../errors/prismaHandler";
 import { UserInfo } from "../types/auth.type";
 import prisma from "../config/prisma.client";
+import { sortUnitsByType } from "../utils/unit-type.util";
 
 type ExcelRow = {
   warehouse: string;
@@ -60,10 +61,12 @@ const getItems = async ({
     //change string to number
     const parsedItems = items.map((item) => ({
       ...item,
-      itemUnits: item.itemUnits.map((unit) => ({
-        ...unit,
-        purchasePrice: unit.purchasePrice.toNumber(),
-      })),
+      itemUnits: sortUnitsByType(
+        item.itemUnits.map((unit) => ({
+          ...unit,
+          purchasePrice: unit.purchasePrice.toNumber(),
+        })),
+      ),
     }));
 
     return { items: parsedItems, total };
@@ -79,10 +82,14 @@ const getItemById = async (id: number) => {
     //change string to number
     const parsedItem = {
       ...item,
-      itemUnits: item?.itemUnits.map((unit) => ({
-        ...unit,
-        purchasePrice: unit.purchasePrice.toNumber(),
-      })),
+      itemUnits: item?.itemUnits
+        ? sortUnitsByType(
+            item.itemUnits.map((unit) => ({
+              ...unit,
+              purchasePrice: unit.purchasePrice.toNumber(),
+            })),
+          )
+        : [],
     };
 
     return parsedItem;
@@ -103,10 +110,14 @@ const updateItem = async (
     //change string to number
     const parsedOldItem = {
       ...oldItem,
-      itemUnits: oldItem?.itemUnits.map((unit) => ({
-        ...unit,
-        purchasePrice: unit.purchasePrice.toNumber(),
-      })),
+      itemUnits: oldItem?.itemUnits
+        ? sortUnitsByType(
+            oldItem.itemUnits.map((unit) => ({
+              ...unit,
+              purchasePrice: unit.purchasePrice.toNumber(),
+            })),
+          )
+        : [],
     };
 
     const newUnit = markIsChangedUnit(unit, parsedOldItem.itemUnits!);
@@ -140,7 +151,7 @@ const deleteItem = async (id: number) => {
   }
 };
 
-const importItem = async (buffer: Buffer) => {
+const importItem = async (buffer: Buffer, user: UserInfo) => {
   try {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer);
@@ -205,10 +216,12 @@ const exportItem = async (abacFilter: PrismaQuery) => {
 
     const parsedItems = items.map((item) => ({
       ...item,
-      itemUnits: item.itemUnits.map((unit) => ({
-        ...unit,
-        purchasePrice: unit.purchasePrice.toNumber(),
-      })),
+      itemUnits: sortUnitsByType(
+        item.itemUnits.map((unit) => ({
+          ...unit,
+          purchasePrice: unit.purchasePrice.toNumber(),
+        })),
+      ),
     }));
 
     const workbook = new ExcelJS.Workbook();

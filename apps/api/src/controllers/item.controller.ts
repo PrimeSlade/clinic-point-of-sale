@@ -132,7 +132,7 @@ const importItem = async (
       throw new BadRequestError("No file uploaded");
     }
 
-    const result = await itemService.importItem(req.file.buffer);
+    const result = await itemService.importItem(req.file.buffer, req.user);
 
     sendResponse(res, 201, "Items imported successfully", result);
   } catch (error) {
