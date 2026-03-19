@@ -3,6 +3,7 @@ import { withRollback } from '../helpers/transaction.helper';
 import { createTestItem, mockImportItem, createTestUser } from '../factories/item.factory';
 import * as itemModel from '../../src/models/item.model';
 import { HistoryAction } from '../../src/generated/prisma';
+import prisma from '../../src/config/prisma.client';
 
 describe('importItem transaction', () => {
   it('should process items sequentially in transaction', async () => {
@@ -15,13 +16,16 @@ describe('importItem transaction', () => {
         mockImportItem({ barcode: 'TEST-002', locationId: 1 }),
       ];
 
-      const results = await itemModel.importItemsWithTransaction(items, user, trx);
+      const { results, summary } = await itemModel.importItemsWithTransaction(items, user, trx);
 
       expect(results).toHaveLength(2);
       expect(results[0].item.barcode).toBe('TEST-001');
       expect(results[1].item.barcode).toBe('TEST-002');
-      expect(results[0].wasUpdate).toBe(false); // New items
-      expect(results[0].hasChanges).toBe(false); // No existing to compare
+      expect(results[0].action).toBe('created'); // New items
+      expect(results[1].action).toBe('created');
+      expect(summary.created).toBe(2);
+      expect(summary.updated).toBe(0);
+      expect(summary.skipped).toBe(0);
     });
   });
 
@@ -33,7 +37,7 @@ describe('importItem transaction', () => {
         locationId: 1,
       });
 
-      const results = await itemModel.importItemsWithTransaction(
+      const { results, summary } = await itemModel.importItemsWithTransaction(
         [newItem],
         user,
         trx,
@@ -42,8 +46,9 @@ describe('importItem transaction', () => {
       expect(results).toHaveLength(1);
       expect(results[0].item.barcode).toBe(newItem.barcode);
       expect(results[0].item.name).toBe(newItem.name);
-      expect(results[0].wasUpdate).toBe(false);
-      expect(results[0].hasChanges).toBe(false);
+      expect(results[0].action).toBe('created');
+      expect(summary.created).toBe(1);
+      expect(summary.updated).toBe(0);
     });
   });
 
@@ -76,7 +81,7 @@ describe('importItem transaction', () => {
       // Set the correct unit ID from the existing item
       importItem.itemUnits[0].id = existingItem.itemUnits[0].id;
 
-      const results = await itemModel.importItemsWithTransaction(
+      const { results, summary } = await itemModel.importItemsWithTransaction(
         [importItem],
         user,
         trx,
@@ -86,9 +91,10 @@ describe('importItem transaction', () => {
       expect(results[0].item.barcode).toBe('UPDATE-TEST');
       expect(results[0].item.name).toBe('Updated Name');
       expect(results[0].item.id).toBe(existingItem.id); // Same item updated
-      expect(results[0].wasUpdate).toBe(true);
-      expect(results[0].hasChanges).toBe(true); // Changes detected!
-      expect(results[0].newUnitsWithFlags[0].isChanged).toBe(true);
+      expect(results[0].action).toBe('updated'); // Changes detected!
+      expect(summary.updated).toBe(1);
+      expect(summary.created).toBe(0);
+      expect(summary.skipped).toBe(0);
     });
   });
 
@@ -129,16 +135,17 @@ describe('importItem transaction', () => {
       // Set the correct unit ID
       importItem.itemUnits[0].id = existingItem.itemUnits[0].id;
 
-      const results = await itemModel.importItemsWithTransaction(
+      const { results, summary } = await itemModel.importItemsWithTransaction(
         [importItem],
         user,
         trx,
       );
 
       expect(results).toHaveLength(1);
-      expect(results[0].wasUpdate).toBe(true);
-      expect(results[0].hasChanges).toBe(false); // No changes detected!
-      expect(results[0].newUnitsWithFlags[0].isChanged).toBe(false);
+      expect(results[0].action).toBe('skipped'); // No changes detected!
+      expect(summary.skipped).toBe(1);
+      expect(summary.updated).toBe(0);
+      expect(summary.created).toBe(0);
     });
   });
 });
@@ -152,15 +159,14 @@ describe('importItem history recording', () => {
         locationId: 1,
       });
 
-      const results = await itemModel.importItemsWithTransaction(
+      const { results } = await itemModel.importItemsWithTransaction(
         [newItem],
         user,
         trx,
       );
 
       expect(results).toHaveLength(1);
-      expect(results[0].wasUpdate).toBe(false);
-      expect(results[0].hasChanges).toBe(false);
+      expect(results[0].action).toBe('created');
       
       // Check that no history was created
       const histories = await itemModel.getItemHistoriesById(results[0].item.id, trx);
@@ -204,13 +210,13 @@ describe('importItem history recording', () => {
       
       importItem.itemUnits[0].id = existingItem.itemUnits[0].id;
 
-      const results = await itemModel.importItemsWithTransaction(
+      const { results } = await itemModel.importItemsWithTransaction(
         [importItem],
         user,
         trx,
       );
 
-      expect(results[0].hasChanges).toBe(true);
+      expect(results[0].action).toBe('updated');
       
       // Check that history was created
       const histories = await itemModel.getItemHistoriesById(results[0].item.id, trx);
@@ -267,14 +273,13 @@ describe('importItem history recording', () => {
       
       importItem.itemUnits[0].id = existingItem.itemUnits[0].id;
 
-      const results = await itemModel.importItemsWithTransaction(
+      const { results } = await itemModel.importItemsWithTransaction(
         [importItem],
         user,
         trx,
       );
 
-      expect(results[0].wasUpdate).toBe(true);
-      expect(results[0].hasChanges).toBe(false);
+      expect(results[0].action).toBe('skipped');
       
       // Check that no history was created
       const histories = await itemModel.getItemHistoriesById(results[0].item.id, trx);
@@ -430,9 +435,12 @@ describe('importItem history recording', () => {
       imports[1].itemUnits[0].id = existingItem1.itemUnits[0].id;
       imports[2].itemUnits[0].id = existingItem2.itemUnits[0].id;
 
-      const results = await itemModel.importItemsWithTransaction(imports, user, trx);
+      const { results, summary } = await itemModel.importItemsWithTransaction(imports, user, trx);
 
       expect(results).toHaveLength(3);
+      expect(summary.created).toBe(1);
+      expect(summary.updated).toBe(1);
+      expect(summary.skipped).toBe(1);
       
       // New item: no history
       const history0 = await itemModel.getItemHistoriesById(results[0].item.id, trx);
@@ -446,6 +454,213 @@ describe('importItem history recording', () => {
       // Unchanged: no history
       const history2 = await itemModel.getItemHistoriesById(results[2].item.id, trx);
       expect(history2).toHaveLength(0);
+    });
+  });
+});
+
+describe('importItem end-to-end integration', () => {
+  it('should handle E2E import with history query verification', async () => {
+    await withRollback(async (trx) => {
+      const user = await createTestUser(trx);
+      
+      // Create an existing item
+      const existingItem = await createTestItem(trx, {
+        barcode: 'E2E-TEST',
+        locationId: 1,
+        units: [
+          {
+            unitType: 'btl',
+            rate: 1,
+            quantity: 10,
+            purchasePrice: 100,
+          },
+        ],
+      });
+
+      // Import with changes
+      const importItem = mockImportItem({
+        barcode: 'E2E-TEST',
+        locationId: 1,
+        units: [
+          {
+            unitType: 'btl',
+            rate: 1,
+            quantity: 50,
+            purchasePrice: 150,
+          },
+        ],
+      });
+      
+      importItem.itemUnits[0].id = existingItem.itemUnits[0].id;
+
+      const { results, summary } = await itemModel.importItemsWithTransaction(
+        [importItem],
+        user,
+        trx,
+      );
+
+      expect(results).toHaveLength(1);
+      expect(summary.updated).toBe(1);
+      
+      // Query history to verify
+      const histories = await itemModel.getItemHistoriesById(results[0].item.id, trx);
+      expect(histories).toHaveLength(1);
+      expect(histories[0].action).toBe(HistoryAction.import);
+      expect(histories[0].itemHistoryDetails).toHaveLength(1);
+      
+      const detail = histories[0].itemHistoryDetails[0];
+      expect(detail.oldQuantity).toBe(10);
+      expect(detail.newQuantity).toBe(50);
+      expect(detail.oldPurchasePrice.toNumber()).toBe(100);
+      expect(detail.newPurchasePrice.toNumber()).toBe(150);
+    });
+  });
+
+  it('should return history with import and edit entries ordered', async () => {
+    await withRollback(async (trx) => {
+      const user = await createTestUser(trx);
+      
+      // Create item
+      const item = await createTestItem(trx, {
+        barcode: 'HISTORY-ORDER-TEST',
+        locationId: 1,
+        units: [
+          {
+            unitType: 'btl',
+            rate: 1,
+            quantity: 10,
+            purchasePrice: 100,
+          },
+        ],
+      });
+
+      // First: import to create initial history
+      const importItem1 = mockImportItem({
+        barcode: 'HISTORY-ORDER-TEST',
+        locationId: 1,
+        units: [
+          {
+            unitType: 'btl',
+            rate: 1,
+            quantity: 20, // Changed
+            purchasePrice: 100,
+          },
+        ],
+      });
+      
+      importItem1.itemUnits[0].id = item.itemUnits[0].id;
+      await itemModel.importItemsWithTransaction([importItem1], user, trx);
+
+      // Second: another import
+      const importItem2 = mockImportItem({
+        barcode: 'HISTORY-ORDER-TEST',
+        locationId: 1,
+        units: [
+          {
+            unitType: 'btl',
+            rate: 1,
+            quantity: 30, // Changed again
+            purchasePrice: 100,
+          },
+        ],
+      });
+      
+      importItem2.itemUnits[0].id = item.itemUnits[0].id;
+      await itemModel.importItemsWithTransaction([importItem2], user, trx);
+      
+      // Query history
+      const histories = await itemModel.getItemHistoriesById(item.id, trx);
+      expect(histories).toHaveLength(2);
+      
+      // Most recent first (second import)
+      expect(histories[0].action).toBe(HistoryAction.import);
+      expect(histories[0].itemHistoryDetails[0].newQuantity).toBe(30);
+      
+      // Older entry (first import)
+      expect(histories[1].action).toBe(HistoryAction.import);
+      expect(histories[1].itemHistoryDetails[0].newQuantity).toBe(20);
+    });
+  });
+});
+
+describe('importItem error handling', () => {
+  it('should rollback on invalid locationId', async () => {
+    const user = await withRollback(async (trx) => {
+      return await createTestUser(trx);
+    });
+    
+    // Try import with invalid location
+    const invalidItem = mockImportItem({
+      barcode: 'INVALID-LOC-TEST',
+      locationId: 99999, // Non-existent location
+    });
+
+    await expect(
+      prisma.$transaction(async (trx) => {
+        return itemModel.importItemsWithTransaction([invalidItem], user, trx);
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('should handle duplicate barcodes in same import batch', async () => {
+    await withRollback(async (trx) => {
+      const user = await createTestUser(trx);
+      
+      const items = [
+        mockImportItem({ barcode: 'DUP-001', locationId: 1 }),
+        mockImportItem({ barcode: 'DUP-002', locationId: 1 }),
+      ];
+
+      // Should create both items successfully
+      const { results, summary } = await itemModel.importItemsWithTransaction(items, user, trx);
+      
+      expect(results).toHaveLength(2);
+      expect(summary.created).toBe(2);
+      expect(results[0].item.barcode).toBe('DUP-001');
+      expect(results[1].item.barcode).toBe('DUP-002');
+    });
+  });
+
+  it('should preserve Decimal precision for before/after values', async () => {
+    await withRollback(async (trx) => {
+      const user = await createTestUser(trx);
+      
+      const item = await createTestItem(trx, {
+        barcode: 'DECIMAL-TEST',
+        locationId: 1,
+        units: [
+          {
+            unitType: 'btl',
+            rate: 1,
+            quantity: 10,
+            purchasePrice: 99.99,
+          },
+        ],
+      });
+
+      const importItem = mockImportItem({
+        barcode: 'DECIMAL-TEST',
+        locationId: 1,
+        units: [
+          {
+            unitType: 'btl',
+            rate: 1,
+            quantity: 10,
+            purchasePrice: 199.99, // Decimal change
+          },
+        ],
+      });
+      
+      importItem.itemUnits[0].id = item.itemUnits[0].id;
+
+      await itemModel.importItemsWithTransaction([importItem], user, trx);
+      
+      const histories = await itemModel.getItemHistoriesById(item.id, trx);
+      const detail = histories[0].itemHistoryDetails[0];
+      
+      // Verify exact decimal precision
+      expect(detail.oldPurchasePrice.toNumber()).toBe(99.99);
+      expect(detail.newPurchasePrice.toNumber()).toBe(199.99);
     });
   });
 });

@@ -333,16 +333,24 @@ const importItemsWithTransaction = async (
       );
     }
     
-    // Store result with metadata about changes
+    // Store result with action metadata
     results.push({
       item: result,
-      wasUpdate: !!existingItem,
-      hasChanges,
-      oldUnits,
-      newUnitsWithFlags,
+      action: existingItem 
+        ? (hasChanges ? 'updated' : 'skipped')
+        : 'created',
     });
   }
-  return results;
+  
+  // Generate summary
+  const summary = {
+    created: results.filter(r => r.action === 'created').length,
+    updated: results.filter(r => r.action === 'updated').length,
+    skipped: results.filter(r => r.action === 'skipped').length,
+    errors: [] as string[],
+  };
+  
+  return { results, summary };
 };
 
 
