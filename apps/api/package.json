@@ -39,6 +39,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.7",
+    "@vitest/coverage-v8": "^4.1.0",
     "@vitest/ui": "^4.1.0",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
