@@ -1,24 +1,12 @@
 import { z } from "zod";
 import { BadRequestError } from "../errors";
 import { ImportItems } from "../types/item.type";
-
-const unitType = [
-  "pkg",
-  "box",
-  "strip",
-  "btl",
-  "amp",
-  "tube",
-  "sac",
-  "cap",
-  "tab",
-  "pcs",
-] as const;
+import { UNIT_TYPE_ORDER } from "./unit-type.util";
 
 const subUnitSchema = z.object({
   id: z.number().optional(),
 
-  unitType: z.enum(unitType, {
+  unitType: z.enum(UNIT_TYPE_ORDER, {
     message: "Plese select a valid unit",
   }),
 
