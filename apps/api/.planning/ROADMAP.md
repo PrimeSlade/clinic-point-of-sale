@@ -44,7 +44,10 @@ This roadmap extends the existing single-item history tracking functionality to 
 - Add validation for maximum row count (5000 items) to prevent obvious performance issues
 - Verify existing query endpoint (`getItemHistoriesById()`) correctly returns import history
 
-**Plans:** TBD
+**Plans:** 1 plan (6 waves)
+
+Plans:
+- [ ] 01-PLAN.md — Core history integration with transactional consistency
 
 ---
 
@@ -117,7 +120,7 @@ This roadmap extends the existing single-item history tracking functionality to 
 
 | Phase                           | Plans Complete | Status      | Completed |
 | ------------------------------- | -------------- | ----------- | --------- |
-| 1. Core History Integration     | 0/?            | Not started | -         |
+| 1. Core History Integration     | 0/1            | Planned     | -         |
 | 2. Performance & Reliability    | 0/?            | Not started | -         |
 | 3. Observability & Verification | 0/?            | Not started | -         |
 
