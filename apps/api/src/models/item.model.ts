@@ -10,6 +10,7 @@ import {
 import { HistoryAction, Prisma } from "../generated/prisma";
 import { PrismaQuery } from "@casl/prisma";
 import { UserInfo } from "../types/auth.type";
+import { markIsChangedUnit } from "../utils/item.util";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
   return prisma.item.create({
@@ -221,15 +222,59 @@ const importItems = async (items: ImportItems) => {
 };
 
 /**
+ * Fetch item by barcode within a transaction.
+ */
+const getItemByBarcodeWithTrx = async (
+  barcode: string,
+  trx: Prisma.TransactionClient,
+) => {
+  return trx.item.findUnique({
+    where: { barcode },
+    include: { location: true, itemUnits: true },
+  });
+};
+
+/**
  * Import items using callback-based transaction for sequential processing.
  * This enables history recording before each upsert.
  */
 const importItemsWithTransaction = async (
   items: ImportItems,
+  user: UserInfo,
   trx: Prisma.TransactionClient,
 ) => {
   const results = [];
   for (const item of items) {
+    // 1. Fetch existing item (if any)
+    const existingItem = item.barcode
+      ? await getItemByBarcodeWithTrx(item.barcode, trx)
+      : null;
+
+    // 2. Detect changes if existing
+    let hasChanges = false;
+    let oldUnits: UpdateUnit[] = [];
+    let newUnitsWithFlags: UpdateUnit[] = [];
+
+    if (existingItem) {
+      // Parse Decimal to number for comparison
+      oldUnits = existingItem.itemUnits.map((u) => ({
+        ...u,
+        purchasePrice: u.purchasePrice.toNumber(),
+        isChanged: false,
+      })) as UpdateUnit[];
+
+      // Map import units to have IDs from existing item
+      const mappedNewUnits = item.itemUnits.map((u, idx) => ({
+        ...u,
+        id: oldUnits[idx]?.id ?? -1,
+        isChanged: false,
+      }));
+
+      newUnitsWithFlags = markIsChangedUnit(mappedNewUnits, oldUnits);
+      hasChanges = newUnitsWithFlags.some((u) => u.isChanged);
+    }
+
+    // 3. Perform upsert (history recording comes in Wave 4)
     const result = await trx.item.upsert({
       where: { barcode: item.barcode || " " },
       update: {
@@ -275,7 +320,15 @@ const importItemsWithTransaction = async (
         itemUnits: true,
       },
     });
-    results.push(result);
+    
+    // Store result with metadata about changes
+    results.push({
+      item: result,
+      wasUpdate: !!existingItem,
+      hasChanges,
+      oldUnits,
+      newUnitsWithFlags,
+    });
   }
   return results;
 };
@@ -350,6 +403,7 @@ export {
   deleteItem,
   importItems,
   importItemsWithTransaction,
+  getItemByBarcodeWithTrx,
   addItemHistory,
   getItemHistoriesById,
 };

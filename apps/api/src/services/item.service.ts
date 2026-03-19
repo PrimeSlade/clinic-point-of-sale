@@ -210,7 +210,7 @@ const importItem = async (buffer: Buffer, user: UserInfo) => {
     // Use callback-based transaction for sequential processing
     const result = await prisma.$transaction(
       async (trx) => {
-        return itemModel.importItemsWithTransaction(validatedItems, trx);
+        return itemModel.importItemsWithTransaction(validatedItems, user, trx);
       },
       {
         maxWait: 10000, // 10s to acquire lock

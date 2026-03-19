@@ -52,6 +52,8 @@ export async function createTestUser(
     name: string;
     email: string;
     roleId: number;
+    locationId: number;
+    pricePercent: number;
   }>
 ) {
   return trx.user.create({
@@ -60,6 +62,8 @@ export async function createTestUser(
       email: overrides?.email ?? `test-${Date.now()}@example.com`,
       password: 'hashedpassword',
       roleId: overrides?.roleId ?? 1,
+      locationId: overrides?.locationId ?? 1,
+      pricePercent: overrides?.pricePercent ?? 0,
     },
   });
 }
