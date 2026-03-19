@@ -199,7 +199,24 @@ const importItem = async (buffer: Buffer, user: UserInfo) => {
 
     const validatedItems = validateItems(items);
 
-    const result = await itemModel.importItems(validatedItems);
+    // Add row limit validation to prevent timeout
+    const MAX_IMPORT_ROWS = 5000;
+    if (validatedItems.length > MAX_IMPORT_ROWS) {
+      throw new BadRequestError(
+        `Import exceeds maximum of ${MAX_IMPORT_ROWS} items`,
+      );
+    }
+
+    // Use callback-based transaction for sequential processing
+    const result = await prisma.$transaction(
+      async (trx) => {
+        return itemModel.importItemsWithTransaction(validatedItems, trx);
+      },
+      {
+        maxWait: 10000, // 10s to acquire lock
+        timeout: 20000, // 20s total execution
+      },
+    );
 
     return result;
   } catch (error: any) {

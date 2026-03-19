@@ -220,6 +220,67 @@ const importItems = async (items: ImportItems) => {
   );
 };
 
+/**
+ * Import items using callback-based transaction for sequential processing.
+ * This enables history recording before each upsert.
+ */
+const importItemsWithTransaction = async (
+  items: ImportItems,
+  trx: Prisma.TransactionClient,
+) => {
+  const results = [];
+  for (const item of items) {
+    const result = await trx.item.upsert({
+      where: { barcode: item.barcode || " " },
+      update: {
+        name: item.name,
+        category: item.category,
+        expiryDate: item.expiryDate,
+        description: item.description,
+        locationId: item.locationId,
+        itemUnits: {
+          update: item.itemUnits.map((u) => ({
+            where: {
+              id: u.id || -1,
+            },
+            data: {
+              unitType: u.unitType,
+              rate: u.rate,
+              quantity: u.quantity,
+              purchasePrice: u.purchasePrice,
+            },
+          })),
+        },
+      },
+      create: {
+        barcode: item.barcode || undefined, // Let Prisma generate UUID if not provided
+        name: item.name,
+        category: item.category,
+        expiryDate: item.expiryDate,
+        description: item.description,
+        locationId: item.locationId,
+        itemUnits: {
+          createMany: {
+            data: item.itemUnits.map((u) => ({
+              unitType: u.unitType,
+              rate: u.rate,
+              quantity: u.quantity,
+              purchasePrice: u.purchasePrice,
+            })),
+          },
+        },
+      },
+      include: {
+        location: true,
+        itemUnits: true,
+      },
+    });
+    results.push(result);
+  }
+  return results;
+};
+
+
 const addItemHistory = (
   newUnit: Array<UpdateUnit>,
   oldUnit: Array<UpdateUnit>,
@@ -288,6 +349,7 @@ export {
   updateItem,
   deleteItem,
   importItems,
+  importItemsWithTransaction,
   addItemHistory,
   getItemHistoriesById,
 };

@@ -11,6 +11,7 @@ export async function createTestItem(
     barcode: string;
     category: string;
     locationId: number;
+    expiryDate: Date | null;
     units: Array<Partial<Unit>>;
   }>
 ) {
@@ -21,12 +22,13 @@ export async function createTestItem(
       category: overrides?.category ?? 'Test Category',
       locationId: overrides?.locationId ?? 1,
       description: 'Test Description',
+      expiryDate: overrides?.expiryDate ?? new Date('2025-12-31'),
       itemUnits: {
         createMany: {
           data: (overrides?.units ?? [
-            { unitType: 'BOX', rate: 1, quantity: 10, purchasePrice: 100 },
+            { unitType: 'btl', rate: 1, quantity: 10, purchasePrice: 100 },
           ]).map((u) => ({
-            unitType: u.unitType ?? 'BOX',
+            unitType: u.unitType ?? 'btl',
             rate: u.rate ?? 1,
             quantity: u.quantity ?? 10,
             purchasePrice: u.purchasePrice ?? 100,
@@ -71,6 +73,7 @@ export function mockImportItem(
     barcode: string;
     category: string;
     locationId: number;
+    expiryDate: Date | null;
     units: Array<Partial<Unit>>;
   }>
 ) {
@@ -80,11 +83,11 @@ export function mockImportItem(
     category: overrides?.category ?? 'Import Category',
     locationId: overrides?.locationId ?? 1,
     description: 'Import Description',
-    expiryDate: null,
+    expiryDate: overrides?.expiryDate ?? new Date('2025-12-31'),
     itemUnits: (overrides?.units ?? [
-      { unitType: 'BOX', rate: 1, quantity: 20, purchasePrice: 150 },
+      { unitType: 'btl', rate: 1, quantity: 20, purchasePrice: 150 },
     ]).map((u) => ({
-      unitType: u.unitType ?? 'BOX',
+      unitType: u.unitType ?? 'btl',
       rate: u.rate ?? 1,
       quantity: u.quantity ?? 20,
       purchasePrice: u.purchasePrice ?? 150,
