@@ -274,7 +274,7 @@ const importItemsWithTransaction = async (
       hasChanges = newUnitsWithFlags.some((u) => u.isChanged);
     }
 
-    // 3. Perform upsert (history recording comes in Wave 4)
+    // 3. Perform upsert
     const result = await trx.item.upsert({
       where: { barcode: item.barcode || " " },
       update: {
@@ -320,6 +320,18 @@ const importItemsWithTransaction = async (
         itemUnits: true,
       },
     });
+    
+    // 4. Record history for updated items with changes
+    if (existingItem && hasChanges) {
+      await addItemHistory(
+        newUnitsWithFlags,
+        oldUnits,
+        user,
+        HistoryAction.import,
+        result.id,
+        trx,
+      );
+    }
     
     // Store result with metadata about changes
     results.push({
@@ -371,8 +383,13 @@ const addItemHistory = (
   });
 };
 
-const getItemHistoriesById = async (itemId: number) => {
-  return prisma.itemHistory.findMany({
+const getItemHistoriesById = async (
+  itemId: number,
+  trx?: Prisma.TransactionClient,
+) => {
+  const client = trx || prisma;
+  
+  return client.itemHistory.findMany({
     where: {
       itemId,
     },
