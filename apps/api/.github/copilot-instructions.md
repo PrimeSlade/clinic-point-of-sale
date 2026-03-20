@@ -81,10 +81,42 @@ The project follows a **layered architecture**:
 
 1. **Routes** (`src/routes/*.ts`) - Define endpoints and HTTP methods
 2. **Controllers** (`src/controllers/*.ts`) - Handle requests, call services
-3. **Services** (`src/services/*.ts`) - Contain business logic
-4. **Models** (`src/models/*.ts`) - Direct database queries via Prisma
-5. **Middlewares** (`src/middlewares/*.ts`) - Request processing (auth, validation, error handling)
-6. **Types** (`src/types/*.ts`) - Shared TypeScript definitions
+3. **Services** (`src/services/*.ts`) - Business logic orchestration and transactions
+4. **Models** (`src/models/*.ts`) - Pure database queries via Prisma (no business logic)
+5. **Utils** (`src/utils/*.ts`) - Pure helper functions (no DB calls, no side effects)
+6. **Middlewares** (`src/middlewares/*.ts`) - Request processing (auth, validation, error handling)
+7. **Types** (`src/types/*.ts`) - Shared TypeScript definitions
+
+#### Layer Responsibilities
+
+| Layer | Responsibility | Example |
+|-------|---------------|---------|
+| **Models** | Database operations only | `getItemById()`, `upsertItem()`, `addHistory()` |
+| **Utils** | Pure helper functions | `detectChanges()`, `generateSummary()`, `formatDate()` |
+| **Services** | Orchestration & transactions | Combine models + utils inside `prisma.$transaction()` |
+
+```typescript
+// ✅ Correct: Service orchestrates inside transaction
+const importItem = async (items, user) => {
+  const result = await prisma.$transaction(async (trx) => {
+    for (const item of items) {
+      const existing = await itemModel.getByBarcode(item.barcode, trx);  // Model: DB
+      const changes = detectUnitChanges(existing, item.units);           // Util: Pure
+      const upserted = await itemModel.upsertItem(item, trx);            // Model: DB
+      if (changes.hasChanges) {
+        await itemModel.addHistory(changes, user, trx);                  // Model: DB
+      }
+    }
+    return generateImportSummary(results);                               // Util: Pure
+  });
+  return result;
+};
+
+// ❌ Wrong: Model containing business logic
+const importItemsWithTransaction = async (items, user, trx) => {
+  // Don't put orchestration logic in models
+};
+```
 
 ### Key Patterns
 
