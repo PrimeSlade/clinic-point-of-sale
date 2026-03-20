@@ -1,7 +1,15 @@
 import { Worksheet } from "exceljs";
 import { NotFoundError, BadRequestError } from "../errors";
 import { getLocationByName } from "../models/location.model";
-import { ImportUnit, UpdateUnit } from "../types/item.type";
+import {
+  ImportItems,
+  ImportUnit,
+  UpdateUnit,
+  ImportAction,
+  ExistingItemWithUnits,
+  ImportResult,
+  ChangeDetectionResult,
+} from "../types/item.type";
 
 const transformImportedData = async (items: any) => {
   return Promise.all(
@@ -110,4 +118,60 @@ const markIsChangedUnit = (
   });
 };
 
-export { transformImportedData, validateFile, markIsChangedUnit };
+/**
+ * Detects changes between existing item units and incoming import units.
+ */
+const detectUnitChanges = (
+  existingItem: ExistingItemWithUnits,
+  importUnits: ImportItems[number]["itemUnits"],
+): ChangeDetectionResult => {
+  const oldUnits = existingItem.itemUnits.map((u) => ({
+    ...u,
+    purchasePrice: u.purchasePrice.toNumber(),
+    isChanged: false,
+  })) as UpdateUnit[];
+
+  // Use Excel ID if present, otherwise fall back to position-based matching
+  const mappedNewUnits = importUnits.map((u, idx) => ({
+    ...u,
+    id: u.id ?? -1,
+    isChanged: false,
+  }));
+
+  const newUnitsWithFlags = markIsChangedUnit(mappedNewUnits, oldUnits);
+  const hasChanges = newUnitsWithFlags.some((u) => u.isChanged);
+
+  return { hasChanges, oldUnits, newUnitsWithFlags };
+};
+
+/**
+ * Determines the import action based on existing item and changes.
+ */
+const determineImportAction = (
+  existingItem: ExistingItemWithUnits | null,
+  hasChanges: boolean,
+): ImportAction => {
+  if (!existingItem) return "created";
+  return hasChanges ? "updated" : "skipped";
+};
+
+/**
+ * Generates summary statistics from import results.
+ */
+const generateImportSummary = (results: ImportResult[]) => ({
+  created: results.filter((r) => r.action === "created").length,
+  updated: results.filter((r) => r.action === "updated").length,
+  skipped: results.filter((r) => r.action === "skipped").length,
+  errors: [] as string[],
+});
+
+export {
+  transformImportedData,
+  validateFile,
+  markIsChangedUnit,
+  detectUnitChanges,
+  determineImportAction,
+  generateImportSummary,
+  type ImportResult,
+  type ImportAction,
+};

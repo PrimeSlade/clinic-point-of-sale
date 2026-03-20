@@ -9,9 +9,13 @@ import {
 } from "../types/item.type";
 import * as itemModel from "../models/item.model";
 import {
-  markIsChangedUnit,
   transformImportedData,
   validateFile,
+  detectUnitChanges,
+  determineImportAction,
+  generateImportSummary,
+  type ImportResult,
+  markIsChangedUnit,
 } from "../utils/item.util";
 import { PrismaQuery } from "@casl/prisma";
 import { validateItems } from "../utils/validation";
@@ -19,6 +23,7 @@ import { handlePrismaError } from "../errors/prismaHandler";
 import { UserInfo } from "../types/auth.type";
 import prisma from "../config/prisma.client";
 import { sortUnitsByType } from "../utils/unit-type.util";
+import { HistoryAction } from "../generated/prisma";
 
 type ExcelRow = {
   warehouse: string;
@@ -207,14 +212,48 @@ const importItem = async (buffer: Buffer, user: UserInfo) => {
       );
     }
 
-    // Use callback-based transaction for sequential processing
+    // Transaction with all business logic inline
     const result = await prisma.$transaction(
       async (trx) => {
-        return itemModel.importItemsWithTransaction(validatedItems, user, trx);
+        const results: ImportResult[] = [];
+
+        for (const item of validatedItems) {
+          // 1. Fetch existing item
+          const existingItem = item.barcode
+            ? await itemModel.getItemByBarcodeWithTrx(item.barcode, trx)
+            : null;
+
+          // 2. Detect changes
+          const { hasChanges, oldUnits, newUnitsWithFlags } = existingItem
+            ? detectUnitChanges(existingItem, item.itemUnits)
+            : { hasChanges: false, oldUnits: [], newUnitsWithFlags: [] };
+
+          // 3. Upsert item
+          const upsertedItem = await itemModel.upsertImportItem(item, trx);
+
+          // 4. Record history if updated with changes
+          if (existingItem && hasChanges) {
+            await itemModel.addItemHistory(
+              newUnitsWithFlags,
+              oldUnits,
+              user,
+              HistoryAction.import,
+              upsertedItem.id,
+              trx,
+            );
+          }
+
+          results.push({
+            item: upsertedItem,
+            action: determineImportAction(existingItem, hasChanges),
+          });
+        }
+
+        return { results, summary: generateImportSummary(results) };
       },
       {
-        maxWait: 10000, // 10s to acquire lock
-        timeout: 20000, // 20s total execution
+        maxWait: 10000, // 10s to acquire connection
+        timeout: 120000, // 2 minutes for large imports
       },
     );
 

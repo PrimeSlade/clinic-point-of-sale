@@ -223,9 +223,6 @@ const importItems = async (items: ImportItems) => {
 
 /**
  * Fetch item by barcode within a transaction.
- * @param barcode - Item barcode to search for
- * @param trx - Prisma transaction client
- * @returns Item with location and units, or null if not found
  */
 const getItemByBarcodeWithTrx = async (
   barcode: string,
@@ -238,133 +235,52 @@ const getItemByBarcodeWithTrx = async (
 };
 
 /**
- * Import items from Excel with history tracking for bulk operations.
- * Uses callback-based transaction for sequential processing to enable
- * change detection and history recording for each item.
- *
- * Features:
- * - Pre-fetches existing items to detect changes
- * - Records history only for items with actual changes
- * - Returns summary with created/updated/skipped counts
- * - Maintains transactional consistency (full rollback on error)
- *
- * @param items - Validated import items (from Excel transformation)
- * @param user - Authenticated user (for history attribution)
- * @param trx - Prisma transaction client
- * @returns Object with results array and summary statistics
- * @throws Prisma errors on database constraint violations
+ * Upsert a single import item within a transaction.
  */
-const importItemsWithTransaction = async (
-  items: ImportItems,
-  user: UserInfo,
+const upsertImportItem = async (
+  item: ImportItems[number],
   trx: Prisma.TransactionClient,
 ) => {
-  const results = [];
-  for (const item of items) {
-    // 1. Fetch existing item (if any)
-    const existingItem = item.barcode
-      ? await getItemByBarcodeWithTrx(item.barcode, trx)
-      : null;
-
-    // 2. Detect changes if existing
-    let hasChanges = false;
-    let oldUnits: UpdateUnit[] = [];
-    let newUnitsWithFlags: UpdateUnit[] = [];
-
-    if (existingItem) {
-      // Parse Decimal to number for comparison
-      oldUnits = existingItem.itemUnits.map((u) => ({
-        ...u,
-        purchasePrice: u.purchasePrice.toNumber(),
-        isChanged: false,
-      })) as UpdateUnit[];
-
-      // Map import units to have IDs from existing item
-      const mappedNewUnits = item.itemUnits.map((u, idx) => ({
-        ...u,
-        id: oldUnits[idx]?.id ?? -1,
-        isChanged: false,
-      }));
-
-      newUnitsWithFlags = markIsChangedUnit(mappedNewUnits, oldUnits);
-      hasChanges = newUnitsWithFlags.some((u) => u.isChanged);
-    }
-
-    // 3. Perform upsert
-    const result = await trx.item.upsert({
-      where: { barcode: item.barcode || " " },
-      update: {
-        name: item.name,
-        category: item.category,
-        expiryDate: item.expiryDate,
-        description: item.description,
-        locationId: item.locationId,
-        itemUnits: {
-          update: item.itemUnits.map((u) => ({
-            where: {
-              id: u.id || -1,
-            },
-            data: {
-              unitType: u.unitType,
-              rate: u.rate,
-              quantity: u.quantity,
-              purchasePrice: u.purchasePrice,
-            },
+  return trx.item.upsert({
+    where: { barcode: item.barcode || " " },
+    update: {
+      name: item.name,
+      category: item.category,
+      expiryDate: item.expiryDate,
+      description: item.description,
+      locationId: item.locationId,
+      itemUnits: {
+        update: item.itemUnits.map((u) => ({
+          where: { id: u.id || -1 },
+          data: {
+            unitType: u.unitType,
+            rate: u.rate,
+            quantity: u.quantity,
+            purchasePrice: u.purchasePrice,
+          },
+        })),
+      },
+    },
+    create: {
+      barcode: item.barcode || undefined,
+      name: item.name,
+      category: item.category,
+      expiryDate: item.expiryDate,
+      description: item.description,
+      locationId: item.locationId,
+      itemUnits: {
+        createMany: {
+          data: item.itemUnits.map((u) => ({
+            unitType: u.unitType,
+            rate: u.rate,
+            quantity: u.quantity,
+            purchasePrice: u.purchasePrice,
           })),
         },
       },
-      create: {
-        barcode: item.barcode || undefined, // Let Prisma generate UUID if not provided
-        name: item.name,
-        category: item.category,
-        expiryDate: item.expiryDate,
-        description: item.description,
-        locationId: item.locationId,
-        itemUnits: {
-          createMany: {
-            data: item.itemUnits.map((u) => ({
-              unitType: u.unitType,
-              rate: u.rate,
-              quantity: u.quantity,
-              purchasePrice: u.purchasePrice,
-            })),
-          },
-        },
-      },
-      include: {
-        location: true,
-        itemUnits: true,
-      },
-    });
-
-    // 4. Record history for updated items with changes
-    if (existingItem && hasChanges) {
-      await addItemHistory(
-        newUnitsWithFlags,
-        oldUnits,
-        user,
-        HistoryAction.import,
-        result.id,
-        trx,
-      );
-    }
-
-    // Store result with action metadata
-    results.push({
-      item: result,
-      action: existingItem ? (hasChanges ? "updated" : "skipped") : "created",
-    });
-  }
-
-  // Generate summary
-  const summary = {
-    created: results.filter((r) => r.action === "created").length,
-    updated: results.filter((r) => r.action === "updated").length,
-    skipped: results.filter((r) => r.action === "skipped").length,
-    errors: [] as string[],
-  };
-
-  return { results, summary };
+    },
+    include: { location: true, itemUnits: true },
+  });
 };
 
 /**
@@ -460,7 +376,7 @@ export {
   updateItem,
   deleteItem,
   importItems,
-  importItemsWithTransaction,
+  upsertImportItem,
   getItemByBarcodeWithTrx,
   addItemHistory,
   getItemHistoriesById,
