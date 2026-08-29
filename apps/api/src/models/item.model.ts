@@ -7,8 +7,10 @@ import {
   UpdateItem,
   UpdateUnit,
 } from "../types/item.type";
-import { Prisma } from "../generated/prisma";
+import { HistoryAction, Prisma } from "../generated/prisma";
 import { PrismaQuery } from "@casl/prisma";
+import { UserInfo } from "../types/auth.type";
+import { markIsChangedUnit } from "../utils/item.util";
 
 const addItem = async (data: Item, unit: Array<Unit>) => {
   return prisma.item.create({
@@ -123,8 +125,9 @@ const updateItem = async (
   data: UpdateItem,
   unit: Array<UpdateUnit>,
   id: number,
+  trx: Prisma.TransactionClient,
 ) => {
-  return prisma.item.update({
+  return trx.item.update({
     where: {
       id: id,
     },
@@ -218,6 +221,152 @@ const importItems = async (items: ImportItems) => {
   );
 };
 
+/**
+ * Fetch item by barcode within a transaction.
+ */
+const getItemByBarcodeWithTrx = async (
+  barcode: string,
+  trx: Prisma.TransactionClient,
+) => {
+  return trx.item.findUnique({
+    where: { barcode },
+    include: { location: true, itemUnits: true },
+  });
+};
+
+/**
+ * Upsert a single import item within a transaction.
+ */
+const upsertImportItem = async (
+  item: ImportItems[number],
+  trx: Prisma.TransactionClient,
+) => {
+  return trx.item.upsert({
+    where: { barcode: item.barcode || " " },
+    update: {
+      name: item.name,
+      category: item.category,
+      expiryDate: item.expiryDate,
+      description: item.description,
+      locationId: item.locationId,
+      itemUnits: {
+        update: item.itemUnits.map((u) => ({
+          where: { id: u.id || -1 },
+          data: {
+            unitType: u.unitType,
+            rate: u.rate,
+            quantity: u.quantity,
+            purchasePrice: u.purchasePrice,
+          },
+        })),
+      },
+    },
+    create: {
+      barcode: item.barcode || undefined,
+      name: item.name,
+      category: item.category,
+      expiryDate: item.expiryDate,
+      description: item.description,
+      locationId: item.locationId,
+      itemUnits: {
+        createMany: {
+          data: item.itemUnits.map((u) => ({
+            unitType: u.unitType,
+            rate: u.rate,
+            quantity: u.quantity,
+            purchasePrice: u.purchasePrice,
+          })),
+        },
+      },
+    },
+    include: { location: true, itemUnits: true },
+  });
+};
+
+/**
+ * Records item history with before/after values for changed units.
+ * Creates history entry with details for each unit that has changes.
+ *
+ * @param newUnit - Array of units with new values (must have isChanged flag)
+ * @param oldUnit - Array of units with old values (for comparison)
+ * @param user - User performing the action (for attribution)
+ * @param action - History action type (import, update, etc.)
+ * @param itemId - ID of the item being modified
+ * @param trx - Prisma transaction client
+ * @returns Created history record
+ */
+const addItemHistory = (
+  newUnit: Array<UpdateUnit>,
+  oldUnit: Array<UpdateUnit>,
+  user: UserInfo,
+  action: HistoryAction,
+  itemId: number,
+  trx: Prisma.TransactionClient,
+) => {
+  return trx.itemHistory.create({
+    data: {
+      userName: user.name,
+      userId: user.id,
+      action: action,
+      itemId: itemId,
+      itemHistoryDetails: {
+        createMany: {
+          data: newUnit
+            .filter((unit) => unit.isChanged)
+            .map((unit) => {
+              const matchOldUnit = oldUnit.find((o) => o.id === unit.id)!;
+              return {
+                oldUnitType: matchOldUnit.unitType,
+                newUnitType: unit.unitType,
+                oldRate: matchOldUnit.rate,
+                newRate: unit.rate,
+                oldQuantity: matchOldUnit.quantity,
+                newQuantity: unit.quantity,
+                oldPurchasePrice: matchOldUnit.purchasePrice,
+                newPurchasePrice: unit.purchasePrice,
+              };
+            }),
+        },
+      },
+    },
+  });
+};
+
+/**
+ * Retrieves item history records by item ID, ordered by most recent first.
+ * Includes history details (before/after values) and user information.
+ *
+ * @param itemId - ID of the item to get history for
+ * @param trx - Optional Prisma transaction client (for testing)
+ * @returns Array of history records with details and user info
+ */
+const getItemHistoriesById = async (
+  itemId: number,
+  trx?: Prisma.TransactionClient,
+) => {
+  const client = trx || prisma;
+
+  return client.itemHistory.findMany({
+    where: {
+      itemId,
+    },
+    include: {
+      itemHistoryDetails: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 export {
   addItem,
   getItems,
@@ -227,4 +376,8 @@ export {
   updateItem,
   deleteItem,
   importItems,
+  upsertImportItem,
+  getItemByBarcodeWithTrx,
+  addItemHistory,
+  getItemHistoriesById,
 };

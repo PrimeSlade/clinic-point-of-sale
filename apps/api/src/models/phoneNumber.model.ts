@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma";
 import prisma from "../config/prisma.client";
 
 const findNumber = async (number: string, trx: Prisma.TransactionClient) => {

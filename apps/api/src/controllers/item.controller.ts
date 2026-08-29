@@ -93,7 +93,12 @@ const updateItem = async (
   }
 
   try {
-    const updatedItem = await itemService.updateItem(item, itemUnits, id);
+    const updatedItem = await itemService.updateItem(
+      item,
+      itemUnits,
+      id,
+      req.user,
+    );
 
     sendResponse(res, 200, "Item updated successfully", updatedItem);
   } catch (error: any) {
@@ -127,7 +132,7 @@ const importItem = async (
       throw new BadRequestError("No file uploaded");
     }
 
-    const result = await itemService.importItem(req.file.buffer);
+    const result = await itemService.importItem(req.file.buffer, req.user);
 
     sendResponse(res, 201, "Items imported successfully", result);
   } catch (error) {
@@ -157,6 +162,22 @@ const exportItem = async (
   }
 };
 
+const getItemHistoriesById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const itemId = Number(req.params.id);
+
+  try {
+    const histories = await itemService.getItemHistoriesById(itemId);
+
+    sendResponse(res, 200, "Item histories fetched successfully", histories);
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 export {
   addItem,
   getItems,
@@ -165,4 +186,5 @@ export {
   deleteItem,
   importItem,
   exportItem,
+  getItemHistoriesById,
 };

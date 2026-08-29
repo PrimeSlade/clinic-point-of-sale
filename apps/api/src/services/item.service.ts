@@ -8,10 +8,22 @@ import {
   UpdateUnit,
 } from "../types/item.type";
 import * as itemModel from "../models/item.model";
-import { transformImportedData, validateFile } from "../utils/item.util";
+import {
+  transformImportedData,
+  validateFile,
+  detectUnitChanges,
+  determineImportAction,
+  generateImportSummary,
+  type ImportResult,
+  markIsChangedUnit,
+} from "../utils/item.util";
 import { PrismaQuery } from "@casl/prisma";
 import { validateItems } from "../utils/validation";
 import { handlePrismaError } from "../errors/prismaHandler";
+import { UserInfo } from "../types/auth.type";
+import prisma from "../config/prisma.client";
+import { sortUnitsByType } from "../utils/unit-type.util";
+import { HistoryAction } from "../generated/prisma";
 
 type ExcelRow = {
   warehouse: string;
@@ -54,10 +66,12 @@ const getItems = async ({
     //change string to number
     const parsedItems = items.map((item) => ({
       ...item,
-      itemUnits: item.itemUnits.map((unit) => ({
-        ...unit,
-        purchasePrice: unit.purchasePrice.toNumber(),
-      })),
+      itemUnits: sortUnitsByType(
+        item.itemUnits.map((unit) => ({
+          ...unit,
+          purchasePrice: unit.purchasePrice.toNumber(),
+        })),
+      ),
     }));
 
     return { items: parsedItems, total };
@@ -73,10 +87,14 @@ const getItemById = async (id: number) => {
     //change string to number
     const parsedItem = {
       ...item,
-      itemUnits: item?.itemUnits.map((unit) => ({
-        ...unit,
-        purchasePrice: unit.purchasePrice.toNumber(),
-      })),
+      itemUnits: item?.itemUnits
+        ? sortUnitsByType(
+            item.itemUnits.map((unit) => ({
+              ...unit,
+              purchasePrice: unit.purchasePrice.toNumber(),
+            })),
+          )
+        : [],
     };
 
     return parsedItem;
@@ -89,9 +107,38 @@ const updateItem = async (
   data: UpdateItem,
   unit: Array<UpdateUnit>,
   id: number,
+  user: UserInfo,
 ) => {
   try {
-    const updated = await itemModel.updateItem(data, unit, id);
+    const oldItem = await itemModel.getItemById(id);
+
+    //change string to number
+    const parsedOldItem = {
+      ...oldItem,
+      itemUnits: oldItem?.itemUnits
+        ? sortUnitsByType(
+            oldItem.itemUnits.map((unit) => ({
+              ...unit,
+              purchasePrice: unit.purchasePrice.toNumber(),
+            })),
+          )
+        : [],
+    };
+
+    const newUnit = markIsChangedUnit(unit, parsedOldItem.itemUnits!);
+
+    const updated = await prisma.$transaction(async (trx) => {
+      await itemModel.addItemHistory(
+        newUnit,
+        parsedOldItem.itemUnits!,
+        user,
+        "edit",
+        id,
+        trx,
+      );
+
+      return itemModel.updateItem(data, unit, id, trx);
+    });
 
     return updated;
   } catch (error: any) {
@@ -109,7 +156,7 @@ const deleteItem = async (id: number) => {
   }
 };
 
-const importItem = async (buffer: Buffer) => {
+const importItem = async (buffer: Buffer, user: UserInfo) => {
   try {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer);
@@ -157,7 +204,58 @@ const importItem = async (buffer: Buffer) => {
 
     const validatedItems = validateItems(items);
 
-    const result = await itemModel.importItems(validatedItems);
+    // Add row limit validation to prevent timeout
+    const MAX_IMPORT_ROWS = 5000;
+    if (validatedItems.length > MAX_IMPORT_ROWS) {
+      throw new BadRequestError(
+        `Import exceeds maximum of ${MAX_IMPORT_ROWS} items`,
+      );
+    }
+
+    // Transaction with all business logic inline
+    const result = await prisma.$transaction(
+      async (trx) => {
+        const results: ImportResult[] = [];
+
+        for (const item of validatedItems) {
+          // 1. Fetch existing item
+          const existingItem = item.barcode
+            ? await itemModel.getItemByBarcodeWithTrx(item.barcode, trx)
+            : null;
+
+          // 2. Detect changes
+          const { hasChanges, oldUnits, newUnitsWithFlags } = existingItem
+            ? detectUnitChanges(existingItem, item.itemUnits)
+            : { hasChanges: false, oldUnits: [], newUnitsWithFlags: [] };
+
+          // 3. Upsert item
+          const upsertedItem = await itemModel.upsertImportItem(item, trx);
+
+          // 4. Record history if updated with changes
+          if (existingItem && hasChanges) {
+            await itemModel.addItemHistory(
+              newUnitsWithFlags,
+              oldUnits,
+              user,
+              HistoryAction.import,
+              upsertedItem.id,
+              trx,
+            );
+          }
+
+          results.push({
+            item: upsertedItem,
+            action: determineImportAction(existingItem, hasChanges),
+          });
+        }
+
+        return { results, summary: generateImportSummary(results) };
+      },
+      {
+        maxWait: 10000, // 10s to acquire connection
+        timeout: 120000, // 2 minutes for large imports
+      },
+    );
 
     return result;
   } catch (error: any) {
@@ -174,10 +272,12 @@ const exportItem = async (abacFilter: PrismaQuery) => {
 
     const parsedItems = items.map((item) => ({
       ...item,
-      itemUnits: item.itemUnits.map((unit) => ({
-        ...unit,
-        purchasePrice: unit.purchasePrice.toNumber(),
-      })),
+      itemUnits: sortUnitsByType(
+        item.itemUnits.map((unit) => ({
+          ...unit,
+          purchasePrice: unit.purchasePrice.toNumber(),
+        })),
+      ),
     }));
 
     const workbook = new ExcelJS.Workbook();
@@ -240,6 +340,31 @@ const exportItem = async (abacFilter: PrismaQuery) => {
   }
 };
 
+const getItemHistoriesById = async (itemId: number) => {
+  try {
+    const item = await itemModel.getItemById(itemId);
+    if (!item) throw new NotFoundError("Item not found");
+
+    const histories = await itemModel.getItemHistoriesById(itemId);
+
+    const parsedHistories = histories.map((history) => ({
+      ...history,
+      itemHistoryDetails: history.itemHistoryDetails.map((detail) => ({
+        ...detail,
+        oldPurchasePrice: detail.oldPurchasePrice.toNumber(),
+        newPurchasePrice: detail.newPurchasePrice.toNumber(),
+      })),
+    }));
+
+    return parsedHistories;
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    handlePrismaError(error);
+  }
+};
+
 export {
   addItem,
   getItems,
@@ -248,4 +373,5 @@ export {
   exportItem,
   updateItem,
   deleteItem,
+  getItemHistoriesById,
 };

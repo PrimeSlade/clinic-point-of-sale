@@ -16,6 +16,7 @@ router.post(
 );
 router.get("/export", authorize("export", "Item"), itemController.exportItem);
 router.get("/:id", authorize("read", "Item"), itemController.getItemById);
+router.get("/:id/histories", authorize("read", "Item"), itemController.getItemHistoriesById);
 router.put("/:id", authorize("update", "Item"), itemController.updateItem);
 router.delete("/:id", authorize("delete", "Item"), itemController.deleteItem);
 

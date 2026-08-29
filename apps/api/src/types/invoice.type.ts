@@ -2,26 +2,7 @@ import { PrismaQuery } from "@casl/prisma";
 import { UserInfo } from "./auth.type";
 import { Location } from "./location.type";
 import { Treatment } from "./treatment.type";
-
-export enum PaymentMethod {
-  KPAY = "kpay",
-  WAVE = "wave",
-  CASH = "cash",
-  OTHERS = "others",
-}
-
-export enum UnitType {
-  BTL = "btl",
-  AMP = "amp",
-  TUBE = "tube",
-  STRIP = "strip",
-  CAP = "cap",
-  PCS = "pcs",
-  SAC = "sac",
-  BOX = "box",
-  PKG = "pkg",
-  TAB = "tab",
-}
+import { PaymentMethod, UnitType } from "../generated/prisma";
 
 type InvoiceItem = {
   barcode: string;

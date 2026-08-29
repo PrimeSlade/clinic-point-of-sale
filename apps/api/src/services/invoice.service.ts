@@ -6,7 +6,7 @@ import { ReportQueryParams } from "../types/report.type";
 import { calcInvoice } from "../utils/calcInvoice";
 import { adjustUnitAmount } from "../utils/invoice.operations";
 import prisma from "../config/prisma.client";
-import { UnitType } from "../types/item.type";
+import { UnitType } from "../generated/prisma";
 import { handlePrismaError } from "../errors/prismaHandler";
 
 const createInvoice = async (data: InvoiceServiceInput, user: UserInfo) => {

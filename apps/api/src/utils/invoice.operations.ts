@@ -2,30 +2,15 @@ import { BadRequestError } from "../errors";
 import { InvoiceItem, InvoiceServiceInput } from "../types/invoice.type";
 import { updateItemUnit } from "../models/itemUnit.model";
 import { getItemByBarcode } from "../models/item.model";
-import { UnitType } from "../types/item.type";
+import { UnitType } from "../generated/prisma";
 import { Prisma } from "../generated/prisma";
+import { sortUnitsByType } from "./unit-type.util";
 
 type AggregatedItem = {
   barcodeId: string;
   unitType: UnitType;
   quantity: number;
 };
-
-export const unitType = [
-  "pkg", // package (could be similar to box)
-  "box", // biggest container
-  "strip", // strip of tablets (multiple tabs)
-  "btl", // bottle
-  "amp", // ampoule (small liquid container)
-  "tube", // tube
-  "sac", // sachet (small packet)
-  "cap", // capsule (single dose)
-  "tab", // tablet (single dose)
-  "pcs", // pieces (single items)
-] as const;
-
-//map
-const unitRank = Object.fromEntries(unitType.map((u, i) => [u, i])); //HashMap
 
 const recalculateRelatedUnits = (
   itemUnit: { id: number; quantity: number; rate: number }[],
@@ -107,9 +92,7 @@ const adjustUnitAmount = async (
     }
 
     //sort item
-    const labeledItems = [...item.itemUnits].sort(
-      (a, b) => unitRank[a.unitType] - unitRank[b.unitType],
-    );
+    const labeledItems = sortUnitsByType(item.itemUnits);
 
     const itemAdjustments = Object.values(aggregatedItem).filter(
       (item) => item.barcodeId === barcode,

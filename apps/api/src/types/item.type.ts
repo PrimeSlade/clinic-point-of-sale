@@ -2,19 +2,7 @@ import { PrismaQuery } from "@casl/prisma";
 import { UserInfo } from "./auth.type";
 import z from "zod";
 import { itemArraySchema } from "../utils/validation";
-
-export enum UnitType {
-  BTL = "btl",
-  AMP = "amp",
-  TUBE = "tube",
-  STRIP = "strip",
-  CAP = "cap",
-  PCS = "pcs",
-  SAC = "sac",
-  BOX = "box",
-  PKG = "pkg",
-  TAB = "tab",
-}
+import { UnitType, Prisma } from "../generated/prisma";
 
 type Item = {
   name: string;
@@ -34,7 +22,7 @@ type Unit = {
   rate: number;
 };
 
-type UpdateUnit = { id: number } & Partial<Unit>;
+type UpdateUnit = { id: number; isChanged?: boolean } & Unit;
 
 type ImportUnit = Unit & { id?: number };
 
@@ -50,6 +38,23 @@ type ItemQueryParams = {
   abacFilter: PrismaQuery;
 };
 
+type ImportAction = "created" | "updated" | "skipped";
+
+type ExistingItemWithUnits = Prisma.ItemGetPayload<{
+  include: { location: true; itemUnits: true };
+}>;
+
+type ImportResult = {
+  item: ExistingItemWithUnits;
+  action: ImportAction;
+};
+
+type ChangeDetectionResult = {
+  hasChanges: boolean;
+  oldUnits: UpdateUnit[];
+  newUnitsWithFlags: UpdateUnit[];
+};
+
 export {
   Item,
   Unit,
@@ -58,4 +63,8 @@ export {
   UpdateUnit,
   ItemQueryParams,
   ImportItems,
+  ImportAction,
+  ExistingItemWithUnits,
+  ImportResult,
+  ChangeDetectionResult,
 };
