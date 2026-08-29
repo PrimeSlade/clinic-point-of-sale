@@ -1,5 +1,5 @@
 {
-  "name": "point-of-sale-frontend",
+  "name": "@pos/web",
   "private": true,
   "version": "0.0.0",
   "type": "module",

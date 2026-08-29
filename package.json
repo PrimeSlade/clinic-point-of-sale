@@ -1,0 +1,19 @@
+{
+  "name": "point-of-sale-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "dev:web": "pnpm --filter @pos/web dev",
+    "dev:api": "pnpm --filter @pos/api dev",
+    "build": "pnpm -r build",
+    "build:web": "pnpm --filter @pos/web build",
+    "build:api": "pnpm --filter @pos/api build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm --filter @pos/api test",
+    "seed": "pnpm --filter @pos/api seed",
+    "db:generate": "pnpm --filter @pos/api db:generate",
+    "db:migrate": "pnpm --filter @pos/api db:migrate"
+  },
+  "packageManager": "pnpm@10.29.2"
+}
