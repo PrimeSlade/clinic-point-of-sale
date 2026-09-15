@@ -33,6 +33,7 @@ COPY --from=build --chown=node:node /app/apps/api/package.json ./apps/api/packag
 COPY --from=build --chown=node:node /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=build --chown=node:node /app/apps/api/dist ./apps/api/dist
 COPY --from=build --chown=node:node /app/apps/api/prisma ./apps/api/prisma
+COPY --from=build --chown=node:node /app/apps/api/src/generated/prisma ./apps/api/src/generated/prisma
 
 USER node
 
