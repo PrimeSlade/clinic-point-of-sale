@@ -36,4 +36,4 @@ COPY --from=build --chown=node:node /app/apps/api/prisma ./apps/api/prisma
 
 USER node
 
-CMD ["sh", "-c", "pnpm --filter @pos/api exec prisma migrate deploy && exec pnpm --filter @pos/api start"]
+CMD ["sh", "-c", "./apps/api/node_modules/.bin/prisma migrate deploy --schema=apps/api/prisma/schema.prisma && exec node apps/api/dist/index.js"]
