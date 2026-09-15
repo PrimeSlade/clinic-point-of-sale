@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-medpos_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-medpos_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    init: true
+    restart: always
+    command:
+      - sh
+      - -c
+      - cd apps/api && ./node_modules/.bin/prisma migrate deploy && exec ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/index.ts
+    environment:
+      NODE_ENV: development
+      PORT: "3000"
+      FRONT_END_ORIGIN: ${FRONT_END_ORIGIN:-https://medpos-dev.primeslade.dev}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-medpos_dev}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-medpos_dev}?schema=public
+      CHOKIDAR_USEPOLLING: "true"
+    networks:
+      - private
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/api').then(response=>{if(!response.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: build
+    init: true
+    restart: always
+    command:
+      - sh
+      - -c
+      - cd apps/web && exec ./node_modules/.bin/vite --host 0.0.0.0
+    environment:
+      VITE_URL: /api/v1
+      VITE_PROXY_TARGET: http://api:3000
+      CHOKIDAR_USEPOLLING: "true"
+    networks:
+      - private
+      - dokploy-network
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:5173').then(response=>{if(!response.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+networks:
+  private:
+    internal: true
+  dokploy-network:
+    external: true
+
+volumes:
+  postgres_dev_data:

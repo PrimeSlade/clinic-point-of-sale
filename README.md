@@ -173,7 +173,6 @@ clinic-point-of-sale/
 │   │   │   └── index.ts               # Server entry point
 │   │   ├── docs/                      # Extensive API & Architecture documentation
 │   │   ├── Dockerfile                 # Backend container definition
-│   │   ├── docker-compose.yml         # Local Docker compose configuration
 │   │   └── package.json
 │   │
 │   └── web/                           # Frontend React Application
@@ -199,6 +198,8 @@ clinic-point-of-sale/
 │       ├── vite.config.ts             # Vite configuration
 │       └── package.json
 │
+├── docker-compose.dev.yml             # Local hot-reload development stack
+├── docker-compose.prod.yml            # Production deployment stack
 ├── package.json                       # Monorepo root configuration
 ├── pnpm-workspace.yaml                # pnpm workspace definition
 └── README.md                          # Project documentation
@@ -305,14 +306,28 @@ Open your browser and navigate to `http://localhost:5173`. Log in with:
 
 ### Docker Setup
 
-To quickly run the backend with a containerized PostgreSQL database:
+The Dokploy development environment tracks the `dev` branch and uses
+`docker-compose.dev.yml`. Configure these environment variables in Dokploy:
 
-```bash
-cd apps/api
-docker-compose up --build
+```env
+POSTGRES_DB=medpos_dev
+POSTGRES_USER=medpos_dev
+POSTGRES_PASSWORD=<strong-alphanumeric-password>
+JWT_SECRET=<strong-random-secret>
+COOKIE_SECRET=<strong-random-secret>
+FRONT_END_ORIGIN=https://medpos-dev.primeslade.dev
 ```
 
-This starts PostgreSQL on port `5432` and the API service on port `3000`.
+In the Compose service's Domains tab, route `medpos-dev.primeslade.dev` to the
+`web` service on container port `5173`. The API and PostgreSQL services remain
+on an internal network, and all services restart automatically.
+
+To validate the configuration locally without starting it:
+
+```bash
+POSTGRES_PASSWORD=check JWT_SECRET=check COOKIE_SECRET=check \
+  docker compose -f docker-compose.dev.yml config -q
+```
 
 ---
 
