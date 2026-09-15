@@ -1,15 +1,39 @@
 FROM node:24-alpine AS base
 
-RUN corepack enable pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN apk add --no-cache openssl \
+    && corepack enable \
+    && corepack install --global pnpm@10.29.2
+
+FROM base AS build
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json ./apps/api/package.json
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --filter @pos/api...
 
-COPY . .
+COPY apps/api ./apps/api
 
-EXPOSE 3000
-# ENTRYPOINT ["npm", "run"]
-# CMD ["dev"]
+RUN pnpm --filter @pos/api exec prisma generate \
+    && pnpm --filter @pos/api build
+
+FROM base AS runtime
+
+ENV NODE_ENV=production
+ENV PORT=3000
+WORKDIR /app
+
+COPY --from=build --chown=node:node /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/apps/api/package.json ./apps/api/package.json
+COPY --from=build --chown=node:node /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=build --chown=node:node /app/apps/api/dist ./apps/api/dist
+COPY --from=build --chown=node:node /app/apps/api/prisma ./apps/api/prisma
+
+USER node
+
+CMD ["sh", "-c", "pnpm --filter @pos/api exec prisma migrate deploy && exec pnpm --filter @pos/api start"]
